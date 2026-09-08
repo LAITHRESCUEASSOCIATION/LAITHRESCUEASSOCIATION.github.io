@@ -73,23 +73,19 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 <script>
   const SUPABASE_URL = "https://mijabxmjrzkzntqpnsnc.supabase.co";
   const SUPABASE_KEY = "sb_publishable_1tg-mHlBnpPQqrjUHVmHyA_ao62TBjc";
-  let supabase = null;
+  let sbClient = null;
 
-  window.ensureSupabase = function(){
-    if(supabase) return Promise.resolve(supabase);
-    if(!window.supabase || !window.supabase.createClient){
-      return Promise.reject(new Error("تعذر تحميل مكتبة Supabase."));
+  function getSupabaseClient(){
+    if(sbClient) return sbClient;
+    if(!window.supabase || typeof window.supabase.createClient !== "function"){
+      throw new Error("تعذر تحميل مكتبة Supabase. حدّث الصفحة ثم حاول مرة أخرى.");
     }
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    return Promise.resolve(supabase);
-  };
-
-  window.withTimeout = function(promise,ms=15000){
-    return Promise.race([
-      promise,
-      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),ms))
-    ]);
-  };
+    sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    if(!sbClient || !sbClient.auth){
+      throw new Error("تعذر إنشاء اتصال Supabase.");
+    }
+    return sbClient;
+  }
 </script>
 </head>
 <body>
@@ -363,9 +359,9 @@ async function uploadSiteImage(file,prefix){
   if(!file) return null;
   const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
   const path=`${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const {error}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",upsert:false});
+  const {error}=await getSupabaseClient().storage.from("site-media").upload(path,file,{cacheControl:"3600",upsert:false});
   if(error) throw error;
-  const {data}=supabase.storage.from("site-media").getPublicUrl(path);
+  const {data}=getSupabaseClient().storage.from("site-media").getPublicUrl(path);
   return data.publicUrl;
 }
 
@@ -391,7 +387,7 @@ function applySiteSettings(s){
 }
 
 async function loadSiteSettings(){
-  const {data,error}=await supabase.from("site_settings").select("*").order("id",{ascending:true}).limit(1).maybeSingle();
+  const {data,error}=await getSupabaseClient().from("site_settings").select("*").order("id",{ascending:true}).limit(1).maybeSingle();
   if(error){console.error(error);return;}
   if(data){
     applySiteSettings(data);
@@ -407,7 +403,7 @@ async function loadSiteSettings(){
 async function saveSiteSettings(){
   const msg=document.getElementById("cmsSettingsMsg"); msg.textContent="جاري الحفظ...";
   try{
-    const {data:current,error:readErr}=await supabase.from("site_settings").select("*").order("id",{ascending:true}).limit(1).maybeSingle();
+    const {data:current,error:readErr}=await getSupabaseClient().from("site_settings").select("*").order("id",{ascending:true}).limit(1).maybeSingle();
     if(readErr) throw readErr;
     let logoUrl=current?.logo_url||null;
     const file=document.getElementById("cmsLogoFile").files[0];
@@ -419,8 +415,8 @@ async function saveSiteSettings(){
       secondary_color:document.getElementById("cmsSecondaryColor").value
     };
     let result;
-    if(current?.id) result=await supabase.from("site_settings").update(payload).eq("id",current.id).select().single();
-    else result=await supabase.from("site_settings").insert(payload).select().single();
+    if(current?.id) result=await getSupabaseClient().from("site_settings").update(payload).eq("id",current.id).select().single();
+    else result=await getSupabaseClient().from("site_settings").insert(payload).select().single();
     if(result.error) throw result.error;
     applySiteSettings(result.data);
     msg.textContent="تم حفظ هوية الموقع.";
@@ -449,13 +445,13 @@ async function savePost(){
     const published=document.getElementById("postPublished").value==="true";
     let imageUrl=null;
     if(id){
-      const {data:old,error:oldErr}=await supabase.from("content_posts").select("image_url").eq("id",id).single();
+      const {data:old,error:oldErr}=await getSupabaseClient().from("content_posts").select("image_url").eq("id",id).single();
       if(oldErr) throw oldErr;
       imageUrl=old.image_url||null;
     }
     const file=document.getElementById("postImageFile").files[0];
     if(file) imageUrl=await uploadSiteImage(file,"posts");
-    const {data:{user}}=await supabase.auth.getUser();
+    const {data:{user}}=await getSupabaseClient().auth.getUser();
     const payload={
       title,
       summary:document.getElementById("postSummary").value.trim()||null,
@@ -466,8 +462,8 @@ async function savePost(){
       published_at:published?new Date().toISOString():null
     };
     let result;
-    if(id) result=await supabase.from("content_posts").update(payload).eq("id",id);
-    else result=await supabase.from("content_posts").insert({...payload,created_by:user.id});
+    if(id) result=await getSupabaseClient().from("content_posts").update(payload).eq("id",id);
+    else result=await getSupabaseClient().from("content_posts").insert({...payload,created_by:user.id});
     if(result.error) throw result.error;
     msg.textContent="تم الحفظ بنجاح.";
     resetPostForm();
@@ -480,7 +476,7 @@ async function loadAdminPosts(){
   const box=document.getElementById("adminPosts");
   if(!box)return;
   box.innerHTML="<p>جاري التحميل...</p>";
-  const {data,error}=await supabase.from("content_posts").select("*").order("created_at",{ascending:false});
+  const {data,error}=await getSupabaseClient().from("content_posts").select("*").order("created_at",{ascending:false});
   if(error){console.error(error);box.innerHTML="<p>تعذر تحميل المحتوى.</p>";return;}
   if(!data?.length){box.innerHTML="<p>لا توجد أخبار أو مقالات حتى الآن.</p>";return;}
   box.innerHTML=data.map(p=>`<div class="member-row">
@@ -495,7 +491,7 @@ async function loadAdminPosts(){
 }
 
 async function editPost(id){
-  const {data:p,error}=await supabase.from("content_posts").select("*").eq("id",id).single();
+  const {data:p,error}=await getSupabaseClient().from("content_posts").select("*").eq("id",id).single();
   if(error||!p){alert("تعذر تحميل المحتوى.");return;}
   document.getElementById("postEditId").value=p.id;
   document.getElementById("postTitle").value=p.title||"";
@@ -509,14 +505,14 @@ async function editPost(id){
 }
 
 async function togglePost(id,publish){
-  const {error}=await supabase.from("content_posts").update({is_published:publish,published_at:publish?new Date().toISOString():null}).eq("id",id);
+  const {error}=await getSupabaseClient().from("content_posts").update({is_published:publish,published_at:publish?new Date().toISOString():null}).eq("id",id);
   if(error){console.error(error);alert("تعذر تحديث حالة النشر.");return;}
   await loadAdminPosts(); await loadPublicPosts();
 }
 
 async function deletePost(id){
   if(!confirm("هل تريد حذف هذا المحتوى؟"))return;
-  const {error}=await supabase.from("content_posts").delete().eq("id",id);
+  const {error}=await getSupabaseClient().from("content_posts").delete().eq("id",id);
   if(error){console.error(error);alert("تعذر الحذف.");return;}
   await loadAdminPosts(); await loadPublicPosts();
 }
@@ -524,7 +520,7 @@ async function deletePost(id){
 async function loadPublicPosts(){
   const box=document.getElementById("publicPosts");
   if(!box)return;
-  const {data,error}=await supabase.from("content_posts").select("id,title,summary,body,post_type,image_url,published_at,created_at").eq("is_published",true).order("published_at",{ascending:false}).limit(12);
+  const {data,error}=await getSupabaseClient().from("content_posts").select("id,title,summary,body,post_type,image_url,published_at,created_at").eq("is_published",true).order("published_at",{ascending:false}).limit(12);
   if(error){console.error(error);box.innerHTML="<p>تعذر تحميل الأخبار حاليًا.</p>";return;}
   if(!data?.length){box.innerHTML="<p>لا توجد أخبار منشورة حاليًا.</p>";return;}
   box.innerHTML=data.map(p=>`<article class="post-card">
@@ -539,7 +535,7 @@ async function loadPublicPosts(){
 }
 
 async function showPost(id){
-  const {data:p,error}=await supabase.from("content_posts").select("*").eq("id",id).eq("is_published",true).single();
+  const {data:p,error}=await getSupabaseClient().from("content_posts").select("*").eq("id",id).eq("is_published",true).single();
   if(error||!p){alert("تعذر فتح المحتوى.");return;}
   alert(p.title+"\n\n"+p.body);
 }
@@ -564,11 +560,11 @@ async function signupVolunteer(){
   if(!document.getElementById("policyConsent").checked){msg.textContent="يجب قراءة سياسة التطوع والخصوصية والموافقة عليها قبل إرسال الطلب.";return;}
   msg.textContent="جاري إنشاء الحساب...";
   try{
-    const client=await window.withTimeout(window.ensureSupabase(),10000);
-    const {data,error}=await window.withTimeout(
+    const client=getSupabaseClient();
+    const {data,error}=await Promise.race([
       client.auth.signUp({email,password,options:{data:{full_name:fullName,national_id:nationalId,birth_date:birthDate,specialty,phone,city,policy_accepted:true,policy_version:"2026-09-08"}}}),
-      15000
-    );
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),15000))
+    ]);
     if(error){console.error(error);msg.textContent="تعذر إنشاء الحساب: "+(error.message||"خطأ غير معروف");return;}
     msg.textContent=data?.user?"تم استلام طلب التسجيل بنجاح. الطلب الآن بانتظار موافقة الإدارة.":"تم إرسال الطلب، لكن لم يرجع النظام بيانات المستخدم.";
   }catch(err){
@@ -584,11 +580,17 @@ async function loginVolunteer(){
   if(!email||!password){msg.textContent="اكتب البريد الإلكتروني وكلمة المرور.";return;}
   msg.textContent="جاري تسجيل الدخول...";
   try{
-    const client=await window.withTimeout(window.ensureSupabase(),10000);
-    const {data,error}=await window.withTimeout(client.auth.signInWithPassword({email,password}),15000);
+    const client=getSupabaseClient();
+    const {data,error}=await Promise.race([
+      client.auth.signInWithPassword({email,password}),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),15000))
+    ]);
     if(error){console.error(error);msg.textContent="تعذر تسجيل الدخول: "+(error.message||"تحقق من البريد وكلمة المرور.");return;}
 
-    const {data:isAdmin,error:adminError}=await window.withTimeout(client.rpc("is_admin"),10000);
+    const {data:isAdmin,error:adminError}=await Promise.race([
+      client.rpc("is_admin"),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
+    ]);
     if(!adminError&&isAdmin===true){
       closeAuth();
       document.getElementById("adminPanel").style.display="block";
@@ -598,10 +600,10 @@ async function loginVolunteer(){
       return;
     }
 
-    const {data:member,error:memberError}=await window.withTimeout(
+    const {data:member,error:memberError}=await Promise.race([
       client.from("members").select("account_status,full_name").eq("id",data.user.id).single(),
-      10000
-    );
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
+    ]);
     if(memberError||!member){console.error(memberError);msg.textContent="تم تسجيل الدخول، لكن تعذر تحميل بيانات العضوية.";return;}
     if(member.account_status==="pending"){msg.textContent="طلب عضويتك بانتظار موافقة الإدارة.";await client.auth.signOut();return;}
     if(member.account_status==="rejected"){msg.textContent="تم رفض طلب العضوية. يرجى التواصل مع إدارة الجمعية.";await client.auth.signOut();return;}
@@ -619,7 +621,7 @@ async function loginVolunteer(){
 
 async function loadMembers(status=null){
   const list=document.getElementById("membersList"); list.innerHTML="<p>جاري تحميل الطلبات...</p>";
-  let q=supabase.from("members").select("*").order("created_at",{ascending:false});
+  let q=getSupabaseClient().from("members").select("*").order("created_at",{ascending:false});
   if(status) q=q.eq("account_status",status);
   const {data,error}=await q;
   if(error){console.error(error);list.innerHTML="<p>تعذر تحميل الأعضاء. تحقق من صلاحيات المدير في Supabase.</p>";return;}
@@ -641,13 +643,13 @@ async function loadMembers(status=null){
 }
 
 async function changeMemberStatus(id,status){
-  const {error}=await supabase.from("members").update({account_status:status}).eq("id",id);
+  const {error}=await getSupabaseClient().from("members").update({account_status:status}).eq("id",id);
   if(error){console.error(error);alert("تعذر تحديث حالة المتطوع.");return;}
   alert(status==="approved"?"تم قبول المتطوع.":"تم رفض الطلب."); await loadMembers("pending");
 }
 
 async function openEdit(id){
-  const {data:m,error}=await supabase.from("members").select("*").eq("id",id).single();
+  const {data:m,error}=await getSupabaseClient().from("members").select("*").eq("id",id).single();
   if(error||!m){alert("تعذر تحميل بيانات المتطوع.");return;}
   document.getElementById("editId").value=m.id; document.getElementById("editName").value=m.full_name||"";
   document.getElementById("editNationalId").value=m.national_id||""; document.getElementById("editBirthDate").value=m.birth_date||"";
@@ -662,12 +664,12 @@ async function saveMemberEdit(){
   if(!/^\d{10}$/.test(national_id)){msg.textContent="السجل المدني يجب أن يكون 10 أرقام.";return;}
   if(!/^05\d{8}$/.test(phone)){msg.textContent="رقم الجوال غير صحيح.";return;}
   const payload={full_name:document.getElementById("editName").value.trim(),national_id,birth_date:document.getElementById("editBirthDate").value,specialty:document.getElementById("editSpecialty").value,phone,city:document.getElementById("editCity").value.trim()};
-  const {error}=await supabase.from("members").update(payload).eq("id",id);
+  const {error}=await getSupabaseClient().from("members").update(payload).eq("id",id);
   if(error){console.error(error);msg.textContent="تعذر حفظ التعديلات: "+error.message;return;}
   closeEdit();alert("تم تعديل بيانات المتطوع.");await loadMembers();
 }
 
-async function logoutUser(){await supabase.auth.signOut();document.getElementById("adminPanel").style.display="none";location.reload();}
+async function logoutUser(){await getSupabaseClient().auth.signOut();document.getElementById("adminPanel").style.display="none";location.reload();}
 
 async function openReport(){
   const name=prompt("اكتب اسمك:"); if(!name)return;
@@ -675,8 +677,11 @@ async function openReport(){
   const location=prompt("اكتب موقع البلاغ:"); if(!location)return;
   const description=prompt("اكتب وصف البلاغ:"); if(!description)return;
   try{
-    const client=await window.withTimeout(window.ensureSupabase(),10000);
-    const {error}=await window.withTimeout(client.from("reports").insert([{name,phone,location,description,report_type:"rescue"}]),15000);
+    const client=getSupabaseClient();
+    const {error}=await Promise.race([
+      client.from("reports").insert([{name,phone,location,description,report_type:"rescue"}]),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),15000))
+    ]);
     if(error){console.error(error);alert("حدث خطأ أثناء إرسال البلاغ: "+(error.message||""));return;}
     alert("تم إرسال البلاغ بنجاح.");
   }catch(e){
@@ -687,12 +692,18 @@ async function openReport(){
 
 window.addEventListener("DOMContentLoaded",async()=>{
   try{
-    const client=await window.withTimeout(window.ensureSupabase(),10000);
+    const client=getSupabaseClient();
     await loadSiteSettings();
     await loadPublicPosts();
-    const {data:{session}}=await window.withTimeout(client.auth.getSession(),10000);
+    const {data:{session}}=await Promise.race([
+      client.auth.getSession(),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
+    ]);
     if(!session)return;
-    const {data:isAdmin}=await window.withTimeout(client.rpc("is_admin"),10000);
+    const {data:isAdmin}=await Promise.race([
+      client.rpc("is_admin"),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
+    ]);
     if(isAdmin===true){
       document.getElementById("adminPanel").style.display="block";
       await loadMembers("pending");
