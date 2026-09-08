@@ -52,7 +52,11 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 <header><div class="wrap nav">
 <div class="brand"><div class="logo">ل</div><div>جمعية ليث للإنقاذ</div></div>
 <nav class="navlinks"><a href="#about">عن الجمعية</a><a href="#services">الخدمات</a><a href="#workflow">آلية العمل</a><a href="#report">البلاغات</a></nav>
-<a class="btn" href="#report">تقديم بلاغ</a>
+<div class="auth-buttons">
+  <a class="btn" href="#report">تقديم بلاغ</a>
+  <button class="btn" onclick="openAuth()">تسجيل دخول</button>
+  <button class="btn" onclick="openSignup()">تسجيل جديد</button>
+</div>
 </div></header>
 
 <main>
@@ -89,7 +93,282 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 
 <footer><div class="wrap">جمعية ليث للإنقاذ — منصة رقمية متخصصة في إدارة البلاغات والإنقاذ والتطوع.</div></footer>
 
-<script>
+<div id="authOverlay" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+">
+  <div style="
+    width:min(520px,100%);
+    max-height:90vh;
+    overflow:auto;
+    background:#fff;
+    border-radius:18px;
+    padding:24px;
+    direction:rtl;
+  ">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h2 style="margin:0;">بوابة المتطوعين</h2>
+      <button onclick="closeAuth()" style="font-size:24px;border:0;background:none;cursor:pointer;">×</button>
+    </div>
+
+    <div id="loginForm" style="margin-top:20px;">
+      <h3>تسجيل دخول</h3>
+
+      <input id="loginEmail" type="email" placeholder="البريد الإلكتروني"
+        style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+      <input id="loginPassword" type="password" placeholder="كلمة المرور"
+        style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+      <button class="btn" onclick="loginVolunteer()" style="width:100%;margin-top:10px;">
+        دخول
+      </button>
+
+      <p id="loginMsg"></p>
+
+      <button onclick="showSignup()" style="border:0;background:none;cursor:pointer;text-decoration:underline;">
+        متطوع جديد؟ إنشاء حساب
+      </button>
+    </div>
+
+
+    <div id="signupForm" style="display:none;margin-top:20px;">
+      <h3>تسجيل متطوع جديد</h3>
+
+      <input id="fullName" type="text" placeholder="الاسم الثلاثي"
+        style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+      <input id="nationalId" type="text" inputmode="numeric" maxlength="10"
+        placeholder="السجل المدني - 10 أرقام"
+        style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+      <label>تاريخ الميلاد</label>
+      <input id="birthDate" type="date"
+        style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+      <label>التخصص</label>
+      <select id="specialty"
+        style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+        <option value="">اختر التخصص</option>
+        <option value="paramedic">مسعف</option>
+        <option value="rescuer">منقذ</option>
+      </select>
+
+      <input id="volunteerPhone" type="tel" placeholder="رقم الجوال 05XXXXXXXX"
+        style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+      <label>المدينة</label>
+      <select id="city"
+        style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+        <option value="">اختر المدينة</option>
+        <option>الرياض</option>
+        <option>جدة</option>
+        <option>مكة المكرمة</option>
+        <option>المدينة المنورة</option>
+        <option>الدمام</option>
+        <option>الخبر</option>
+        <option>الظهران</option>
+        <option>الطائف</option>
+        <option>تبوك</option>
+        <option>أبها</option>
+        <option>خميس مشيط</option>
+        <option>بريدة</option>
+        <option>عنيزة</option>
+        <option>حائل</option>
+        <option>جازان</option>
+        <option>نجران</option>
+        <option>الباحة</option>
+        <option>سكاكا</option>
+        <option>عرعر</option>
+        <option>الأحساء</option>
+        <option>الجبيل</option>
+        <option>حفر الباطن</option>
+        <option>الخرج</option>
+        <option>ينبع</option>
+        <option>العلا</option>
+        <option>القنفذة</option>
+        <option>الليث</option>
+        <option>بيشة</option>
+        <option>محايل عسير</option>
+        <option>القريات</option>
+        <option>رفحاء</option>
+        <option>طريف</option>
+      </select>
+
+      <input id="signupEmail" type="email" placeholder="البريد الإلكتروني"
+        style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+      <input id="signupPassword" type="password" minlength="8"
+        placeholder="كلمة المرور - 8 أحرف على الأقل"
+        style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+      <button class="btn" onclick="signupVolunteer()" style="width:100%;margin-top:10px;">
+        إرسال طلب التسجيل
+      </button>
+
+      <p id="signupMsg"></p>
+
+      <button onclick="showLogin()" style="border:0;background:none;cursor:pointer;text-decoration:underline;">
+        لدي حساب بالفعل
+      </button>
+    </div>
+
+  </div>
+</div>
+  <function openAuth() {
+  document.getElementById("authOverlay").style.display = "flex";
+  showLogin();
+}
+
+function openSignup() {
+  document.getElementById("authOverlay").style.display = "flex";
+  showSignup();
+}
+
+function closeAuth() {
+  document.getElementById("authOverlay").style.display = "none";
+}
+
+function showLogin() {
+  document.getElementById("loginForm").style.display = "block";
+  document.getElementById("signupForm").style.display = "none";
+}
+
+function showSignup() {
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("signupForm").style.display = "block";
+}
+
+async function signupVolunteer() {
+  const fullName = document.getElementById("fullName").value.trim();
+  const nationalId = document.getElementById("nationalId").value.trim();
+  const birthDate = document.getElementById("birthDate").value;
+  const specialty = document.getElementById("specialty").value;
+  const phone = document.getElementById("volunteerPhone").value.trim();
+  const city = document.getElementById("city").value;
+  const email = document.getElementById("signupEmail").value.trim();
+  const password = document.getElementById("signupPassword").value;
+  const msg = document.getElementById("signupMsg");
+
+  msg.textContent = "";
+
+  if (!fullName || !nationalId || !birthDate || !specialty || !phone || !city || !email || !password) {
+    msg.textContent = "يرجى تعبئة جميع البيانات.";
+    return;
+  }
+
+  if (fullName.split(/\s+/).length < 3) {
+    msg.textContent = "يرجى كتابة الاسم الثلاثي كاملًا.";
+    return;
+  }
+
+  if (!/^\d{10}$/.test(nationalId)) {
+    msg.textContent = "السجل المدني يجب أن يكون 10 أرقام.";
+    return;
+  }
+
+  if (!/^05\d{8}$/.test(phone)) {
+    msg.textContent = "رقم الجوال يجب أن يكون بصيغة 05XXXXXXXX.";
+    return;
+  }
+
+  if (password.length < 8) {
+    msg.textContent = "كلمة المرور يجب أن تكون 8 أحرف على الأقل.";
+    return;
+  }
+
+  msg.textContent = "جاري إنشاء الحساب...";
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+        national_id: nationalId,
+        birth_date: birthDate,
+        specialty,
+        phone,
+        city
+      }
+    }
+  });
+
+  if (error) {
+    console.error(error);
+    msg.textContent = "تعذر إنشاء الحساب: " + error.message;
+    return;
+  }
+
+  msg.textContent = "تم إرسال طلب التسجيل بنجاح. حسابك الآن بانتظار موافقة الإدارة.";
+}
+
+async function loginVolunteer() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const msg = document.getElementById("loginMsg");
+
+  msg.textContent = "جاري تسجيل الدخول...";
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    console.error(error);
+    msg.textContent = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+    return;
+  }
+
+  const user = data.user;
+
+  const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin");
+
+  if (!adminError && isAdmin === true) {
+    msg.textContent = "تم تسجيل دخول المدير بنجاح.";
+    closeAuth();
+    alert("مرحبًا بك في حساب المدير.");
+    return;
+  }
+
+  const { data: member, error: memberError } = await supabase
+    .from("members")
+    .select("account_status, full_name")
+    .eq("id", user.id)
+    .single();
+
+  if (memberError) {
+    console.error(memberError);
+    msg.textContent = "تعذر تحميل بيانات العضوية.";
+    return;
+  }
+
+  if (member.account_status === "pending") {
+    msg.textContent = "طلب عضويتك ما زال بانتظار موافقة الإدارة.";
+    await supabase.auth.signOut();
+    return;
+  }
+
+  if (member.account_status === "rejected") {
+    msg.textContent = "تم رفض طلب العضوية. يرجى التواصل مع إدارة الجمعية.";
+    await supabase.auth.signOut();
+    return;
+  }
+
+  if (member.account_status === "approved") {
+    msg.textContent = "تم تسجيل الدخول بنجاح.";
+    closeAuth();
+    alert("مرحبًا " + member.full_name);
+  }
+}>
 function openReport() {
   const name = prompt("اكتب اسمك:");
   if (!name) return;
@@ -103,16 +382,17 @@ function openReport() {
   const description = prompt("اكتب وصف البلاغ:");
   if (!description) return;
 
-  supabase
-    .from("reports")
-    .insert([
-      {
-        name: name,
-        phone: phone,
-        location: location,
-        description: description
-      }
-    ])
+ supabase
+  .from("reports")
+  .insert([
+    {
+      name: name,
+      phone: phone,
+      location: location,
+      description: description,
+      report_type: "rescue"
+    }
+  ])
     .then(({ error }) => {
       if (error) {
         console.error(error);
