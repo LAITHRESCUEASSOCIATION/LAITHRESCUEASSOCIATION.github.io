@@ -86,6 +86,18 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 .assignment-list{margin-top:12px;padding-top:12px;border-top:1px solid #e6eaee;font-size:14px;color:#53616d;line-height:1.9}
 .dispatch-members{max-height:380px;overflow:auto;margin:14px 0}.dispatch-member{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #edf1f4}.dispatch-member input{width:18px;height:18px}
 @media(max-width:800px){.member-directory{grid-template-columns:1fr}.profile-head{align-items:flex-start}.admin-top{align-items:flex-start;flex-direction:column}}
+
+/* إضافات الإصدار المتقدم */
+.public-report-stat{background:#fff;border:1px solid #e4e9ed;border-radius:22px;padding:26px;text-align:center;box-shadow:0 8px 25px rgba(30,45,60,.04)}
+.public-report-stat b{display:block;font-size:42px;line-height:1.2}.public-report-stat span{color:#66747e;font-weight:700}
+.hero-slides{position:absolute;inset:0}.hero-slide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}.hero-slide.active{opacity:.72}.visual.has-slides .map,.visual.has-slides:before{display:none}.visual.has-slides .dashboard{z-index:3}
+.slide-admin-row{display:grid;grid-template-columns:96px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #edf1f4}.slide-admin-row img{width:96px;height:64px;object-fit:cover;border-radius:10px}
+.directory-card.level-green{border-color:#39a66b;background:#f0fff6}.directory-card.level-yellow{border-color:#d8b100;background:#fffbea}.directory-card.level-orange{border-color:#e17d16;background:#fff5e9}.directory-card.level-red{border-color:#c83939;background:#fff0f0}
+.member-badge{display:inline-block;margin-top:5px;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800}.badge-green{background:#dff6e8;color:#17633b}.badge-yellow{background:#fff2b8;color:#7d6500}.badge-orange{background:#ffe1bf;color:#934b00}.badge-red{background:#ffd4d4;color:#9c2020}.badge-neutral{background:#edf1f4;color:#53616d}
+.achievement-card{background:#fff;border:1px solid #e3e8eb;border-radius:16px;padding:16px;margin-bottom:10px}.achievement-card h4{margin:0 0 6px}.achievement-card small{color:#687680}
+.admin-alert{display:none;background:#fff1f1;border:1px solid #efb4b4;color:#8d1f2d;padding:12px 14px;border-radius:14px;margin-bottom:14px;font-weight:800}
+@media(max-width:800px){.slide-admin-row{grid-template-columns:72px 1fr}.slide-admin-row .row-actions{grid-column:1/-1}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -125,8 +137,10 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 <p>منظومة موحدة لاستقبال البلاغات، إدارة حالات الطوارئ والبحث والإنقاذ، استدعاء المتطوعين، متابعة المهام، وتوثيق ساعات التطوع.</p>
 <div class="actions"><a class="btn" href="#report">إرسال بلاغ</a><a class="btn light" href="#about">استكشف المنصة</a></div>
 </div>
-<div class="visual"><div class="dashboard">الخريطة المباشرة</div><div class="map"><i class="pin p1"></i><i class="pin p2"></i><i class="pin p3"></i></div></div>
+<div class="visual" id="homeVisual"><div id="heroSlides" class="hero-slides"></div><div class="dashboard">جمعية ليث للإنقاذ</div><div class="map"><i class="pin p1"></i><i class="pin p2"></i><i class="pin p3"></i></div></div>
 </div></section>
+
+<section style="padding:28px 0"><div class="wrap"><div class="public-report-stat"><b id="publicReportCount">—</b><span>بلاغ تم تقديمه عبر المنصة حتى الآن</span></div></div></section>
 
 <section id="about"><div class="wrap">
 <div class="section-head"><div><h2>منصة واحدة لكل عمليات الإنقاذ</h2><p>تصميم رسمي، حديث، واضح، ومتجاوب مع الجوال والكمبيوتر.</p></div></div>
@@ -269,6 +283,7 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
       <button class="btn light" type="button" onclick="loadMembers()">جميع الأعضاء</button>
       <button class="btn light" type="button" onclick="loadReports()">البلاغات</button>
     </div>
+    <div id="adminNewReportAlert" class="admin-alert">ورد بلاغ جديد إلى المنصة.</div>
     <div id="membersList"></div>
     <div id="reportsList" style="display:none"></div>
     <div style="margin-top:32px;border-top:1px solid #dfe5e9;padding-top:24px">
@@ -299,6 +314,14 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
           <button class="btn" type="button" onclick="saveSiteSettings()">حفظ الهوية</button>
           <span id="cmsSettingsMsg" class="form-msg"></span>
         </div>
+      </div>
+
+      <div class="cms-box">
+        <h3>الصور المتحركة في الواجهة الرئيسية</h3>
+        <p style="color:#687680">أضف أي عدد من الصور، ويمكنك إظهارها أو إخفاؤها أو حذفها من هنا.</p>
+        <input id="heroSlideFile" type="file" accept="image/png,image/jpeg,image/webp">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" type="button" onclick="addHeroSlide()">إضافة الصورة</button><span id="slideMsg" class="form-msg"></span></div>
+        <div id="adminSlides" style="margin-top:14px"><p>جاري التحميل...</p></div>
       </div>
 
       <div class="cms-box">
@@ -356,6 +379,7 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
     </div>
     <div id="myProfileBox"></div>
     <div class="cms-box"><h3>بلاغاتي ومهامي</h3><div id="myTasks"><p>جاري التحميل...</p></div></div>
+    <div class="cms-box"><h3>إنجازاتي</h3><div id="myAchievements"><p>جاري تحميل الإنجازات...</p></div></div>
     <div class="cms-box"><h3>أعضاء الجمعية</h3><p style="color:#687680">تظهر للأعضاء البيانات العامة فقط: الاسم، الصورة الشخصية، والساعات التطوعية.</p><div id="memberDirectory" class="member-directory"></div></div>
   </div>
 </div>
@@ -364,9 +388,23 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
   <div class="auth-card" style="width:min(720px,100%)">
     <div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="margin:0">ترحيل البلاغ</h2><small>اختر عضوًا أو أكثر لإرسال البلاغ إليهم</small></div><button type="button" onclick="closeDispatch()" style="font-size:26px;border:0;background:none;cursor:pointer">×</button></div>
     <input id="dispatchReportId" type="hidden">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn light" type="button" onclick="toggleAllDispatch(true)">تحديد الجميع</button><button class="btn light" type="button" onclick="toggleAllDispatch(false)">إلغاء التحديد</button><span id="dispatchSelectedCount" class="status-pill">0 محدد</span></div>
     <div id="dispatchMembers" class="dispatch-members"><p>جاري تحميل الأعضاء...</p></div>
     <button class="btn" type="button" onclick="submitDispatch()" style="width:100%">إرسال البلاغ للأعضاء المحددين</button>
     <p id="dispatchMsg" class="form-msg"></p>
+  </div>
+</div>
+
+
+<div id="achievementOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10006;align-items:center;justify-content:center;padding:20px">
+  <div class="auth-card" style="width:min(700px,100%)">
+    <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">إرسال شهادة / إنجاز</h2><button type="button" onclick="closeAchievementAdmin()" style="font-size:26px;border:0;background:none;cursor:pointer">×</button></div>
+    <input id="achievementMemberId" type="hidden">
+    <label>عنوان الإنجاز</label><input id="achievementTitle" type="text" placeholder="مثال: متطوع متميز">
+    <label>وصف مختصر</label><textarea id="achievementDescription" placeholder="وصف الإنجاز أو سبب التكريم"></textarea>
+    <label>الشهادة (PDF أو صورة)</label><input id="achievementFile" type="file" accept="application/pdf,image/png,image/jpeg,image/webp">
+    <button class="btn" type="button" onclick="saveAchievement()" style="width:100%;margin-top:12px">إرسال للعضو</button>
+    <p id="achievementMsg" class="form-msg"></p>
   </div>
 </div>
 
@@ -648,6 +686,8 @@ async function loginVolunteer(){
       await loadMembers("pending");
       await loadSiteSettings();
       await loadAdminPosts();
+      await loadAdminSlides();
+      startAdminReportAlerts();
       return;
     }
 
@@ -695,7 +735,7 @@ async function loadMembers(status=null){
     <div class="row-actions">
       <button onclick="changeMemberStatus('${m.id}','approved')">قبول</button>
       <button onclick="changeMemberStatus('${m.id}','rejected')">رفض</button>
-      <button onclick="openEdit('${m.id}')">تعديل البيانات</button>
+      <button onclick="openEdit('${m.id}')">تعديل البيانات</button><button onclick="openAchievementAdmin('${m.id}')">إرسال شهادة</button>
       <select class="role-select" id="role-${m.id}">
         <option value="volunteer" ${(m.role||"volunteer")==="volunteer"?"selected":""}>متطوع</option>
         <option value="operator" ${m.role==="operator"?"selected":""}>مشغل بلاغات</option>
@@ -756,11 +796,14 @@ function avatarPlaceholder(name){const ch=encodeURIComponent((name||"ل").trim()
 async function openDispatch(reportId){
   document.getElementById("dispatchReportId").value=reportId;document.getElementById("dispatchMsg").textContent="";document.getElementById("dispatchOverlay").style.display="flex";
   const box=document.getElementById("dispatchMembers");box.innerHTML="<p>جاري تحميل الأعضاء...</p>";
-  const {data,error}=await getSupabaseClient().from("members").select("id,full_name,specialty,avatar_url,total_volunteer_minutes").eq("account_status","approved").neq("role","admin").order("full_name");
-  if(error){console.error(error);box.innerHTML="<p>تعذر تحميل الأعضاء.</p>";return;}
-  if(!data?.length){box.innerHTML="<p>لا يوجد أعضاء مقبولون حاليًا.</p>";return;}
-  box.innerHTML=data.map(m=>`<label class="dispatch-member"><input type="checkbox" name="dispatchMember" value="${m.id}"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><span><b>${esc(m.full_name)}</b><br><small>${m.specialty==="paramedic"?"مسعف":"منقذ"} · ${formatMinutes(m.total_volunteer_minutes||0)}</small></span></label>`).join("");
+  const {data,error}=await getSupabaseClient().rpc("get_dispatch_members");
+  if(error){console.error(error);box.innerHTML="<p>تعذر تحميل جميع المتطوعين. شغّل ملف SQL الجديد أولًا.</p>";return;}
+  if(!data?.length){box.innerHTML="<p>لا يوجد متطوعون مقبولون حاليًا.</p>";return;}
+  box.innerHTML=data.map(m=>`<label class="dispatch-member"><input type="checkbox" name="dispatchMember" value="${m.id}" onchange="updateDispatchSelectedCount()"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><span><b>${esc(m.full_name)}</b><br><small>${m.specialty==="paramedic"?"مسعف":"منقذ"} · ${formatMinutes(m.total_volunteer_minutes||0)}</small></span></label>`).join("");
+  updateDispatchSelectedCount();
 }
+function toggleAllDispatch(v){document.querySelectorAll('input[name="dispatchMember"]').forEach(x=>x.checked=v);updateDispatchSelectedCount();}
+function updateDispatchSelectedCount(){const n=document.querySelectorAll('input[name="dispatchMember"]:checked').length;const el=document.getElementById("dispatchSelectedCount");if(el)el.textContent=`${n} محدد`;}
 function closeDispatch(){document.getElementById("dispatchOverlay").style.display="none";}
 async function submitDispatch(){
   const reportId=document.getElementById("dispatchReportId").value;
@@ -804,7 +847,7 @@ async function backToAdmin(){document.getElementById("memberPanel").style.displa
 async function openMemberDashboard(){
   document.getElementById("memberPanel").style.display="block";
   document.getElementById("backToAdminBtn").style.display=currentIsAdmin?"inline-flex":"none";
-  await Promise.all([loadMyProfile(),loadMyAssignments(),loadMemberDirectory()]);
+  await Promise.all([loadMyProfile(),loadMyAssignments(),loadMemberDirectory(),loadMyAchievements()]);
   if(taskTimerHandle)clearInterval(taskTimerHandle);taskTimerHandle=setInterval(refreshLiveTimers,1000);if(taskPollHandle)clearInterval(taskPollHandle);taskPollHandle=setInterval(loadMyAssignments,20000);refreshLiveTimers();
 }
 async function loadMyProfile(){
@@ -825,7 +868,7 @@ async function uploadMyAvatar(){
 async function loadMemberDirectory(){
   const box=document.getElementById("memberDirectory");box.innerHTML="<p>جاري تحميل الأعضاء...</p>";
   const {data,error}=await getSupabaseClient().rpc("get_member_directory");if(error){console.error(error);box.innerHTML="<p>تعذر تحميل دليل الأعضاء.</p>";return;}
-  box.innerHTML=(data||[]).map(m=>`<div class="directory-card"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><div><b>${esc(m.full_name)}</b><small>${formatMinutes(m.total_volunteer_minutes||0)} تطوعية</small></div></div>`).join("")||"<p>لا يوجد أعضاء ظاهرون.</p>";
+  box.innerHTML=(data||[]).map(m=>{let level="neutral",label="متطوع";if(m.participation_status==="active"){level="green";label="متطوع مشارك";}else if((m.missed_dispatches||0)>=3){level="red";label="تنبيه: 3 مرات أو أكثر دون استجابة";}else if((m.missed_dispatches||0)===2){level="orange";label="تنبيه ثانٍ لعدم الاستجابة";}else if((m.missed_dispatches||0)===1){level="yellow";label="تنبيه أول لعدم الاستجابة";}return `<div class="directory-card level-${level}"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><div><b>${esc(m.full_name)}</b><small>${formatMinutes(m.total_volunteer_minutes||0)} تطوعية</small><span class="member-badge badge-${level}">${label}</span></div></div>`;}).join("")||"<p>لا يوجد أعضاء ظاهرون.</p>";
 }
 async function loadMyAssignments(){
   const box=document.getElementById("myTasks");box.innerHTML="<p>جاري تحميل المهام...</p>";
@@ -860,11 +903,27 @@ async function openReport(){
   }
 }
 
+
+let adminReportPollHandle=null, lastAdminReportCount=null, heroSlideTimer=null;
+async function loadPublicReportCount(){const {data,error}=await getSupabaseClient().rpc("get_public_report_count");if(!error){const el=document.getElementById("publicReportCount");if(el)el.textContent=Number(data||0).toLocaleString("ar-SA");}}
+async function loadHeroSlides(){const {data,error}=await getSupabaseClient().from("hero_slides").select("id,image_url,sort_order").eq("is_active",true).order("sort_order").order("created_at");if(error){console.error(error);return;}const box=document.getElementById("heroSlides"),visual=document.getElementById("homeVisual");if(!box||!visual)return;box.innerHTML=(data||[]).map((x,i)=>`<img class="hero-slide ${i===0?'active':''}" src="${esc(x.image_url)}" alt="صورة من جمعية ليث">`).join("");visual.classList.toggle("has-slides",!!data?.length);if(heroSlideTimer)clearInterval(heroSlideTimer);if((data||[]).length>1){let i=0;heroSlideTimer=setInterval(()=>{const slides=[...box.querySelectorAll('.hero-slide')];slides[i].classList.remove('active');i=(i+1)%slides.length;slides[i].classList.add('active');},4500);}}
+async function loadAdminSlides(){const box=document.getElementById("adminSlides");if(!box)return;const {data,error}=await getSupabaseClient().from("hero_slides").select("*").order("sort_order").order("created_at");if(error){box.innerHTML="<p>تعذر تحميل الصور.</p>";return;}box.innerHTML=(data||[]).map(x=>`<div class="slide-admin-row"><img src="${esc(x.image_url)}" alt=""><div><b>${x.is_active?'ظاهرة في الموقع':'مخفية'}</b><br><small>الترتيب: ${x.sort_order||0}</small></div><div class="row-actions"><button onclick="toggleHeroSlide('${x.id}',${!x.is_active})">${x.is_active?'إخفاء':'إظهار'}</button><button class="danger" onclick="deleteHeroSlide('${x.id}')">حذف</button></div></div>`).join('')||'<p>لم تضف صورًا متحركة بعد.</p>';}
+async function addHeroSlide(){const f=document.getElementById("heroSlideFile")?.files?.[0],msg=document.getElementById("slideMsg");if(!f){msg.textContent="اختر صورة أولًا.";return;}msg.textContent="جاري الرفع...";try{const url=await uploadSiteImage(f,"hero-slides");const {error}=await getSupabaseClient().from("hero_slides").insert({image_url:url,is_active:true});if(error)throw error;document.getElementById("heroSlideFile").value="";msg.textContent="تمت إضافة الصورة.";await Promise.all([loadAdminSlides(),loadHeroSlides()]);}catch(e){msg.textContent="تعذر الإضافة: "+e.message;}}
+async function toggleHeroSlide(id,v){const {error}=await getSupabaseClient().from("hero_slides").update({is_active:v}).eq("id",id);if(error){alert(error.message);return;}await Promise.all([loadAdminSlides(),loadHeroSlides()]);}
+async function deleteHeroSlide(id){if(!confirm("حذف الصورة من العرض؟"))return;const {error}=await getSupabaseClient().from("hero_slides").delete().eq("id",id);if(error){alert(error.message);return;}await Promise.all([loadAdminSlides(),loadHeroSlides()]);}
+function playNewReportSound(){try{const C=window.AudioContext||window.webkitAudioContext;const ctx=new C();const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.7);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.7);}catch(e){console.warn(e);}}
+async function pollAdminNewReports(){if(!currentIsAdmin)return;const {data,error}=await getSupabaseClient().rpc("get_public_report_count");if(error)return;const n=Number(data||0);if(lastAdminReportCount!==null&&n>lastAdminReportCount){const a=document.getElementById("adminNewReportAlert");if(a){a.style.display="block";a.textContent=`ورد ${n-lastAdminReportCount} بلاغ جديد إلى المنصة.`;}playNewReportSound();if(document.getElementById("reportsList")?.style.display!=="none")loadReports();}lastAdminReportCount=n;}
+function startAdminReportAlerts(){if(adminReportPollHandle)clearInterval(adminReportPollHandle);pollAdminNewReports();adminReportPollHandle=setInterval(pollAdminNewReports,10000);}
+function openAchievementAdmin(memberId){document.getElementById("achievementMemberId").value=memberId;document.getElementById("achievementTitle").value="";document.getElementById("achievementDescription").value="";document.getElementById("achievementFile").value="";document.getElementById("achievementMsg").textContent="";document.getElementById("achievementOverlay").style.display="flex";}
+function closeAchievementAdmin(){document.getElementById("achievementOverlay").style.display="none";}
+async function saveAchievement(){const memberId=document.getElementById("achievementMemberId").value,title=document.getElementById("achievementTitle").value.trim(),desc=document.getElementById("achievementDescription").value.trim(),f=document.getElementById("achievementFile").files[0],msg=document.getElementById("achievementMsg");if(!title){msg.textContent="اكتب عنوان الإنجاز.";return;}msg.textContent="جاري الحفظ...";let path=null;if(f){const {data:{user}}=await getSupabaseClient().auth.getUser();const ext=(f.name.split('.').pop()||'pdf').toLowerCase();path=`${memberId}/${Date.now()}-${user.id}.${ext}`;const {error:up}=await getSupabaseClient().storage.from("certificates").upload(path,f,{upsert:false});if(up){msg.textContent="تعذر رفع الشهادة: "+up.message;return;}}const {error}=await getSupabaseClient().from("member_achievements").insert({member_id:memberId,title,description:desc||null,certificate_path:path});if(error){msg.textContent="تعذر حفظ الإنجاز: "+error.message;return;}msg.textContent="تم إرسال الإنجاز للعضو.";setTimeout(closeAchievementAdmin,700);}
+async function loadMyAchievements(){const box=document.getElementById("myAchievements");if(!box)return;const {data,error}=await getSupabaseClient().from("member_achievements").select("id,title,description,certificate_path,awarded_at").order("awarded_at",{ascending:false});if(error){box.innerHTML="<p>تعذر تحميل الإنجازات.</p>";return;}const rows=[];for(const a of (data||[])){let link='';if(a.certificate_path){const {data:signed}=await getSupabaseClient().storage.from("certificates").createSignedUrl(a.certificate_path,3600);if(signed?.signedUrl)link=`<a class="btn light" target="_blank" rel="noopener" href="${esc(signed.signedUrl)}">فتح الشهادة</a>`;}rows.push(`<div class="achievement-card"><h4>${esc(a.title)}</h4><p>${esc(a.description||'')}</p><small>${esc(formatDateTime(a.awarded_at))}</small><div class="row-actions">${link}</div></div>`);}box.innerHTML=rows.join('')||'<p>لا توجد إنجازات أو شهادات مضافة حتى الآن.</p>';}
+
 window.addEventListener("DOMContentLoaded",async()=>{
   try{
     const client=getSupabaseClient();
     await loadSiteSettings();
-    await loadPublicPosts();
+    await Promise.all([loadPublicPosts(),loadPublicReportCount(),loadHeroSlides()]);
     const {data:{session}}=await Promise.race([
       client.auth.getSession(),
       new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
@@ -880,6 +939,8 @@ window.addEventListener("DOMContentLoaded",async()=>{
       await loadMembers("pending");
       await loadSiteSettings();
       await loadAdminPosts();
+      await loadAdminSlides();
+      startAdminReportAlerts();
     }else{
       const {data:m}=await client.from("members").select("account_status").eq("id",session.user.id).maybeSingle();
       if(m?.account_status==="approved"){currentIsAdmin=false;await openMemberDashboard();}
