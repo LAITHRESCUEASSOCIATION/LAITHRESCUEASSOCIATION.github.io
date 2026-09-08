@@ -98,6 +98,20 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 .admin-alert{display:none;background:#fff1f1;border:1px solid #efb4b4;color:#8d1f2d;padding:12px 14px;border-radius:14px;margin-bottom:14px;font-weight:800}
 @media(max-width:800px){.slide-admin-row{grid-template-columns:72px 1fr}.slide-admin-row .row-actions{grid-column:1/-1}}
 
+/* المراكز الأولى */
+.leaderboard-section{padding:34px 0 58px}
+.leaderboard-head{text-align:center;margin-bottom:26px}.leaderboard-head h2{margin:0 0 8px;font-size:34px}.leaderboard-head p{margin:0;color:#66747e}
+.leaderboard-podium{display:flex;direction:rtl;justify-content:center;align-items:flex-end;gap:18px;min-height:300px}
+.podium-card{width:min(30%,280px);background:#fff;border:1px solid #e3e8eb;border-radius:24px;padding:22px;text-align:center;box-shadow:0 12px 30px rgba(30,45,60,.06);position:relative}
+.podium-card.first{min-height:280px;transform:translateY(-16px);border-width:2px}
+.podium-card.second,.podium-card.third{min-height:245px}
+.podium-rank{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#111d27;color:#fff;font-weight:800;margin-bottom:12px}
+.podium-avatar{width:108px;height:108px;border-radius:50%;object-fit:cover;border:5px solid #fff;box-shadow:0 0 0 2px #dfe6ea;margin-bottom:12px}.first .podium-avatar{width:132px;height:132px}
+.podium-name{font-size:18px;font-weight:800;color:#1f8a4c;margin-bottom:7px}.first .podium-name{font-size:21px}
+.podium-meta{color:#65737e;font-size:14px;line-height:1.9}.podium-hours{display:block;font-size:18px;font-weight:800;color:#14202b;margin-top:7px}
+.leaderboard-empty{width:100%;text-align:center;color:#687680;background:#fff;border:1px dashed #d9e1e6;border-radius:20px;padding:30px}
+@media(max-width:800px){.leaderboard-podium{gap:10px;align-items:stretch}.podium-card{width:33.333%;padding:14px 8px;min-height:0!important;transform:none!important}.podium-avatar,.first .podium-avatar{width:74px;height:74px}.podium-name,.first .podium-name{font-size:14px}.podium-meta{font-size:12px}.podium-hours{font-size:13px}.podium-rank{width:30px;height:30px;font-size:12px}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -141,6 +155,12 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 </div></section>
 
 <section style="padding:28px 0"><div class="wrap"><div class="public-report-stat"><b id="publicReportCount">—</b><span>بلاغ تم تقديمه عبر المنصة حتى الآن</span></div></div></section>
+
+
+<section class="leaderboard-section" id="leaderboard"><div class="wrap">
+  <div class="leaderboard-head"><h2>المراكز الأولى في الساعات التطوعية</h2><p>ترتيب إلكتروني يتحدث تلقائيًا بحسب الساعات التطوعية المعتمدة.</p></div>
+  <div id="publicLeaderboard" class="leaderboard-podium"><div class="leaderboard-empty">جاري تحميل المراكز الأولى...</div></div>
+</div></section>
 
 <section id="about"><div class="wrap">
 <div class="section-head"><div><h2>منصة واحدة لكل عمليات الإنقاذ</h2><p>تصميم رسمي، حديث، واضح، ومتجاوب مع الجوال والكمبيوتر.</p></div></div>
@@ -799,7 +819,7 @@ async function openDispatch(reportId){
   const {data,error}=await getSupabaseClient().rpc("get_dispatch_members");
   if(error){console.error(error);box.innerHTML="<p>تعذر تحميل جميع المتطوعين. شغّل ملف SQL الجديد أولًا.</p>";return;}
   if(!data?.length){box.innerHTML="<p>لا يوجد متطوعون مقبولون حاليًا.</p>";return;}
-  box.innerHTML=data.map(m=>`<label class="dispatch-member"><input type="checkbox" name="dispatchMember" value="${m.id}" onchange="updateDispatchSelectedCount()"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><span><b>${esc(m.full_name)}</b><br><small>${m.specialty==="paramedic"?"مسعف":"منقذ"} · ${formatMinutes(m.total_volunteer_minutes||0)}</small></span></label>`).join("");
+  box.innerHTML=data.map(m=>`<label class="dispatch-member"><input type="checkbox" name="dispatchMember" value="${m.id}" onchange="updateDispatchSelectedCount()"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><span><b>${esc(m.full_name)}</b><br><small>${m.specialty==="paramedic"?"مسعف":m.specialty==="rescuer"?"منقذ":"عضو"} · ${formatMinutes(m.total_volunteer_minutes||0)}</small></span></label>`).join("");
   updateDispatchSelectedCount();
 }
 function toggleAllDispatch(v){document.querySelectorAll('input[name="dispatchMember"]').forEach(x=>x.checked=v);updateDispatchSelectedCount();}
@@ -904,7 +924,20 @@ async function openReport(){
 }
 
 
-let adminReportPollHandle=null, lastAdminReportCount=null, heroSlideTimer=null;
+let adminReportPollHandle=null, lastAdminReportCount=null, heroSlideTimer=null, leaderboardPollHandle=null;
+
+async function loadPublicLeaderboard(){
+  const box=document.getElementById("publicLeaderboard"); if(!box)return;
+  const {data,error}=await getSupabaseClient().rpc("get_public_leaderboard");
+  if(error){console.error(error);box.innerHTML='<div class="leaderboard-empty">تعذر تحميل المراكز الأولى حاليًا.</div>';return;}
+  const rows=data||[];
+  if(!rows.length){box.innerHTML='<div class="leaderboard-empty">لا توجد ساعات تطوعية معتمدة حتى الآن.</div>';return;}
+  const cards={};
+  rows.slice(0,3).forEach((m,i)=>{const rank=i+1;cards[rank]=`<article class="podium-card ${rank===1?'first':rank===2?'second':'third'}"><div class="podium-rank">${rank}</div><img class="podium-avatar" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt="الصورة الشخصية"><div class="podium-name">${esc(m.full_name)}</div><div class="podium-meta">${m.age_years!=null?`العمر: ${Number(m.age_years).toLocaleString('ar-SA')} سنة<br>`:''}<span class="podium-hours">${formatMinutes(m.total_volunteer_minutes||0)}</span></div></article>`;});
+  box.innerHTML=(cards[2]||'')+(cards[1]||'')+(cards[3]||'');
+}
+function startPublicLeaderboardUpdates(){if(leaderboardPollHandle)clearInterval(leaderboardPollHandle);loadPublicLeaderboard();leaderboardPollHandle=setInterval(loadPublicLeaderboard,15000);}
+
 async function loadPublicReportCount(){const {data,error}=await getSupabaseClient().rpc("get_public_report_count");if(!error){const el=document.getElementById("publicReportCount");if(el)el.textContent=Number(data||0).toLocaleString("ar-SA");}}
 async function loadHeroSlides(){const {data,error}=await getSupabaseClient().from("hero_slides").select("id,image_url,sort_order").eq("is_active",true).order("sort_order").order("created_at");if(error){console.error(error);return;}const box=document.getElementById("heroSlides"),visual=document.getElementById("homeVisual");if(!box||!visual)return;box.innerHTML=(data||[]).map((x,i)=>`<img class="hero-slide ${i===0?'active':''}" src="${esc(x.image_url)}" alt="صورة من جمعية ليث">`).join("");visual.classList.toggle("has-slides",!!data?.length);if(heroSlideTimer)clearInterval(heroSlideTimer);if((data||[]).length>1){let i=0;heroSlideTimer=setInterval(()=>{const slides=[...box.querySelectorAll('.hero-slide')];slides[i].classList.remove('active');i=(i+1)%slides.length;slides[i].classList.add('active');},4500);}}
 async function loadAdminSlides(){const box=document.getElementById("adminSlides");if(!box)return;const {data,error}=await getSupabaseClient().from("hero_slides").select("*").order("sort_order").order("created_at");if(error){box.innerHTML="<p>تعذر تحميل الصور.</p>";return;}box.innerHTML=(data||[]).map(x=>`<div class="slide-admin-row"><img src="${esc(x.image_url)}" alt=""><div><b>${x.is_active?'ظاهرة في الموقع':'مخفية'}</b><br><small>الترتيب: ${x.sort_order||0}</small></div><div class="row-actions"><button onclick="toggleHeroSlide('${x.id}',${!x.is_active})">${x.is_active?'إخفاء':'إظهار'}</button><button class="danger" onclick="deleteHeroSlide('${x.id}')">حذف</button></div></div>`).join('')||'<p>لم تضف صورًا متحركة بعد.</p>';}
@@ -923,7 +956,8 @@ window.addEventListener("DOMContentLoaded",async()=>{
   try{
     const client=getSupabaseClient();
     await loadSiteSettings();
-    await Promise.all([loadPublicPosts(),loadPublicReportCount(),loadHeroSlides()]);
+    await Promise.all([loadPublicPosts(),loadPublicReportCount(),loadHeroSlides(),loadPublicLeaderboard()]);
+    startPublicLeaderboardUpdates();
     const {data:{session}}=await Promise.race([
       client.auth.getSession(),
       new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
