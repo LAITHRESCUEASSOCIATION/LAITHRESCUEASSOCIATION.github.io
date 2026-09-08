@@ -98,98 +98,18 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 .admin-alert{display:none;background:#fff1f1;border:1px solid #efb4b4;color:#8d1f2d;padding:12px 14px;border-radius:14px;margin-bottom:14px;font-weight:800}
 @media(max-width:800px){.slide-admin-row{grid-template-columns:72px 1fr}.slide-admin-row .row-actions{grid-column:1/-1}}
 
-/* المراكز الأولى */
-.leaderboard-section{padding:34px 0 58px}
-.leaderboard-head{text-align:center;margin-bottom:26px}.leaderboard-head h2{margin:0 0 8px;font-size:34px}.leaderboard-head p{margin:0;color:#66747e}
-.leaderboard-podium{display:flex;direction:rtl;justify-content:center;align-items:flex-end;gap:18px;min-height:300px}
-.podium-card{width:min(30%,280px);background:#fff;border:1px solid #e3e8eb;border-radius:24px;padding:22px;text-align:center;box-shadow:0 12px 30px rgba(30,45,60,.06);position:relative}
-.podium-card.first{min-height:280px;transform:translateY(-16px);border-width:2px}
-.podium-card.second,.podium-card.third{min-height:245px}
-.podium-rank{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#111d27;color:#fff;font-weight:800;margin-bottom:12px}
-.podium-avatar{width:108px;height:108px;border-radius:50%;object-fit:cover;border:5px solid #fff;box-shadow:0 0 0 2px #dfe6ea;margin-bottom:12px}.first .podium-avatar{width:132px;height:132px}
-.podium-name{font-size:18px;font-weight:800;color:#1f8a4c;margin-bottom:7px}.first .podium-name{font-size:21px}
-.podium-meta{color:#65737e;font-size:14px;line-height:1.9}.podium-hours{display:block;font-size:18px;font-weight:800;color:#14202b;margin-top:7px}
-.leaderboard-empty{width:100%;text-align:center;color:#687680;background:#fff;border:1px dashed #d9e1e6;border-radius:20px;padding:30px}
-@media(max-width:800px){.leaderboard-podium{gap:10px;align-items:stretch}.podium-card{width:33.333%;padding:14px 8px;min-height:0!important;transform:none!important}.podium-avatar,.first .podium-avatar{width:74px;height:74px}.podium-name,.first .podium-name{font-size:14px}.podium-meta{font-size:12px}.podium-hours{font-size:13px}.podium-rank{width:30px;height:30px;font-size:12px}}
+/* التتبع المباشر للمتطوعين */
+.tracking-consent{margin:12px 0;padding:12px 14px;border-radius:12px;background:#eef7f1;border:1px solid #cfe7d7;color:#29543a;font-size:13px;line-height:1.8}
+.tracking-status{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;background:#edf1f4;color:#53616d}
+.tracking-status.live{background:#dff6e8;color:#17633b}.tracking-status.stale{background:#fff2b8;color:#7d6500}.tracking-status.off{background:#ffd4d4;color:#9c2020}
+.tracking-dot{width:8px;height:8px;border-radius:50%;background:currentColor}.tracking-map{height:min(62vh,560px);min-height:360px;border-radius:18px;overflow:hidden;border:1px solid #dfe5e9;margin-top:14px}
+.tracking-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}.tracking-person{background:#f7f9fa;border:1px solid #e3e8eb;border-radius:14px;padding:12px}.tracking-person b{display:block;margin-bottom:5px}.tracking-person small{display:block;color:#687680;line-height:1.7}
+@media(max-width:800px){.tracking-list{grid-template-columns:1fr}.tracking-map{min-height:320px}}
 
-
-/* تحسينات شاملة للجوال والأجهزة اللوحية */
-@media (max-width: 800px){
-  html{scroll-behavior:smooth}
-  body{overflow-x:hidden}
-  .wrap{width:100%;padding-left:16px;padding-right:16px}
-  header{position:sticky}
-  .nav{height:auto;min-height:68px;padding:10px 0;gap:10px;flex-wrap:wrap}
-  .brand{min-width:0;flex:1;font-size:14px;gap:8px}
-  .logo{width:40px;height:40px;flex:0 0 40px}
-  #brandSiteName{white-space:normal;line-height:1.45}
-  .auth-buttons{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-  .auth-buttons .btn{width:100%;padding:10px 5px;font-size:11px;border-radius:10px;white-space:nowrap}
-  .hero{padding:42px 0 34px}
-  .hero-grid{gap:26px}
-  .kicker{font-size:11px;padding:6px 9px}
-  h1{font-size:clamp(30px,10vw,42px);letter-spacing:0;margin:14px 0}
-  .hero p{font-size:15px;line-height:1.9}
-  .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}
-  .actions .btn{width:100%;padding:11px 8px;font-size:13px}
-  .visual{min-height:230px;border-radius:20px}
-  .dashboard{top:12px;right:12px;font-size:10px}
-  section{padding:42px 0}
-  .section-head{display:block;margin-bottom:20px}
-  .section-head h2,.leaderboard-head h2{font-size:26px;line-height:1.45}
-  .section-head p,.leaderboard-head p{font-size:14px}
-  .cards{gap:12px}
-  .card{padding:18px;gap:12px;border-radius:16px}
-  .card h3{font-size:18px}
-  .card p{font-size:14px}
-  .stats{grid-template-columns:1fr 1fr;gap:9px}
-  .stat{padding:17px;border-radius:15px}
-  .stat b{font-size:22px}
-  .workflow{padding:16px;border-radius:18px}
-  .steps{grid-template-columns:1fr;gap:8px;margin-top:0}
-  .step{padding:15px}
-  .cta{padding:24px 18px;border-radius:20px;gap:18px}
-  .cta h2{font-size:24px}
-  .cta .btn{width:100%}
-  .public-report-stat{padding:20px;border-radius:17px}
-  .public-report-stat b{font-size:34px}
-  .posts-grid{gap:12px}
-  .post-card img{height:180px}
-  .post-card .body{padding:16px}
-  .leaderboard-section{padding:30px 0 42px}
-  .leaderboard-podium{display:grid;grid-template-columns:1fr;gap:10px;min-height:0}
-  .podium-card{width:100%;display:grid;grid-template-columns:auto 70px 1fr;align-items:center;text-align:right;gap:10px;padding:13px;min-height:0!important;transform:none!important}
-  .podium-avatar,.first .podium-avatar{width:64px;height:64px;margin:0;border-width:3px}
-  .podium-rank{margin:0}
-  .podium-name,.first .podium-name{font-size:15px;margin-bottom:2px}
-  .podium-meta{font-size:12px;line-height:1.6}
-  .podium-hours{font-size:13px;margin-top:2px}
-  footer{margin-top:35px;padding:25px 0;text-align:center;line-height:1.8}
-  .auth-card{padding:18px;border-radius:18px;max-height:94vh}
-  .admin-shell{padding:14px}
-  .admin-wrap{width:100%}
-  .admin-top{gap:12px}
-  .admin-top>div:last-child,.admin-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:7px}
-  .admin-actions .btn,.admin-top>div:last-child .btn{width:100%;font-size:12px;padding:10px 7px}
-  .member-row,.report-row,.cms-box,.task-card{padding:15px;border-radius:15px}
-  .row-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-  .row-actions button{width:100%;padding:10px 6px;font-size:12px}
-  .cms-grid,.edit-grid{grid-template-columns:1fr}
-  .cms-grid>div[style*="grid-column"]{grid-column:auto!important}
-  .profile-head{flex-direction:column;align-items:center!important;text-align:center}
-  .dispatch-member{align-items:flex-start}
-  input,select,textarea,button{max-width:100%}
-}
-@media (max-width: 390px){
-  .wrap{padding-left:12px;padding-right:12px}
-  .auth-buttons .btn{font-size:10px;padding:9px 3px}
-  .actions{grid-template-columns:1fr}
-  .stats{grid-template-columns:1fr}
-  .admin-top>div:last-child,.admin-actions,.row-actions{grid-template-columns:1fr}
-  h1{font-size:30px}
-}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
   const SUPABASE_URL = "https://mijabxmjrzkzntqpnsnc.supabase.co";
   const SUPABASE_KEY = "sb_publishable_1tg-mHlBnpPQqrjUHVmHyA_ao62TBjc";
@@ -232,17 +152,6 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 
 <section style="padding:28px 0"><div class="wrap"><div class="public-report-stat"><b id="publicReportCount">—</b><span>بلاغ تم تقديمه عبر المنصة حتى الآن</span></div></div></section>
 
-
-<section class="leaderboard-section" id="leaderboard"><div class="wrap">
-  <div class="leaderboard-head"><h2>المراكز الأولى في الساعات التطوعية</h2><p>ترتيب إلكتروني يتحدث تلقائيًا بحسب الساعات التطوعية المعتمدة.</p></div>
-  <div id="publicLeaderboard" class="leaderboard-podium"><div class="leaderboard-empty">جاري تحميل المراكز الأولى...</div></div>
-</div></section>
-
-<section id="news"><div class="wrap">
-  <div class="section-head"><div><h2>الأخبار والمقالات</h2><p>آخر أخبار ومقالات جمعية ليث للإنقاذ.</p></div></div>
-  <div id="publicPosts" class="posts-grid"><p>جاري تحميل المحتوى...</p></div>
-</div></section>
-
 <section id="about"><div class="wrap">
 <div class="section-head"><div><h2>منصة واحدة لكل عمليات الإنقاذ</h2><p>تصميم رسمي، حديث، واضح، ومتجاوب مع الجوال والكمبيوتر.</p></div></div>
 <div class="cards"><article class="card"><div class="num">01</div><div><span>عن الجمعية</span><h3>جمعية ليث للإنقاذ</h3><p>منظومة رقمية متكاملة لتنظيم أعمال الإنقاذ والبلاغات والمتطوعين وربط الإدارة بالميدان والمواطنين.</p></div></article><article class="card"><div class="num">02</div><div><span>البلاغات</span><h3>استقبال البلاغات وإدارتها</h3><p>تقديم البلاغات من المواطنين بدون إنشاء حساب، مع رقم مرجعي ومتابعة حالة البلاغ.</p></div></article><article class="card"><div class="num">03</div><div><span>المتطوعون</span><h3>إدارة المتطوعين والمهام</h3><p>ملفات متكاملة للمتطوعين، قبول ورفض المهام، تسجيل المشاركة وساعات التطوع تلقائياً.</p></div></article><article class="card"><div class="num">04</div><div><span>الخريطة المباشرة</span><h3>متابعة المتطوعين أثناء المهمة</h3><p>عرض موقع البلاغ والمتطوعين المشاركين ومسارات الحركة على خريطة الإدارة.</p></div></article></div>
@@ -259,6 +168,10 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 </div></section>
 
 
+<section id="news"><div class="wrap">
+  <div class="section-head"><div><h2>الأخبار والمقالات</h2><p>آخر أخبار ومقالات جمعية ليث للإنقاذ.</p></div></div>
+  <div id="publicPosts" class="posts-grid"><p>جاري تحميل المحتوى...</p></div>
+</div></section>
 
 <section id="report"><div class="wrap"><div class="cta">
 <div><h2>هل لديك بلاغ؟</h2><p>يمكن للمواطن تقديم البلاغ مباشرة دون إنشاء حساب.</p></div>
@@ -374,8 +287,10 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn light" type="button" onclick="openMyProfile()">ملفي الشخصي</button><button class="btn light" type="button" onclick="logoutUser()">تسجيل خروج</button></div>
     </div>
     <div class="admin-actions">
-      <button class="btn" type="button" onclick="loadMembers('pending')">طلبات المتطوعين الجديدة</button>
-      <button class="btn light" type="button" onclick="loadMembers('approved')">المتطوعون الفعّالون</button>
+      <button class="btn" type="button" onclick="loadMembers('pending')">طلبات جديدة</button>
+      <button class="btn light" type="button" onclick="loadMembers('approved')">المقبولون</button>
+      <button class="btn light" type="button" onclick="loadMembers('rejected')">المرفوضون</button>
+      <button class="btn light" type="button" onclick="loadMembers()">جميع الأعضاء</button>
       <button class="btn light" type="button" onclick="loadReports()">البلاغات</button>
     </div>
     <div id="adminNewReportAlert" class="admin-alert">ورد بلاغ جديد إلى المنصة.</div>
@@ -520,6 +435,19 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
   </div>
 </div>
 
+
+<div id="trackingOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10050;align-items:center;justify-content:center;padding:20px">
+  <div class="auth-card" style="width:min(980px,96vw)">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <div><h2 style="margin:0">التتبع المباشر للمهمة</h2><small id="trackingReportLabel">مواقع المشاركين ومسار حركتهم</small></div>
+      <button type="button" onclick="closeTracking()" style="font-size:26px;border:0;background:none;cursor:pointer">×</button>
+    </div>
+    <div id="liveTrackingMap" class="tracking-map"></div>
+    <div id="trackingPeople" class="tracking-list"></div>
+    <p style="font-size:12px;color:#687680;line-height:1.8;margin-bottom:0">يتم تحديث المواقع تلقائيًا. إذا أغلق المتطوع الصفحة أو أوقف إذن الموقع من جهازه فسيظهر آخر موقع معروف ووقت آخر تحديث.</p>
+  </div>
+</div>
+
 <script>
 function openAuth(){ document.getElementById("authOverlay").style.display="flex"; showLogin(); }
 function openSignup(){ document.getElementById("authOverlay").style.display="flex"; showSignup(); }
@@ -533,6 +461,13 @@ function acceptPolicy(){ document.getElementById("policyConsent").checked=true; 
 let currentIsAdmin=false;
 let taskTimerHandle=null;
 let taskPollHandle=null;
+let activeGeoWatchId=null;
+let activeGeoAssignmentId=null;
+let lastGeoSentAt=0;
+let trackingMap=null;
+let trackingLayer=null;
+let trackingPollHandle=null;
+let trackingReportId=null;
 async function uploadSiteImage(file,prefix){
   if(!file) return null;
   const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
@@ -806,47 +741,41 @@ async function loginVolunteer(){
   }
 }
 
-async function loadMembers(status="approved"){
+async function loadMembers(status=null){
   const list=document.getElementById("membersList"), reports=document.getElementById("reportsList");
   reports.style.display="none"; list.style.display="block";
-  const isPending=status==="pending";
-  list.innerHTML=isPending?"<p>جاري تحميل طلبات المتطوعين الجديدة...</p>":"<p>جاري تحميل المتطوعين الفعّالين...</p>";
-
-  // المرفوضون لا يظهرون في لوحة الإدارة أو القوائم النشطة.
-  let q=getSupabaseClient().from("members").select("*").eq("account_status",isPending?"pending":"approved").order("created_at",{ascending:false});
+  list.innerHTML="<p>جاري تحميل الأعضاء...</p>";
+  let q=getSupabaseClient().from("members").select("*").order("created_at",{ascending:false});
+  if(status) q=q.eq("account_status",status);
   const {data,error}=await q;
   if(error){console.error(error);list.innerHTML="<p>تعذر تحميل الأعضاء. تحقق من صلاحيات المدير في Supabase.</p>";return;}
-  if(!data?.length){list.innerHTML=isPending?"<p>لا توجد طلبات متطوعين جديدة حاليًا.</p>":"<p>لا يوجد متطوعون فعّالون حاليًا.</p>";return;}
-
+  if(!data?.length){list.innerHTML="<p>لا توجد طلبات في هذه القائمة.</p>";return;}
+  const statusName={pending:"بانتظار الموافقة",approved:"مقبول",rejected:"مرفوض"};
   const roleName={volunteer:"متطوع",operator:"مشغل بلاغات",supervisor:"مشرف",admin:"مدير"};
-  list.innerHTML=data.map(m=>{
-    const isApproved=m.account_status==="approved";
-    const actions=isPending
-      ? `<button class="success" onclick="changeMemberStatus('${m.id}','approved')">قبول</button><button class="danger" onclick="changeMemberStatus('${m.id}','rejected')">رفض</button>`
-      : `<button onclick="openEdit('${m.id}')">تعديل</button><button class="danger" onclick="deleteVolunteer('${m.id}','${escJs(m.full_name||"المتطوع")}')">حذف المتطوع</button><button onclick="openAchievementAdmin('${m.id}')">إرسال شهادة</button>
-         <select class="role-select" id="role-${m.id}">
-           <option value="volunteer" ${(m.role||"volunteer")==="volunteer"?"selected":""}>متطوع</option>
-           <option value="operator" ${m.role==="operator"?"selected":""}>مشغل بلاغات</option>
-           <option value="supervisor" ${m.role==="supervisor"?"selected":""}>مشرف</option>
-           <option value="admin" ${m.role==="admin"?"selected":""}>مدير</option>
-         </select>
-         <button onclick="changeMemberRole('${m.id}')">حفظ الصلاحية</button>`;
-    return `<div class="member-row">
-      <div style="display:flex;align-items:center;gap:12px"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><h3 style="margin:0">${esc(m.full_name)} <span class="status-pill">${isApproved?"متطوع فعّال":"طلب جديد"}</span> <span class="status-pill">${roleName[m.role||"volunteer"]||esc(m.role||"متطوع")}</span></h3></div>
-      <div class="member-meta">
-        <div><b>السجل المدني:</b> ${esc(m.national_id)}</div><div><b>الميلاد:</b> ${esc(m.birth_date)}</div>
-        <div><b>التخصص:</b> ${m.specialty==="paramedic"?"مسعف":"منقذ"}</div><div><b>الجوال:</b> ${esc(m.phone)}</div>
-        <div><b>المدينة:</b> ${esc(m.city)}</div><div><b>تاريخ الطلب:</b> ${esc(formatDateTime(m.created_at))}</div>
-        <div><b>آخر دخول:</b> ${m.last_login_at?esc(formatDateTime(m.last_login_at)):"لم يسجل دخولًا بعد"}</div>
-        <div><b>الصفة:</b> ${roleName[m.role||"volunteer"]||"متطوع"}</div>
-        <div><b>الساعات التطوعية:</b> ${formatMinutes(m.total_volunteer_minutes||0)}</div>
-      </div>
-      <div class="row-actions">${actions}</div>
-    </div>`;
-  }).join("");
+  list.innerHTML=data.map(m=>`<div class="member-row">
+    <div style="display:flex;align-items:center;gap:12px"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><h3 style="margin:0">${esc(m.full_name)} <span class="status-pill">${statusName[m.account_status]||esc(m.account_status||"غير محدد")}</span> <span class="status-pill">${roleName[m.role||"volunteer"]||esc(m.role||"متطوع")}</span></h3></div>
+    <div class="member-meta">
+      <div><b>السجل المدني:</b> ${esc(m.national_id)}</div><div><b>الميلاد:</b> ${esc(m.birth_date)}</div>
+      <div><b>التخصص:</b> ${m.specialty==="paramedic"?"مسعف":"منقذ"}</div><div><b>الجوال:</b> ${esc(m.phone)}</div>
+      <div><b>المدينة:</b> ${esc(m.city)}</div><div><b>تاريخ الطلب:</b> ${esc(formatDateTime(m.created_at))}</div>
+      <div><b>آخر دخول:</b> ${m.last_login_at?esc(formatDateTime(m.last_login_at)):"لم يسجل دخولًا بعد"}</div>
+      <div><b>الصفة:</b> ${roleName[m.role||"volunteer"]||"متطوع"}</div>
+      <div><b>الساعات التطوعية:</b> ${formatMinutes(m.total_volunteer_minutes||0)}</div>
+    </div>
+    <div class="row-actions">
+      <button onclick="changeMemberStatus('${m.id}','approved')">قبول</button>
+      <button onclick="changeMemberStatus('${m.id}','rejected')">رفض</button>
+      <button onclick="openEdit('${m.id}')">تعديل البيانات</button><button onclick="openAchievementAdmin('${m.id}')">إرسال شهادة</button>
+      <select class="role-select" id="role-${m.id}">
+        <option value="volunteer" ${(m.role||"volunteer")==="volunteer"?"selected":""}>متطوع</option>
+        <option value="operator" ${m.role==="operator"?"selected":""}>مشغل بلاغات</option>
+        <option value="supervisor" ${m.role==="supervisor"?"selected":""}>مشرف</option>
+        <option value="admin" ${m.role==="admin"?"selected":""}>مدير</option>
+      </select>
+      <button onclick="changeMemberRole('${m.id}')">حفظ الصلاحية</button>
+    </div>
+  </div>`).join("");
 }
-
-function escJs(v){return String(v??"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\r?\n/g," ");}
 
 function formatDateTime(value){
   if(!value)return "";
@@ -859,7 +788,7 @@ async function changeMemberRole(id){
   const {error}=await getSupabaseClient().from("members").update({role}).eq("id",id);
   if(error){console.error(error);alert("تعذر تحديث صلاحية العضو: "+(error.message||""));return;}
   alert("تم تحديث صلاحية العضو بنجاح.");
-  await loadMembers("approved");
+  await loadMembers();
 }
 
 async function loadReports(){
@@ -877,7 +806,7 @@ async function loadReports(){
     const ra=(assignments||[]).filter(a=>a.report_id===r.id);
     const assignmentHtml=ra.length?`<div class="assignment-list"><b>الأعضاء المرحل إليهم:</b><br>${ra.map(a=>`${esc(a.members?.full_name||"عضو")} — ${assignmentStatusName(a.status)}${a.volunteer_minutes?` — ${formatMinutes(a.volunteer_minutes)}`:""}`).join("<br>")}</div>`:"";
     const wf=r.workflow_status||"new";
-    const actions=wf==="completed"||wf==="cancelled"?"":`<div class="row-actions">${wf==="new"||wf==="dispatched"?`<button class="success" onclick="openDispatch('${r.id}')">ترحيل البلاغ</button>`:""}<button class="danger" onclick="cancelReport('${r.id}')">إلغاء البلاغ</button>${wf==="dispatched"||wf==="in_progress"?`<button onclick="closeWholeReport('${r.id}')">إيقاف البلاغ كاملًا</button>`:""}</div>`;
+    const actions=wf==="completed"||wf==="cancelled"?"":`<div class="row-actions">${wf==="new"||wf==="dispatched"?`<button class="success" onclick="openDispatch('${r.id}')">ترحيل البلاغ</button>`:""}${wf==="dispatched"||wf==="in_progress"?`<button onclick="openTracking('${r.id}')">التتبع المباشر</button>`:""}<button class="danger" onclick="cancelReport('${r.id}')">إلغاء البلاغ</button>${wf==="dispatched"||wf==="in_progress"?`<button onclick="closeWholeReport('${r.id}')">إيقاف البلاغ كاملًا</button>`:""}</div>`;
     return `<div class="report-row">
       <h3>بلاغ ${esc(r.name||"بدون اسم")} <span class="status-pill">${workflowName[wf]||esc(wf)}</span></h3>
       <div class="report-meta">
@@ -900,7 +829,7 @@ async function openDispatch(reportId){
   const {data,error}=await getSupabaseClient().rpc("get_dispatch_members");
   if(error){console.error(error);box.innerHTML="<p>تعذر تحميل جميع المتطوعين. شغّل ملف SQL الجديد أولًا.</p>";return;}
   if(!data?.length){box.innerHTML="<p>لا يوجد متطوعون مقبولون حاليًا.</p>";return;}
-  box.innerHTML=data.map(m=>`<label class="dispatch-member"><input type="checkbox" name="dispatchMember" value="${m.id}" onchange="updateDispatchSelectedCount()"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><span><b>${esc(m.full_name)}</b><br><small>${m.specialty==="paramedic"?"مسعف":m.specialty==="rescuer"?"منقذ":"عضو"} · ${formatMinutes(m.total_volunteer_minutes||0)}</small></span></label>`).join("");
+  box.innerHTML=data.map(m=>`<label class="dispatch-member"><input type="checkbox" name="dispatchMember" value="${m.id}" onchange="updateDispatchSelectedCount()"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><span><b>${esc(m.full_name)}</b><br><small>${m.specialty==="paramedic"?"مسعف":"منقذ"} · ${formatMinutes(m.total_volunteer_minutes||0)}</small></span></label>`).join("");
   updateDispatchSelectedCount();
 }
 function toggleAllDispatch(v){document.querySelectorAll('input[name="dispatchMember"]').forEach(x=>x.checked=v);updateDispatchSelectedCount();}
@@ -922,18 +851,6 @@ async function changeMemberStatus(id,status){
   alert(status==="approved"?"تم قبول المتطوع.":"تم رفض الطلب."); await loadMembers("pending");
 }
 
-
-async function deleteVolunteer(id,name){
-  if(!confirm(`هل تريد حذف المتطوع ${name} من قائمة المتطوعين الفعّالين؟`))return;
-  const {data:{user}}=await getSupabaseClient().auth.getUser();
-  if(user?.id===id){alert("لا يمكنك حذف حسابك الإداري أثناء تسجيل الدخول.");return;}
-  // نحافظ على السجل التاريخي للمهام والساعات، لكن نخرجه نهائيًا من القوائم النشطة.
-  const {error}=await getSupabaseClient().from("members").update({account_status:"rejected"}).eq("id",id);
-  if(error){console.error(error);alert("تعذر حذف المتطوع: "+(error.message||""));return;}
-  alert("تم حذف المتطوع من القوائم النشطة.");
-  await loadMembers("approved");
-}
-
 async function openEdit(id){
   const {data:m,error}=await getSupabaseClient().from("members").select("*").eq("id",id).single();
   if(error||!m){alert("تعذر تحميل بيانات المتطوع.");return;}
@@ -952,7 +869,7 @@ async function saveMemberEdit(){
   const payload={full_name:document.getElementById("editName").value.trim(),national_id,birth_date:document.getElementById("editBirthDate").value,specialty:document.getElementById("editSpecialty").value,phone,city:document.getElementById("editCity").value.trim()};
   const {error}=await getSupabaseClient().from("members").update(payload).eq("id",id);
   if(error){console.error(error);msg.textContent="تعذر حفظ التعديلات: "+error.message;return;}
-  closeEdit();alert("تم تعديل بيانات المتطوع.");await loadMembers("approved");
+  closeEdit();alert("تم تعديل بيانات المتطوع.");await loadMembers();
 }
 
 async function openMyProfile(){currentIsAdmin=true;await openMemberDashboard();}
@@ -989,13 +906,69 @@ async function loadMyAssignments(){
   if(error){console.error(error);box.innerHTML="<p>تعذر تحميل المهام.</p>";return;}
   const pending=(data||[]).filter(a=>a.status==="assigned").length;
   const alertHtml=pending?`<div class="task-alert">لديك ${pending} بلاغ جديد بانتظار قبولك.</div>`:"";
-  box.innerHTML=alertHtml+((data||[]).map(a=>{const r=a.reports||{};const live=a.status==="accepted"?`<div>الوقت الحالي: <span class="timer live-timer" data-start="${esc(a.accepted_at)}">00:00:00</span></div>`:"";const btn=a.status==="assigned"?`<button class="btn success" onclick="acceptAssignment('${a.id}')">قبول وبدء المهمة</button>`:a.status==="accepted"?`<button class="btn danger" onclick="stopMyAssignment('${a.id}')">إيقاف مشاركتي</button>`:"";return `<div class="task-card"><h3 style="margin-top:0">بلاغ: ${esc(r.description||"بلاغ إنقاذ")}</h3><div class="member-meta"><div><b>الحالة:</b> ${assignmentStatusName(a.status)}</div><div><b>الموقع:</b> ${esc(r.location||"")}</div><div><b>وقت الإرسال:</b> ${esc(formatDateTime(a.assigned_at))}</div><div><b>وقت القبول:</b> ${a.accepted_at?esc(formatDateTime(a.accepted_at)):"—"}</div><div><b>الساعات المحتسبة:</b> ${formatMinutes(a.volunteer_minutes||0)}</div></div>${live}<div class="report-desc">${esc(r.description||"")}</div><div class="row-actions">${btn}</div></div>`;}).join(""))||"<p>لا توجد بلاغات مرسلة لك حاليًا.</p>";refreshLiveTimers();
+  box.innerHTML=alertHtml+((data||[]).map(a=>{const r=a.reports||{};const live=a.status==="accepted"?`<div style="margin-top:10px">الوقت الحالي: <span class="timer live-timer" data-start="${esc(a.accepted_at)}">00:00:00</span> <span class="tracking-status live"><span class="tracking-dot"></span>التتبع يعمل تلقائيًا</span></div>`:"";const consent=a.status==="assigned"?`<div class="tracking-consent"><b>مشاركة الموقع أثناء المهمة:</b> عند الضغط على «قبول وبدء المهمة» سيطلب الجهاز السماح بالموقع، وبعد الموافقة يتم إرسال موقعك للإدارة طوال بقاء المهمة نشطة. لا يوجد زر داخل المنصة لإيقاف التتبع أثناء المهمة.</div>`:"";const btn=a.status==="assigned"?`<button class="btn success" onclick="acceptAssignment('${a.id}')">قبول وبدء المهمة ومشاركة موقعي</button>`:a.status==="accepted"?`<span class="tracking-status live"><span class="tracking-dot"></span>مشاركة الموقع إلزامية أثناء المهمة</span>`:"";return `<div class="task-card"><h3 style="margin-top:0">بلاغ: ${esc(r.description||"بلاغ إنقاذ")}</h3><div class="member-meta"><div><b>الحالة:</b> ${assignmentStatusName(a.status)}</div><div><b>الموقع:</b> ${esc(r.location||"")}</div><div><b>وقت الإرسال:</b> ${esc(formatDateTime(a.assigned_at))}</div><div><b>وقت القبول:</b> ${a.accepted_at?esc(formatDateTime(a.accepted_at)):"—"}</div><div><b>الساعات المحتسبة:</b> ${formatMinutes(a.volunteer_minutes||0)}</div></div>${live}<div class="report-desc">${esc(r.description||"")}</div>${consent}<div class="row-actions">${btn}</div></div>`;}).join(""))||"<p>لا توجد بلاغات مرسلة لك حاليًا.</p>";refreshLiveTimers();
+  const active=(data||[]).find(a=>a.status==="accepted");
+  if(active) ensureLocationTracking(active.id); else stopLocationTracking();
 }
 function refreshLiveTimers(){document.querySelectorAll('.live-timer').forEach(el=>{const start=new Date(el.dataset.start).getTime();if(!start)return;let sec=Math.max(0,Math.floor((Date.now()-start)/1000));const h=String(Math.floor(sec/3600)).padStart(2,'0');sec%=3600;const m=String(Math.floor(sec/60)).padStart(2,'0'),s=String(sec%60).padStart(2,'0');el.textContent=`${h}:${m}:${s}`;});}
-async function acceptAssignment(id){const {error}=await getSupabaseClient().rpc("accept_assignment",{p_assignment_id:id});if(error){alert("تعذر قبول البلاغ: "+error.message);return;}await loadMyAssignments();}
-async function stopMyAssignment(id){if(!confirm("هل تريد إيقاف مشاركتك؟ سيتم تثبيت الوقت المحتسب وإضافته لساعاتك التطوعية."))return;const {error}=await getSupabaseClient().rpc("stop_assignment",{p_assignment_id:id});if(error){alert("تعذر إيقاف المشاركة: "+error.message);return;}await Promise.all([loadMyAssignments(),loadMyProfile(),loadMemberDirectory()]);}
+function requestInitialPosition(){
+  return new Promise((resolve,reject)=>{
+    if(!navigator.geolocation){reject(new Error("هذا الجهاز أو المتصفح لا يدعم تحديد الموقع."));return;}
+    navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+  });
+}
+async function sendVolunteerPosition(assignmentId,pos,force=false){
+  const now=Date.now(); if(!force && now-lastGeoSentAt<5000)return; lastGeoSentAt=now;
+  const c=pos.coords;
+  const {error}=await getSupabaseClient().rpc("record_my_location",{p_assignment_id:assignmentId,p_latitude:c.latitude,p_longitude:c.longitude,p_accuracy:c.accuracy??null,p_heading:Number.isFinite(c.heading)?c.heading:null,p_speed:Number.isFinite(c.speed)?c.speed:null});
+  if(error)console.error("تعذر إرسال الموقع:",error);
+}
+function stopLocationTracking(){if(activeGeoWatchId!==null&&navigator.geolocation){navigator.geolocation.clearWatch(activeGeoWatchId);}activeGeoWatchId=null;activeGeoAssignmentId=null;}
+async function ensureLocationTracking(assignmentId,initialPosition=null){
+  if(!navigator.geolocation)return;
+  if(activeGeoAssignmentId===assignmentId&&activeGeoWatchId!==null)return;
+  stopLocationTracking(); activeGeoAssignmentId=assignmentId;
+  if(initialPosition)await sendVolunteerPosition(assignmentId,initialPosition,true);
+  activeGeoWatchId=navigator.geolocation.watchPosition(
+    p=>sendVolunteerPosition(assignmentId,p),
+    e=>console.warn("توقف/تعذر تحديث الموقع:",e.message),
+    {enableHighAccuracy:true,maximumAge:3000,timeout:20000}
+  );
+}
+async function acceptAssignment(id){
+  let pos;
+  try{pos=await requestInitialPosition();}
+  catch(e){alert("لا يمكن قبول المهمة قبل السماح بمشاركة الموقع. فعّل إذن الموقع للموقع ثم حاول مرة أخرى.");return;}
+  const {error}=await getSupabaseClient().rpc("accept_assignment",{p_assignment_id:id});
+  if(error){alert("تعذر قبول البلاغ: "+error.message);return;}
+  await ensureLocationTracking(id,pos);
+  await loadMyAssignments();
+}
+async function stopMyAssignment(id){if(!confirm("هل تريد إنهاء مشاركتك؟"))return;const {error}=await getSupabaseClient().rpc("stop_assignment",{p_assignment_id:id});if(error){alert("تعذر إنهاء المشاركة: "+error.message);return;}stopLocationTracking();await Promise.all([loadMyAssignments(),loadMyProfile(),loadMemberDirectory()]);}
 
-async function logoutUser(){await getSupabaseClient().auth.signOut();document.getElementById("adminPanel").style.display="none";location.reload();}
+async function openTracking(reportId){
+  trackingReportId=reportId;document.getElementById("trackingOverlay").style.display="flex";
+  if(!trackingMap){trackingMap=L.map("liveTrackingMap").setView([24.7136,46.6753],6);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}).addTo(trackingMap);trackingLayer=L.layerGroup().addTo(trackingMap);}
+  setTimeout(()=>trackingMap.invalidateSize(),120);
+  await refreshTracking(); if(trackingPollHandle)clearInterval(trackingPollHandle);trackingPollHandle=setInterval(refreshTracking,8000);
+}
+function closeTracking(){document.getElementById("trackingOverlay").style.display="none";if(trackingPollHandle)clearInterval(trackingPollHandle);trackingPollHandle=null;trackingReportId=null;}
+async function refreshTracking(){
+  if(!trackingReportId||!trackingLayer)return;
+  const {data,error}=await getSupabaseClient().rpc("get_live_report_locations",{p_report_id:trackingReportId});
+  if(error){console.error(error);document.getElementById("trackingPeople").innerHTML=`<p>تعذر تحميل المواقع: ${esc(error.message)}</p>`;return;}
+  trackingLayer.clearLayers();const bounds=[];const people=[];
+  for(const x of (data||[])){
+    const age=x.captured_at?Math.max(0,(Date.now()-new Date(x.captured_at).getTime())/1000):999999;
+    const state=!x.captured_at?"off":age<=30?"live":age<=120?"stale":"off";const label=state==="live"?"متصل الآن":state==="stale"?"تحديث متأخر":"انقطع التتبع";
+    if(x.latitude!=null&&x.longitude!=null){const ll=[Number(x.latitude),Number(x.longitude)];bounds.push(ll);L.marker(ll).bindPopup(`<b>${esc(x.full_name||"متطوع")}</b><br>${label}<br>${x.captured_at?esc(formatDateTime(x.captured_at)):""}`).addTo(trackingLayer);}
+    people.push(`<div class="tracking-person"><b>${esc(x.full_name||"متطوع")}</b><span class="tracking-status ${state}"><span class="tracking-dot"></span>${label}</span><small>آخر تحديث: ${x.captured_at?esc(formatDateTime(x.captured_at)):"لم يصل موقع بعد"}</small><small>${x.accuracy?`دقة تقريبية: ${Math.round(Number(x.accuracy))} م`:""}</small></div>`);
+  }
+  document.getElementById("trackingPeople").innerHTML=people.join("")||"<p>لا يوجد مشاركون مقبولون في هذا البلاغ حتى الآن.</p>";
+  if(bounds.length)trackingMap.fitBounds(bounds,{padding:[35,35],maxZoom:16});
+}
+
+async function logoutUser(){stopLocationTracking();await getSupabaseClient().auth.signOut();document.getElementById("adminPanel").style.display="none";location.reload();}
 
 async function openReport(){
   const name=prompt("اكتب اسمك:"); if(!name)return;
@@ -1017,20 +990,7 @@ async function openReport(){
 }
 
 
-let adminReportPollHandle=null, lastAdminReportCount=null, heroSlideTimer=null, leaderboardPollHandle=null;
-
-async function loadPublicLeaderboard(){
-  const box=document.getElementById("publicLeaderboard"); if(!box)return;
-  const {data,error}=await getSupabaseClient().rpc("get_public_leaderboard");
-  if(error){console.error(error);box.innerHTML='<div class="leaderboard-empty">تعذر تحميل المراكز الأولى حاليًا.</div>';return;}
-  const rows=data||[];
-  if(!rows.length){box.innerHTML='<div class="leaderboard-empty">لا توجد ساعات تطوعية معتمدة حتى الآن.</div>';return;}
-  const cards={};
-  rows.slice(0,3).forEach((m,i)=>{const rank=i+1;cards[rank]=`<article class="podium-card ${rank===1?'first':rank===2?'second':'third'}"><div class="podium-rank">${rank}</div><img class="podium-avatar" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt="الصورة الشخصية"><div class="podium-name">${esc(m.full_name)}</div><div class="podium-meta">${m.age_years!=null?`العمر: ${Number(m.age_years).toLocaleString('ar-SA')} سنة<br>`:''}<span class="podium-hours">${formatMinutes(m.total_volunteer_minutes||0)}</span></div></article>`;});
-  box.innerHTML=(cards[2]||'')+(cards[1]||'')+(cards[3]||'');
-}
-function startPublicLeaderboardUpdates(){if(leaderboardPollHandle)clearInterval(leaderboardPollHandle);loadPublicLeaderboard();leaderboardPollHandle=setInterval(loadPublicLeaderboard,15000);}
-
+let adminReportPollHandle=null, lastAdminReportCount=null, heroSlideTimer=null;
 async function loadPublicReportCount(){const {data,error}=await getSupabaseClient().rpc("get_public_report_count");if(!error){const el=document.getElementById("publicReportCount");if(el)el.textContent=Number(data||0).toLocaleString("ar-SA");}}
 async function loadHeroSlides(){const {data,error}=await getSupabaseClient().from("hero_slides").select("id,image_url,sort_order").eq("is_active",true).order("sort_order").order("created_at");if(error){console.error(error);return;}const box=document.getElementById("heroSlides"),visual=document.getElementById("homeVisual");if(!box||!visual)return;box.innerHTML=(data||[]).map((x,i)=>`<img class="hero-slide ${i===0?'active':''}" src="${esc(x.image_url)}" alt="صورة من جمعية ليث">`).join("");visual.classList.toggle("has-slides",!!data?.length);if(heroSlideTimer)clearInterval(heroSlideTimer);if((data||[]).length>1){let i=0;heroSlideTimer=setInterval(()=>{const slides=[...box.querySelectorAll('.hero-slide')];slides[i].classList.remove('active');i=(i+1)%slides.length;slides[i].classList.add('active');},4500);}}
 async function loadAdminSlides(){const box=document.getElementById("adminSlides");if(!box)return;const {data,error}=await getSupabaseClient().from("hero_slides").select("*").order("sort_order").order("created_at");if(error){box.innerHTML="<p>تعذر تحميل الصور.</p>";return;}box.innerHTML=(data||[]).map(x=>`<div class="slide-admin-row"><img src="${esc(x.image_url)}" alt=""><div><b>${x.is_active?'ظاهرة في الموقع':'مخفية'}</b><br><small>الترتيب: ${x.sort_order||0}</small></div><div class="row-actions"><button onclick="toggleHeroSlide('${x.id}',${!x.is_active})">${x.is_active?'إخفاء':'إظهار'}</button><button class="danger" onclick="deleteHeroSlide('${x.id}')">حذف</button></div></div>`).join('')||'<p>لم تضف صورًا متحركة بعد.</p>';}
@@ -1049,8 +1009,7 @@ window.addEventListener("DOMContentLoaded",async()=>{
   try{
     const client=getSupabaseClient();
     await loadSiteSettings();
-    await Promise.all([loadPublicPosts(),loadPublicReportCount(),loadHeroSlides(),loadPublicLeaderboard()]);
-    startPublicLeaderboardUpdates();
+    await Promise.all([loadPublicPosts(),loadPublicReportCount(),loadHeroSlides()]);
     const {data:{session}}=await Promise.race([
       client.auth.getSession(),
       new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
