@@ -54,6 +54,20 @@ section{padding:75px 0} .section-head{display:flex;justify-content:space-between
 .cta{background:#111d27;color:white;border-radius:28px;padding:45px;display:flex;justify-content:space-between;align-items:center;gap:30px} .cta h2{margin:0 0 10px;font-size:30px} .cta p{margin:0;color:#bac4ca}
 footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;margin-top:75px}
 @media(max-width:800px){.hero-grid{grid-template-columns:1fr}.visual{min-height:300px}.navlinks{display:none}.cards,.stats{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.cta{flex-direction:column;align-items:flex-start}}
+
+.cms-box{background:#fff;border:1px solid #e3e8eb;border-radius:18px;padding:20px;margin-top:14px}
+.cms-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cms-box input,.cms-box textarea,.cms-box select{width:100%;padding:12px 14px;border:1px solid #dce3e8;border-radius:12px;font-family:inherit;background:#fff}
+.cms-box textarea{min-height:140px;resize:vertical}
+.preview-logo{max-width:150px;max-height:90px;object-fit:contain;border:1px solid #e3e8eb;border-radius:12px;padding:8px;background:#fff}
+.posts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.post-card{background:#fff;border:1px solid #e5eaee;border-radius:20px;overflow:hidden}
+.post-card img{width:100%;height:190px;object-fit:cover;background:#edf1f4}
+.post-card .body{padding:20px}
+.post-card h3{margin:6px 0 10px}
+.post-card p{color:#66747e;line-height:1.8}
+.post-meta{font-size:12px;color:#788692;font-weight:700}
+@media(max-width:800px){.cms-grid,.posts-grid{grid-template-columns:1fr}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -68,7 +82,7 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 </head>
 <body>
 <header><div class="wrap nav">
-<div class="brand"><div class="logo">ل</div><div>جمعية ليث للإنقاذ</div></div>
+<div class="brand"><div class="logo" id="brandLogoBox"><span id="brandFallback">ل</span><img id="brandLogoImg" alt="شعار الجمعية" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:12px"></div><div id="brandSiteName">جمعية ليث للإنقاذ</div></div>
 <nav class="navlinks"><a href="#about">عن الجمعية</a><a href="#services">الخدمات</a><a href="#workflow">آلية العمل</a><a href="#report">البلاغات</a></nav>
 <div class="auth-buttons">
   <a class="btn" href="#report">تقديم بلاغ</a>
@@ -101,6 +115,12 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 <div class="steps">
 <div class="step">المواطن يقدم البلاغ</div><div class="step">الإدارة تراجع الحالة</div><div class="step">إرسال المهمة للمتطوعين</div><div class="step">تنفيذ المهمة وتتبع الموقع</div><div class="step">إنهاء المهمة وأرشفة البلاغ</div>
 </div></div>
+</div></section>
+
+
+<section id="news"><div class="wrap">
+  <div class="section-head"><div><h2>الأخبار والمقالات</h2><p>آخر أخبار ومقالات جمعية ليث للإنقاذ.</p></div></div>
+  <div id="publicPosts" class="posts-grid"><p>جاري تحميل المحتوى...</p></div>
 </div></section>
 
 <section id="report"><div class="wrap"><div class="cta">
@@ -225,10 +245,76 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
     <div id="membersList"></div>
     <div style="margin-top:32px;border-top:1px solid #dfe5e9;padding-top:24px">
       <h2>إدارة محتوى الموقع</h2>
-      <p style="color:#66747e">هذه الواجهة جاهزة لإدارة الشعار والألوان والأخبار والمقالات. يلزم إنشاء جداول المحتوى والتخزين في Supabase قبل تفعيل الحفظ والنشر.</p>
-      <div class="cards">
-        <article class="card"><div><span>الهوية</span><h3>الشعار وألوان الموقع</h3><p>تغيير شعار المنصة والألوان الرئيسية من حساب المدير.</p><button class="btn light" type="button" onclick="cmsNotReady()">إدارة الهوية</button></div></article>
-        <article class="card"><div><span>المحتوى</span><h3>الأخبار والمقالات</h3><p>إضافة خبر أو مقال وصورة وتاريخ نشر والتحكم في ظهوره.</p><button class="btn light" type="button" onclick="cmsNotReady()">إدارة الأخبار</button></div></article>
+
+      <div class="cms-box">
+        <h3>هوية الموقع</h3>
+        <div class="cms-grid">
+          <div>
+            <label>اسم الموقع</label>
+            <input id="cmsSiteName" type="text" placeholder="جمعية ليث للإنقاذ">
+          </div>
+          <div>
+            <label>الشعار</label>
+            <input id="cmsLogoFile" type="file" accept="image/png,image/jpeg,image/webp">
+          </div>
+          <div>
+            <label>اللون الرئيسي</label>
+            <input id="cmsPrimaryColor" type="color" value="#111d27">
+          </div>
+          <div>
+            <label>اللون الثانوي</label>
+            <input id="cmsSecondaryColor" type="color" value="#edf1f4">
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px">
+          <img id="cmsLogoPreview" class="preview-logo" alt="معاينة الشعار" style="display:none">
+          <button class="btn" type="button" onclick="saveSiteSettings()">حفظ الهوية</button>
+          <span id="cmsSettingsMsg" class="form-msg"></span>
+        </div>
+      </div>
+
+      <div class="cms-box">
+        <h3>إضافة خبر أو مقال</h3>
+        <input id="postEditId" type="hidden">
+        <div class="cms-grid">
+          <div>
+            <label>العنوان</label>
+            <input id="postTitle" type="text" placeholder="عنوان الخبر أو المقال">
+          </div>
+          <div>
+            <label>النوع</label>
+            <select id="postType"><option value="news">خبر</option><option value="article">مقال</option></select>
+          </div>
+          <div style="grid-column:1/-1">
+            <label>ملخص</label>
+            <input id="postSummary" type="text" placeholder="ملخص قصير يظهر في الموقع">
+          </div>
+          <div style="grid-column:1/-1">
+            <label>المحتوى</label>
+            <textarea id="postBody" placeholder="اكتب محتوى الخبر أو المقال"></textarea>
+          </div>
+          <div>
+            <label>صورة الخبر/المقال</label>
+            <input id="postImageFile" type="file" accept="image/png,image/jpeg,image/webp">
+          </div>
+          <div>
+            <label>حالة النشر</label>
+            <select id="postPublished"><option value="false">مسودة</option><option value="true">منشور</option></select>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+          <button class="btn" type="button" onclick="savePost()">حفظ الخبر/المقال</button>
+          <button class="btn light" type="button" onclick="resetPostForm()">جديد</button>
+          <span id="postMsg" class="form-msg"></span>
+        </div>
+      </div>
+
+      <div class="cms-box">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+          <h3 style="margin:0">الأخبار والمقالات الحالية</h3>
+          <button class="btn light" type="button" onclick="loadAdminPosts()">تحديث</button>
+        </div>
+        <div id="adminPosts" style="margin-top:14px"><p>جاري التحميل...</p></div>
       </div>
     </div>
   </div>
@@ -261,7 +347,190 @@ function closeEdit(){ document.getElementById("editOverlay").style.display="none
 function openPolicy(){ document.getElementById("policyOverlay").style.display="flex"; }
 function closePolicy(){ document.getElementById("policyOverlay").style.display="none"; }
 function acceptPolicy(){ document.getElementById("policyConsent").checked=true; closePolicy(); }
-function cmsNotReady(){ alert("واجهة الإدارة جاهزة، لكن يلزم الآن إنشاء جداول الأخبار وإعداد تخزين الصور في Supabase. سنفعّلها في الخطوة التالية."); }
+async function uploadSiteImage(file,prefix){
+  if(!file) return null;
+  const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
+  const path=`${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const {error}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",upsert:false});
+  if(error) throw error;
+  const {data}=supabase.storage.from("site-media").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+function applySiteSettings(s){
+  if(!s)return;
+  if(s.site_name){
+    document.getElementById("brandSiteName").textContent=s.site_name;
+    document.title=s.site_name+" | المنصة الرقمية";
+  }
+  if(s.primary_color){
+    document.documentElement.style.setProperty("--primary",s.primary_color);
+    document.querySelectorAll(".btn:not(.light),.stat,.visual,.cta,.logo").forEach(el=>el.style.background=s.primary_color);
+  }
+  if(s.secondary_color){
+    document.querySelectorAll(".btn.light").forEach(el=>el.style.background=s.secondary_color);
+  }
+  const img=document.getElementById("brandLogoImg"), fb=document.getElementById("brandFallback");
+  if(s.logo_url){
+    img.src=s.logo_url; img.style.display="block"; fb.style.display="none";
+  }else{
+    img.style.display="none"; fb.style.display="inline";
+  }
+}
+
+async function loadSiteSettings(){
+  const {data,error}=await supabase.from("site_settings").select("*").order("id",{ascending:true}).limit(1).maybeSingle();
+  if(error){console.error(error);return;}
+  if(data){
+    applySiteSettings(data);
+    if(document.getElementById("cmsSiteName")){
+      document.getElementById("cmsSiteName").value=data.site_name||"";
+      document.getElementById("cmsPrimaryColor").value=data.primary_color||"#111d27";
+      document.getElementById("cmsSecondaryColor").value=data.secondary_color||"#edf1f4";
+      if(data.logo_url){const p=document.getElementById("cmsLogoPreview");p.src=data.logo_url;p.style.display="block";}
+    }
+  }
+}
+
+async function saveSiteSettings(){
+  const msg=document.getElementById("cmsSettingsMsg"); msg.textContent="جاري الحفظ...";
+  try{
+    const {data:current,error:readErr}=await supabase.from("site_settings").select("*").order("id",{ascending:true}).limit(1).maybeSingle();
+    if(readErr) throw readErr;
+    let logoUrl=current?.logo_url||null;
+    const file=document.getElementById("cmsLogoFile").files[0];
+    if(file) logoUrl=await uploadSiteImage(file,"branding");
+    const payload={
+      site_name:document.getElementById("cmsSiteName").value.trim()||"جمعية ليث للإنقاذ",
+      logo_url:logoUrl,
+      primary_color:document.getElementById("cmsPrimaryColor").value,
+      secondary_color:document.getElementById("cmsSecondaryColor").value
+    };
+    let result;
+    if(current?.id) result=await supabase.from("site_settings").update(payload).eq("id",current.id).select().single();
+    else result=await supabase.from("site_settings").insert(payload).select().single();
+    if(result.error) throw result.error;
+    applySiteSettings(result.data);
+    msg.textContent="تم حفظ هوية الموقع.";
+    await loadSiteSettings();
+  }catch(e){console.error(e);msg.textContent="تعذر الحفظ: "+(e.message||"خطأ غير معروف");}
+}
+
+function resetPostForm(){
+  document.getElementById("postEditId").value="";
+  document.getElementById("postTitle").value="";
+  document.getElementById("postSummary").value="";
+  document.getElementById("postBody").value="";
+  document.getElementById("postType").value="news";
+  document.getElementById("postPublished").value="false";
+  document.getElementById("postImageFile").value="";
+  document.getElementById("postMsg").textContent="";
+}
+
+async function savePost(){
+  const msg=document.getElementById("postMsg"); msg.textContent="جاري الحفظ...";
+  try{
+    const title=document.getElementById("postTitle").value.trim();
+    const body=document.getElementById("postBody").value.trim();
+    if(!title||!body){msg.textContent="العنوان والمحتوى مطلوبان.";return;}
+    const id=document.getElementById("postEditId").value;
+    const published=document.getElementById("postPublished").value==="true";
+    let imageUrl=null;
+    if(id){
+      const {data:old,error:oldErr}=await supabase.from("content_posts").select("image_url").eq("id",id).single();
+      if(oldErr) throw oldErr;
+      imageUrl=old.image_url||null;
+    }
+    const file=document.getElementById("postImageFile").files[0];
+    if(file) imageUrl=await uploadSiteImage(file,"posts");
+    const {data:{user}}=await supabase.auth.getUser();
+    const payload={
+      title,
+      summary:document.getElementById("postSummary").value.trim()||null,
+      body,
+      post_type:document.getElementById("postType").value,
+      image_url:imageUrl,
+      is_published:published,
+      published_at:published?new Date().toISOString():null
+    };
+    let result;
+    if(id) result=await supabase.from("content_posts").update(payload).eq("id",id);
+    else result=await supabase.from("content_posts").insert({...payload,created_by:user.id});
+    if(result.error) throw result.error;
+    msg.textContent="تم الحفظ بنجاح.";
+    resetPostForm();
+    await loadAdminPosts();
+    await loadPublicPosts();
+  }catch(e){console.error(e);msg.textContent="تعذر الحفظ: "+(e.message||"خطأ غير معروف");}
+}
+
+async function loadAdminPosts(){
+  const box=document.getElementById("adminPosts");
+  if(!box)return;
+  box.innerHTML="<p>جاري التحميل...</p>";
+  const {data,error}=await supabase.from("content_posts").select("*").order("created_at",{ascending:false});
+  if(error){console.error(error);box.innerHTML="<p>تعذر تحميل المحتوى.</p>";return;}
+  if(!data?.length){box.innerHTML="<p>لا توجد أخبار أو مقالات حتى الآن.</p>";return;}
+  box.innerHTML=data.map(p=>`<div class="member-row">
+    <h3>${esc(p.title)} <span class="status-pill">${p.post_type==="article"?"مقال":"خبر"} — ${p.is_published?"منشور":"مسودة"}</span></h3>
+    <p>${esc(p.summary||"")}</p>
+    <div class="row-actions">
+      <button onclick="editPost('${p.id}')">تعديل</button>
+      <button onclick="togglePost('${p.id}',${p.is_published?'false':'true'})">${p.is_published?"إخفاء":"نشر"}</button>
+      <button onclick="deletePost('${p.id}')">حذف</button>
+    </div>
+  </div>`).join("");
+}
+
+async function editPost(id){
+  const {data:p,error}=await supabase.from("content_posts").select("*").eq("id",id).single();
+  if(error||!p){alert("تعذر تحميل المحتوى.");return;}
+  document.getElementById("postEditId").value=p.id;
+  document.getElementById("postTitle").value=p.title||"";
+  document.getElementById("postSummary").value=p.summary||"";
+  document.getElementById("postBody").value=p.body||"";
+  document.getElementById("postType").value=p.post_type||"news";
+  document.getElementById("postPublished").value=String(!!p.is_published);
+  document.getElementById("postImageFile").value="";
+  document.getElementById("postMsg").textContent="أنت تعدل محتوى موجودًا.";
+  document.getElementById("postTitle").scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+async function togglePost(id,publish){
+  const {error}=await supabase.from("content_posts").update({is_published:publish,published_at:publish?new Date().toISOString():null}).eq("id",id);
+  if(error){console.error(error);alert("تعذر تحديث حالة النشر.");return;}
+  await loadAdminPosts(); await loadPublicPosts();
+}
+
+async function deletePost(id){
+  if(!confirm("هل تريد حذف هذا المحتوى؟"))return;
+  const {error}=await supabase.from("content_posts").delete().eq("id",id);
+  if(error){console.error(error);alert("تعذر الحذف.");return;}
+  await loadAdminPosts(); await loadPublicPosts();
+}
+
+async function loadPublicPosts(){
+  const box=document.getElementById("publicPosts");
+  if(!box)return;
+  const {data,error}=await supabase.from("content_posts").select("id,title,summary,body,post_type,image_url,published_at,created_at").eq("is_published",true).order("published_at",{ascending:false}).limit(12);
+  if(error){console.error(error);box.innerHTML="<p>تعذر تحميل الأخبار حاليًا.</p>";return;}
+  if(!data?.length){box.innerHTML="<p>لا توجد أخبار منشورة حاليًا.</p>";return;}
+  box.innerHTML=data.map(p=>`<article class="post-card">
+    ${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.title)}">`:""}
+    <div class="body">
+      <div class="post-meta">${p.post_type==="article"?"مقال":"خبر"} · ${esc((p.published_at||p.created_at||"").slice(0,10))}</div>
+      <h3>${esc(p.title)}</h3>
+      <p>${esc(p.summary||p.body.slice(0,180))}</p>
+      <button class="auth-link" type="button" onclick='showPost(${JSON.stringify(p.id)})'>قراءة التفاصيل</button>
+    </div>
+  </article>`).join("");
+}
+
+async function showPost(id){
+  const {data:p,error}=await supabase.from("content_posts").select("*").eq("id",id).eq("is_published",true).single();
+  if(error||!p){alert("تعذر فتح المحتوى.");return;}
+  alert(p.title+"\n\n"+p.body);
+}
 function esc(v){ return String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c])); }
 
 async function signupVolunteer(){
@@ -302,7 +571,7 @@ async function loginVolunteer(){
   const {data,error}=await supabase.auth.signInWithPassword({email,password});
   if(error){console.error(error);msg.textContent="تعذر تسجيل الدخول. تأكد من البريد وكلمة المرور وتأكيد البريد إن كان مطلوبًا.";return;}
   const {data:isAdmin,error:adminError}=await supabase.rpc("is_admin");
-  if(!adminError&&isAdmin===true){closeAuth();document.getElementById("adminPanel").style.display="block";await loadMembers("pending");return;}
+  if(!adminError&&isAdmin===true){closeAuth();document.getElementById("adminPanel").style.display="block";await loadMembers("pending");await loadSiteSettings();await loadAdminPosts();return;}
   const {data:member,error:memberError}=await supabase.from("members").select("account_status,full_name").eq("id",data.user.id).single();
   if(memberError||!member){console.error(memberError);msg.textContent="تعذر تحميل بيانات العضوية.";return;}
   if(member.account_status==="pending"){msg.textContent="طلب عضويتك بانتظار موافقة الإدارة.";await supabase.auth.signOut();return;}
@@ -373,10 +642,12 @@ async function openReport(){
 }
 
 window.addEventListener("DOMContentLoaded",async()=>{
+  await loadSiteSettings();
+  await loadPublicPosts();
   const {data:{session}}=await supabase.auth.getSession();
   if(!session)return;
   const {data:isAdmin}=await supabase.rpc("is_admin");
-  if(isAdmin===true){document.getElementById("adminPanel").style.display="block";await loadMembers("pending");}
+  if(isAdmin===true){document.getElementById("adminPanel").style.display="block";await loadMembers("pending");await loadSiteSettings();await loadAdminPosts();}
 });
 </script>
 </body>
