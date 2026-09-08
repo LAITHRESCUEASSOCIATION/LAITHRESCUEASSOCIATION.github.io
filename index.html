@@ -227,9 +227,38 @@ async function signupVolunteer(){
   if(!/^05\d{8}$/.test(phone)){msg.textContent="رقم الجوال يجب أن يكون بصيغة 05XXXXXXXX.";return;}
   if(password.length<8){msg.textContent="كلمة المرور يجب أن تكون 8 أحرف على الأقل.";return;}
   msg.textContent="جاري إنشاء الحساب...";
-  const {error}=await supabase.auth.signUp({email,password,options:{data:{full_name:fullName,national_id:nationalId,birth_date:birthDate,specialty,phone,city}}});
-  if(error){console.error(error);msg.textContent="تعذر إنشاء الحساب: "+error.message;return;}
-  msg.textContent="تم استلام طلب التسجيل. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التأكيد أولًا. وبعدها يبقى الطلب بانتظار موافقة الإدارة.";
+  try{
+    const signupPromise = supabase.auth.signUp({
+      email,
+      password,
+      options:{data:{full_name:fullName,national_id:nationalId,birth_date:birthDate,specialty,phone,city}}
+    });
+
+    const timeoutPromise = new Promise((_,reject)=>{
+      setTimeout(()=>reject(new Error("TIMEOUT")),15000);
+    });
+
+    const {data,error}=await Promise.race([signupPromise,timeoutPromise]);
+
+    if(error){
+      console.error(error);
+      msg.textContent="تعذر إنشاء الحساب: "+(error.message||"خطأ غير معروف");
+      return;
+    }
+
+    if(data?.user){
+      msg.textContent="تم استلام طلب التسجيل بنجاح. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التأكيد أولًا. وبعدها يبقى الطلب بانتظار موافقة الإدارة.";
+    }else{
+      msg.textContent="تم إرسال الطلب، لكن لم يرجع النظام بيانات المستخدم. جرّب تسجيل الدخول بعد قليل.";
+    }
+  }catch(err){
+    console.error(err);
+    if(err?.message==="TIMEOUT"){
+      msg.textContent="تعذر الاتصال بخدمة التسجيل خلال 15 ثانية. تحقق من إعدادات Supabase ثم حاول مرة أخرى.";
+    }else{
+      msg.textContent="حدث خطأ أثناء إنشاء الحساب: "+(err?.message||"خطأ غير معروف");
+    }
+  }
 }
 
 async function loginVolunteer(){
