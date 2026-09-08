@@ -73,23 +73,7 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 <script>
   const SUPABASE_URL = "https://mijabxmjrzkzntqpnsnc.supabase.co";
   const SUPABASE_KEY = "sb_publishable_1tg-mHlBnpPQqrjUHVmHyA_ao62TBjc";
-  let supabase = null;
-
-  window.ensureSupabase = function(){
-    if(supabase) return Promise.resolve(supabase);
-    if(!window.supabase || !window.supabase.createClient){
-      return Promise.reject(new Error("تعذر تحميل مكتبة Supabase."));
-    }
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    return Promise.resolve(supabase);
-  };
-
-  window.withTimeout = function(promise,ms=15000){
-    return Promise.race([
-      promise,
-      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),ms))
-    ]);
-  };
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 </script>
 </head>
 <body>
@@ -564,11 +548,11 @@ async function signupVolunteer(){
   if(!document.getElementById("policyConsent").checked){msg.textContent="يجب قراءة سياسة التطوع والخصوصية والموافقة عليها قبل إرسال الطلب.";return;}
   msg.textContent="جاري إنشاء الحساب...";
   try{
-    const client=await window.withTimeout(window.ensureSupabase(),10000);
-    const {data,error}=await window.withTimeout(
+    const client=supabase;
+    const {data,error}=await Promise.race([
       client.auth.signUp({email,password,options:{data:{full_name:fullName,national_id:nationalId,birth_date:birthDate,specialty,phone,city,policy_accepted:true,policy_version:"2026-09-08"}}}),
-      15000
-    );
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),15000))
+    ]);
     if(error){console.error(error);msg.textContent="تعذر إنشاء الحساب: "+(error.message||"خطأ غير معروف");return;}
     msg.textContent=data?.user?"تم استلام طلب التسجيل بنجاح. الطلب الآن بانتظار موافقة الإدارة.":"تم إرسال الطلب، لكن لم يرجع النظام بيانات المستخدم.";
   }catch(err){
@@ -584,11 +568,17 @@ async function loginVolunteer(){
   if(!email||!password){msg.textContent="اكتب البريد الإلكتروني وكلمة المرور.";return;}
   msg.textContent="جاري تسجيل الدخول...";
   try{
-    const client=await window.withTimeout(window.ensureSupabase(),10000);
-    const {data,error}=await window.withTimeout(client.auth.signInWithPassword({email,password}),15000);
+    const client=supabase;
+    const {data,error}=await Promise.race([
+      client.auth.signInWithPassword({email,password}),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),15000))
+    ]);
     if(error){console.error(error);msg.textContent="تعذر تسجيل الدخول: "+(error.message||"تحقق من البريد وكلمة المرور.");return;}
 
-    const {data:isAdmin,error:adminError}=await window.withTimeout(client.rpc("is_admin"),10000);
+    const {data:isAdmin,error:adminError}=await Promise.race([
+      client.rpc("is_admin"),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
+    ]);
     if(!adminError&&isAdmin===true){
       closeAuth();
       document.getElementById("adminPanel").style.display="block";
@@ -598,10 +588,10 @@ async function loginVolunteer(){
       return;
     }
 
-    const {data:member,error:memberError}=await window.withTimeout(
+    const {data:member,error:memberError}=await Promise.race([
       client.from("members").select("account_status,full_name").eq("id",data.user.id).single(),
-      10000
-    );
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
+    ]);
     if(memberError||!member){console.error(memberError);msg.textContent="تم تسجيل الدخول، لكن تعذر تحميل بيانات العضوية.";return;}
     if(member.account_status==="pending"){msg.textContent="طلب عضويتك بانتظار موافقة الإدارة.";await client.auth.signOut();return;}
     if(member.account_status==="rejected"){msg.textContent="تم رفض طلب العضوية. يرجى التواصل مع إدارة الجمعية.";await client.auth.signOut();return;}
@@ -675,8 +665,11 @@ async function openReport(){
   const location=prompt("اكتب موقع البلاغ:"); if(!location)return;
   const description=prompt("اكتب وصف البلاغ:"); if(!description)return;
   try{
-    const client=await window.withTimeout(window.ensureSupabase(),10000);
-    const {error}=await window.withTimeout(client.from("reports").insert([{name,phone,location,description,report_type:"rescue"}]),15000);
+    const client=supabase;
+    const {error}=await Promise.race([
+      client.from("reports").insert([{name,phone,location,description,report_type:"rescue"}]),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),15000))
+    ]);
     if(error){console.error(error);alert("حدث خطأ أثناء إرسال البلاغ: "+(error.message||""));return;}
     alert("تم إرسال البلاغ بنجاح.");
   }catch(e){
@@ -687,12 +680,18 @@ async function openReport(){
 
 window.addEventListener("DOMContentLoaded",async()=>{
   try{
-    const client=await window.withTimeout(window.ensureSupabase(),10000);
+    const client=supabase;
     await loadSiteSettings();
     await loadPublicPosts();
-    const {data:{session}}=await window.withTimeout(client.auth.getSession(),10000);
+    const {data:{session}}=await Promise.race([
+      client.auth.getSession(),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
+    ]);
     if(!session)return;
-    const {data:isAdmin}=await window.withTimeout(client.rpc("is_admin"),10000);
+    const {data:isAdmin}=await Promise.race([
+      client.rpc("is_admin"),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
+    ]);
     if(isAdmin===true){
       document.getElementById("adminPanel").style.display="block";
       await loadMembers("pending");
