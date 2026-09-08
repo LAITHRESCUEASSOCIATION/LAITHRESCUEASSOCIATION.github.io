@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>جمعية ليث للإنقاذ | المنصة الرقمية</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+*{box-sizing:border-box} body{margin:0;font-family:Cairo,Arial,sans-serif;background:#f5f7f9;color:#14202b}
+a{text-decoration:none;color:inherit} .wrap{max-width:1180px;margin:auto;padding:0 24px}
+header{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid #e6eaee}
+.nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800} .logo{width:44px;height:44px;border-radius:14px;background:#111d27;display:grid;place-items:center;color:white;font-size:18px}
+.navlinks{display:flex;gap:26px;color:#53616d;font-size:14px} .navlinks a:hover{color:#111d27}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border-radius:12px;background:#111d27;color:white;font-weight:700;border:0;cursor:pointer}
+.btn.light{background:#edf1f4;color:#17232d}
+.hero{padding:92px 0 65px;background:linear-gradient(135deg,#f7fafb 0%,#e9eef1 100%)}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:55px;align-items:center}
+.kicker{display:inline-block;padding:7px 12px;border-radius:999px;background:#fff;border:1px solid #dde4e9;color:#52606b;font-size:13px;font-weight:700}
+h1{font-size:clamp(38px,5vw,64px);line-height:1.13;margin:18px 0 20px;letter-spacing:-1px}
+.hero p{font-size:18px;line-height:2;color:#5a6873;max-width:680px}
+.actions{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+.visual{min-height:390px;border-radius:30px;background:#111d27;position:relative;overflow:hidden;box-shadow:0 25px 60px rgba(17,29,39,.18)}
+.visual:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 25% 20%,rgba(255,255,255,.14),transparent 32%),linear-gradient(145deg,transparent 35%,rgba(255,255,255,.04))}
+.map{position:absolute;inset:45px 30px 30px;border:1px solid rgba(255,255,255,.12);border-radius:22px;background:
+linear-gradient(35deg,transparent 46%,rgba(255,255,255,.06) 47%,transparent 48%),
+linear-gradient(120deg,transparent 48%,rgba(255,255,255,.05) 49%,transparent 50%);}
+.pin{position:absolute;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 0 0 8px rgba(255,255,255,.12)} .p1{top:30%;left:28%} .p2{top:55%;left:62%} .p3{top:68%;left:43%}
+.dashboard{position:absolute;top:18px;right:18px;padding:9px 13px;border-radius:10px;background:#fff;color:#17232d;font-size:12px;font-weight:800}
+section{padding:75px 0} .section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:30px}
+.section-head h2{font-size:34px;margin:0 0 8px} .section-head p{color:#66747e;margin:0;line-height:1.8}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:18px} .card{background:white;border:1px solid #e5eaee;border-radius:22px;padding:28px;display:flex;gap:20px;box-shadow:0 8px 25px rgba(30,45,60,.04)}
+.num{font-size:13px;font-weight:800;color:#788692} .card span{font-size:13px;color:#788692} .card h3{margin:5px 0 8px;font-size:21px} .card p{margin:0;color:#66747e;line-height:1.8}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px} .stat{background:#111d27;color:#fff;border-radius:20px;padding:25px;display:flex;flex-direction:column;gap:7px} .stat b{font-size:28px} .stat span{font-weight:700} .stat small{color:#aeb8c0}
+.workflow{background:white;border:1px solid #e4e9ed;border-radius:28px;padding:35px} .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:25px} .step{padding:20px;border-radius:16px;background:#f3f6f8;text-align:center;font-weight:700;font-size:14px} .arrow{display:none}
+.cta{background:#111d27;color:white;border-radius:28px;padding:45px;display:flex;justify-content:space-between;align-items:center;gap:30px} .cta h2{margin:0 0 10px;font-size:30px} .cta p{margin:0;color:#bac4ca}
+footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;margin-top:75px}
+@media(max-width:800px){.hero-grid{grid-template-columns:1fr}.visual{min-height:300px}.navlinks{display:none}.cards,.stats{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.cta{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+<div class="brand"><div class="logo">ل</div><div>جمعية ليث للإنقاذ</div></div>
+<nav class="navlinks"><a href="#about">عن الجمعية</a><a href="#services">الخدمات</a><a href="#workflow">آلية العمل</a><a href="#report">البلاغات</a></nav>
+<a class="btn" href="#report">تقديم بلاغ</a>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap hero-grid">
+<div>
+<span class="kicker">المنصة الرقمية لجمعية ليث للإنقاذ</span>
+<h1>نحو إنقاذ أسرع،<br>وتنظيم أكثر احترافية.</h1>
+<p>منظومة موحدة لاستقبال البلاغات، إدارة حالات الطوارئ والبحث والإنقاذ، استدعاء المتطوعين، متابعة المهام، وتوثيق ساعات التطوع.</p>
+<div class="actions"><a class="btn" href="#report">إرسال بلاغ</a><a class="btn light" href="#about">استكشف المنصة</a></div>
+</div>
+<div class="visual"><div class="dashboard">الخريطة المباشرة</div><div class="map"><i class="pin p1"></i><i class="pin p2"></i><i class="pin p3"></i></div></div>
+</div></section>
+
+<section id="about"><div class="wrap">
+<div class="section-head"><div><h2>منصة واحدة لكل عمليات الإنقاذ</h2><p>تصميم رسمي، حديث، واضح، ومتجاوب مع الجوال والكمبيوتر.</p></div></div>
+<div class="cards"><article class="card"><div class="num">01</div><div><span>عن الجمعية</span><h3>جمعية ليث للإنقاذ</h3><p>منظومة رقمية متكاملة لتنظيم أعمال الإنقاذ والبلاغات والمتطوعين وربط الإدارة بالميدان والمواطنين.</p></div></article><article class="card"><div class="num">02</div><div><span>البلاغات</span><h3>استقبال البلاغات وإدارتها</h3><p>تقديم البلاغات من المواطنين بدون إنشاء حساب، مع رقم مرجعي ومتابعة حالة البلاغ.</p></div></article><article class="card"><div class="num">03</div><div><span>المتطوعون</span><h3>إدارة المتطوعين والمهام</h3><p>ملفات متكاملة للمتطوعين، قبول ورفض المهام، تسجيل المشاركة وساعات التطوع تلقائياً.</p></div></article><article class="card"><div class="num">04</div><div><span>الخريطة المباشرة</span><h3>متابعة المتطوعين أثناء المهمة</h3><p>عرض موقع البلاغ والمتطوعين المشاركين ومسارات الحركة على خريطة الإدارة.</p></div></article></div>
+</div></section>
+
+<section><div class="wrap"><div class="stats"><div class="stat"><b>01</b><span>بلاغ جديد</span><small>إرسال البلاغ</small></div><div class="stat"><b>02</b><span>المتطوعون</span><small>إدارة المشاركات</small></div><div class="stat"><b>03</b><span>المهام</span><small>متابعة التنفيذ</small></div><div class="stat"><b>04</b><span>التقارير</span><small>إحصائيات الأداء</small></div></div></div></section>
+
+<section id="services"><div class="wrap">
+<div class="section-head"><div><h2>دورة البلاغ من البداية للنهاية</h2><p>تسلسل رقمي واضح يساعد الإدارة على معرفة حالة كل بلاغ وكل مهمة.</p></div></div>
+<div class="workflow" id="workflow">
+<div class="steps">
+<div class="step">المواطن يقدم البلاغ</div><div class="step">الإدارة تراجع الحالة</div><div class="step">إرسال المهمة للمتطوعين</div><div class="step">تنفيذ المهمة وتتبع الموقع</div><div class="step">إنهاء المهمة وأرشفة البلاغ</div>
+</div></div>
+</div></section>
+
+<section id="report"><div class="wrap"><div class="cta">
+<div><h2>هل لديك بلاغ؟</h2><p>يمكن للمواطن تقديم البلاغ مباشرة دون إنشاء حساب.</p></div>
+<button class="btn" onclick="openReport()">فتح نموذج البلاغ</button>
+</div></div></section>
+</main>
+
+<footer><div class="wrap">جمعية ليث للإنقاذ — منصة رقمية متخصصة في إدارة البلاغات والإنقاذ والتطوع.</div></footer>
+
+<script>
+function openReport(){
+ alert("نموذج البلاغ في هذه النسخة هو نموذج واجهة أولي. يمكن ربطه لاحقاً بقاعدة البيانات ونظام البلاغات الفعلي.");
+}
+</script>
+</body></html>
