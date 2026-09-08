@@ -69,15 +69,64 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 .post-meta{font-size:12px;color:#788692;font-weight:700}
 @media(max-width:800px){.cms-grid,.posts-grid{grid-template-columns:1fr}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
   const SUPABASE_URL = "https://mijabxmjrzkzntqpnsnc.supabase.co";
   const SUPABASE_KEY = "sb_publishable_1tg-mHlBnpPQqrjUHVmHyA_ao62TBjc";
-  const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  let supabase = null;
+  let supabaseLoadingPromise = null;
+
+  function loadScript(src){
+    return new Promise((resolve,reject)=>{
+      const s=document.createElement("script");
+      s.src=src;
+      s.async=true;
+      s.onload=()=>resolve();
+      s.onerror=()=>reject(new Error("تعذر تحميل مكتبة الاتصال من: "+src));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function ensureSupabase(){
+    if(supabase) return supabase;
+    if(supabaseLoadingPromise) return supabaseLoadingPromise;
+
+    supabaseLoadingPromise=(async()=>{
+      const sources=[
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js",
+        "https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"
+      ];
+
+      let lastError=null;
+      for(const src of sources){
+        try{
+          await loadScript(src);
+          if(window.supabase?.createClient){
+            supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+            return supabase;
+          }
+        }catch(e){
+          lastError=e;
+          console.error(e);
+        }
+      }
+
+      throw lastError || new Error("تعذر تحميل مكتبة Supabase.");
+    })();
+
+    try{
+      return await supabaseLoadingPromise;
+    }catch(e){
+      supabaseLoadingPromise=null;
+      throw e;
+    }
+  }
+
+  function withTimeout(promise,ms=15000){
+    return Promise.race([
+      promise,
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),ms))
+    ]);
+  }
 </script>
 </head>
 <body>
@@ -552,9 +601,11 @@ async function signupVolunteer(){
   if(!document.getElementById("policyConsent").checked){msg.textContent="يجب قراءة سياسة التطوع والخصوصية والموافقة عليها قبل إرسال الطلب.";return;}
   msg.textContent="جاري إنشاء الحساب...";
   try{
-    const signupPromise=supabase.auth.signUp({email,password,options:{data:{full_name:fullName,national_id:nationalId,birth_date:birthDate,specialty,phone,city,policy_accepted:true,policy_version:"2026-09-08"}}});
-    const timeoutPromise=new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),15000));
-    const {data,error}=await Promise.race([signupPromise,timeoutPromise]);
+    const client=await withTimeout(ensureSupabase(),10000);
+    const {data,error}=await withTimeout(
+      client.auth.signUp({email,password,options:{data:{full_name:fullName,national_id:nationalId,birth_date:birthDate,specialty,phone,city,policy_accepted:true,policy_version:"2026-09-08"}}}),
+      15000
+    );
     if(error){console.error(error);msg.textContent="تعذر إنشاء الحساب: "+(error.message||"خطأ غير معروف");return;}
     msg.textContent=data?.user?"تم استلام طلب التسجيل بنجاح. الطلب الآن بانتظار موافقة الإدارة.":"تم إرسال الطلب، لكن لم يرجع النظام بيانات المستخدم.";
   }catch(err){
@@ -567,16 +618,40 @@ async function loginVolunteer(){
   const email=document.getElementById("loginEmail").value.trim();
   const password=document.getElementById("loginPassword").value;
   const msg=document.getElementById("loginMsg");
+  if(!email||!password){msg.textContent="اكتب البريد الإلكتروني وكلمة المرور.";return;}
   msg.textContent="جاري تسجيل الدخول...";
-  const {data,error}=await supabase.auth.signInWithPassword({email,password});
-  if(error){console.error(error);msg.textContent="تعذر تسجيل الدخول. تأكد من البريد وكلمة المرور وتأكيد البريد إن كان مطلوبًا.";return;}
-  const {data:isAdmin,error:adminError}=await supabase.rpc("is_admin");
-  if(!adminError&&isAdmin===true){closeAuth();document.getElementById("adminPanel").style.display="block";await loadMembers("pending");await loadSiteSettings();await loadAdminPosts();return;}
-  const {data:member,error:memberError}=await supabase.from("members").select("account_status,full_name").eq("id",data.user.id).single();
-  if(memberError||!member){console.error(memberError);msg.textContent="تعذر تحميل بيانات العضوية.";return;}
-  if(member.account_status==="pending"){msg.textContent="طلب عضويتك بانتظار موافقة الإدارة.";await supabase.auth.signOut();return;}
-  if(member.account_status==="rejected"){msg.textContent="تم رفض طلب العضوية. يرجى التواصل مع إدارة الجمعية.";await supabase.auth.signOut();return;}
-  closeAuth();alert("مرحبًا "+member.full_name+"، تم تسجيل الدخول بنجاح.");
+  try{
+    const client=await withTimeout(ensureSupabase(),10000);
+    const {data,error}=await withTimeout(client.auth.signInWithPassword({email,password}),15000);
+    if(error){console.error(error);msg.textContent="تعذر تسجيل الدخول: "+(error.message||"تحقق من البريد وكلمة المرور.");return;}
+
+    const {data:isAdmin,error:adminError}=await withTimeout(client.rpc("is_admin"),10000);
+    if(!adminError&&isAdmin===true){
+      closeAuth();
+      document.getElementById("adminPanel").style.display="block";
+      await loadMembers("pending");
+      await loadSiteSettings();
+      await loadAdminPosts();
+      return;
+    }
+
+    const {data:member,error:memberError}=await withTimeout(
+      client.from("members").select("account_status,full_name").eq("id",data.user.id).single(),
+      10000
+    );
+    if(memberError||!member){console.error(memberError);msg.textContent="تم تسجيل الدخول، لكن تعذر تحميل بيانات العضوية.";return;}
+    if(member.account_status==="pending"){msg.textContent="طلب عضويتك بانتظار موافقة الإدارة.";await client.auth.signOut();return;}
+    if(member.account_status==="rejected"){msg.textContent="تم رفض طلب العضوية. يرجى التواصل مع إدارة الجمعية.";await client.auth.signOut();return;}
+    closeAuth();
+    alert("مرحبًا "+member.full_name+"، تم تسجيل الدخول بنجاح.");
+  }catch(err){
+    console.error(err);
+    if(err?.message==="TIMEOUT"){
+      msg.textContent="انتهت مهلة الاتصال. يبدو أن مكتبة أو خدمة Supabase لا تصل من صفحة الموقع.";
+    }else{
+      msg.textContent="تعذر تشغيل الاتصال: "+(err?.message||"خطأ غير معروف");
+    }
+  }
 }
 
 async function loadMembers(status=null){
@@ -636,18 +711,34 @@ async function openReport(){
   const phone=prompt("اكتب رقم الجوال:"); if(!phone)return;
   const location=prompt("اكتب موقع البلاغ:"); if(!location)return;
   const description=prompt("اكتب وصف البلاغ:"); if(!description)return;
-  const {error}=await supabase.from("reports").insert([{name,phone,location,description,report_type:"rescue"}]);
-  if(error){console.error(error);alert("حدث خطأ أثناء إرسال البلاغ.");return;}
-  alert("تم إرسال البلاغ بنجاح.");
+  try{
+    const client=await withTimeout(ensureSupabase(),10000);
+    const {error}=await withTimeout(client.from("reports").insert([{name,phone,location,description,report_type:"rescue"}]),15000);
+    if(error){console.error(error);alert("حدث خطأ أثناء إرسال البلاغ: "+(error.message||""));return;}
+    alert("تم إرسال البلاغ بنجاح.");
+  }catch(e){
+    console.error(e);
+    alert(e?.message==="TIMEOUT"?"تعذر الاتصال بالنظام خلال المهلة المحددة.":"تعذر تشغيل الاتصال: "+(e?.message||"خطأ غير معروف"));
+  }
 }
 
 window.addEventListener("DOMContentLoaded",async()=>{
-  await loadSiteSettings();
-  await loadPublicPosts();
-  const {data:{session}}=await supabase.auth.getSession();
-  if(!session)return;
-  const {data:isAdmin}=await supabase.rpc("is_admin");
-  if(isAdmin===true){document.getElementById("adminPanel").style.display="block";await loadMembers("pending");await loadSiteSettings();await loadAdminPosts();}
+  try{
+    const client=await withTimeout(ensureSupabase(),10000);
+    await loadSiteSettings();
+    await loadPublicPosts();
+    const {data:{session}}=await withTimeout(client.auth.getSession(),10000);
+    if(!session)return;
+    const {data:isAdmin}=await withTimeout(client.rpc("is_admin"),10000);
+    if(isAdmin===true){
+      document.getElementById("adminPanel").style.display="block";
+      await loadMembers("pending");
+      await loadSiteSettings();
+      await loadAdminPosts();
+    }
+  }catch(e){
+    console.error("Supabase startup error:",e);
+  }
 });
 </script>
 </body>
