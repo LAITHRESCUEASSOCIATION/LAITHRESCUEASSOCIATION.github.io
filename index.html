@@ -37,6 +37,16 @@ section{padding:75px 0} .section-head{display:flex;justify-content:space-between
 footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;margin-top:75px}
 @media(max-width:800px){.hero-grid{grid-template-columns:1fr}.visual{min-height:300px}.navlinks{display:none}.cards,.stats{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.cta{flex-direction:column;align-items:flex-start}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPABASE_URL = "https://mijabxmjrzkzntqpnsnc.supabase.co";
+  const SUPABASE_KEY = "مفتاحك";
+  const supabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+</script>
 </head>
 <body>
 <header><div class="wrap nav">
