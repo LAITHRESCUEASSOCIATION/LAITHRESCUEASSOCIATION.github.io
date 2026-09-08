@@ -112,6 +112,82 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 .leaderboard-empty{width:100%;text-align:center;color:#687680;background:#fff;border:1px dashed #d9e1e6;border-radius:20px;padding:30px}
 @media(max-width:800px){.leaderboard-podium{gap:10px;align-items:stretch}.podium-card{width:33.333%;padding:14px 8px;min-height:0!important;transform:none!important}.podium-avatar,.first .podium-avatar{width:74px;height:74px}.podium-name,.first .podium-name{font-size:14px}.podium-meta{font-size:12px}.podium-hours{font-size:13px}.podium-rank{width:30px;height:30px;font-size:12px}}
 
+
+/* تحسينات شاملة للجوال والأجهزة اللوحية */
+@media (max-width: 800px){
+  html{scroll-behavior:smooth}
+  body{overflow-x:hidden}
+  .wrap{width:100%;padding-left:16px;padding-right:16px}
+  header{position:sticky}
+  .nav{height:auto;min-height:68px;padding:10px 0;gap:10px;flex-wrap:wrap}
+  .brand{min-width:0;flex:1;font-size:14px;gap:8px}
+  .logo{width:40px;height:40px;flex:0 0 40px}
+  #brandSiteName{white-space:normal;line-height:1.45}
+  .auth-buttons{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .auth-buttons .btn{width:100%;padding:10px 5px;font-size:11px;border-radius:10px;white-space:nowrap}
+  .hero{padding:42px 0 34px}
+  .hero-grid{gap:26px}
+  .kicker{font-size:11px;padding:6px 9px}
+  h1{font-size:clamp(30px,10vw,42px);letter-spacing:0;margin:14px 0}
+  .hero p{font-size:15px;line-height:1.9}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}
+  .actions .btn{width:100%;padding:11px 8px;font-size:13px}
+  .visual{min-height:230px;border-radius:20px}
+  .dashboard{top:12px;right:12px;font-size:10px}
+  section{padding:42px 0}
+  .section-head{display:block;margin-bottom:20px}
+  .section-head h2,.leaderboard-head h2{font-size:26px;line-height:1.45}
+  .section-head p,.leaderboard-head p{font-size:14px}
+  .cards{gap:12px}
+  .card{padding:18px;gap:12px;border-radius:16px}
+  .card h3{font-size:18px}
+  .card p{font-size:14px}
+  .stats{grid-template-columns:1fr 1fr;gap:9px}
+  .stat{padding:17px;border-radius:15px}
+  .stat b{font-size:22px}
+  .workflow{padding:16px;border-radius:18px}
+  .steps{grid-template-columns:1fr;gap:8px;margin-top:0}
+  .step{padding:15px}
+  .cta{padding:24px 18px;border-radius:20px;gap:18px}
+  .cta h2{font-size:24px}
+  .cta .btn{width:100%}
+  .public-report-stat{padding:20px;border-radius:17px}
+  .public-report-stat b{font-size:34px}
+  .posts-grid{gap:12px}
+  .post-card img{height:180px}
+  .post-card .body{padding:16px}
+  .leaderboard-section{padding:30px 0 42px}
+  .leaderboard-podium{display:grid;grid-template-columns:1fr;gap:10px;min-height:0}
+  .podium-card{width:100%;display:grid;grid-template-columns:auto 70px 1fr;align-items:center;text-align:right;gap:10px;padding:13px;min-height:0!important;transform:none!important}
+  .podium-avatar,.first .podium-avatar{width:64px;height:64px;margin:0;border-width:3px}
+  .podium-rank{margin:0}
+  .podium-name,.first .podium-name{font-size:15px;margin-bottom:2px}
+  .podium-meta{font-size:12px;line-height:1.6}
+  .podium-hours{font-size:13px;margin-top:2px}
+  footer{margin-top:35px;padding:25px 0;text-align:center;line-height:1.8}
+  .auth-card{padding:18px;border-radius:18px;max-height:94vh}
+  .admin-shell{padding:14px}
+  .admin-wrap{width:100%}
+  .admin-top{gap:12px}
+  .admin-top>div:last-child,.admin-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .admin-actions .btn,.admin-top>div:last-child .btn{width:100%;font-size:12px;padding:10px 7px}
+  .member-row,.report-row,.cms-box,.task-card{padding:15px;border-radius:15px}
+  .row-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .row-actions button{width:100%;padding:10px 6px;font-size:12px}
+  .cms-grid,.edit-grid{grid-template-columns:1fr}
+  .cms-grid>div[style*="grid-column"]{grid-column:auto!important}
+  .profile-head{flex-direction:column;align-items:center!important;text-align:center}
+  .dispatch-member{align-items:flex-start}
+  input,select,textarea,button{max-width:100%}
+}
+@media (max-width: 390px){
+  .wrap{padding-left:12px;padding-right:12px}
+  .auth-buttons .btn{font-size:10px;padding:9px 3px}
+  .actions{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr}
+  .admin-top>div:last-child,.admin-actions,.row-actions{grid-template-columns:1fr}
+  h1{font-size:30px}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
