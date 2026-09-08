@@ -162,6 +162,11 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
   <div id="publicLeaderboard" class="leaderboard-podium"><div class="leaderboard-empty">جاري تحميل المراكز الأولى...</div></div>
 </div></section>
 
+<section id="news"><div class="wrap">
+  <div class="section-head"><div><h2>الأخبار والمقالات</h2><p>آخر أخبار ومقالات جمعية ليث للإنقاذ.</p></div></div>
+  <div id="publicPosts" class="posts-grid"><p>جاري تحميل المحتوى...</p></div>
+</div></section>
+
 <section id="about"><div class="wrap">
 <div class="section-head"><div><h2>منصة واحدة لكل عمليات الإنقاذ</h2><p>تصميم رسمي، حديث، واضح، ومتجاوب مع الجوال والكمبيوتر.</p></div></div>
 <div class="cards"><article class="card"><div class="num">01</div><div><span>عن الجمعية</span><h3>جمعية ليث للإنقاذ</h3><p>منظومة رقمية متكاملة لتنظيم أعمال الإنقاذ والبلاغات والمتطوعين وربط الإدارة بالميدان والمواطنين.</p></div></article><article class="card"><div class="num">02</div><div><span>البلاغات</span><h3>استقبال البلاغات وإدارتها</h3><p>تقديم البلاغات من المواطنين بدون إنشاء حساب، مع رقم مرجعي ومتابعة حالة البلاغ.</p></div></article><article class="card"><div class="num">03</div><div><span>المتطوعون</span><h3>إدارة المتطوعين والمهام</h3><p>ملفات متكاملة للمتطوعين، قبول ورفض المهام، تسجيل المشاركة وساعات التطوع تلقائياً.</p></div></article><article class="card"><div class="num">04</div><div><span>الخريطة المباشرة</span><h3>متابعة المتطوعين أثناء المهمة</h3><p>عرض موقع البلاغ والمتطوعين المشاركين ومسارات الحركة على خريطة الإدارة.</p></div></article></div>
@@ -178,10 +183,6 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 </div></section>
 
 
-<section id="news"><div class="wrap">
-  <div class="section-head"><div><h2>الأخبار والمقالات</h2><p>آخر أخبار ومقالات جمعية ليث للإنقاذ.</p></div></div>
-  <div id="publicPosts" class="posts-grid"><p>جاري تحميل المحتوى...</p></div>
-</div></section>
 
 <section id="report"><div class="wrap"><div class="cta">
 <div><h2>هل لديك بلاغ؟</h2><p>يمكن للمواطن تقديم البلاغ مباشرة دون إنشاء حساب.</p></div>
@@ -297,10 +298,8 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn light" type="button" onclick="openMyProfile()">ملفي الشخصي</button><button class="btn light" type="button" onclick="logoutUser()">تسجيل خروج</button></div>
     </div>
     <div class="admin-actions">
-      <button class="btn" type="button" onclick="loadMembers('pending')">طلبات جديدة</button>
-      <button class="btn light" type="button" onclick="loadMembers('approved')">المقبولون</button>
-      <button class="btn light" type="button" onclick="loadMembers('rejected')">المرفوضون</button>
-      <button class="btn light" type="button" onclick="loadMembers()">جميع الأعضاء</button>
+      <button class="btn" type="button" onclick="loadMembers('pending')">طلبات المتطوعين الجديدة</button>
+      <button class="btn light" type="button" onclick="loadMembers('approved')">المتطوعون الفعّالون</button>
       <button class="btn light" type="button" onclick="loadReports()">البلاغات</button>
     </div>
     <div id="adminNewReportAlert" class="admin-alert">ورد بلاغ جديد إلى المنصة.</div>
@@ -731,41 +730,47 @@ async function loginVolunteer(){
   }
 }
 
-async function loadMembers(status=null){
+async function loadMembers(status="approved"){
   const list=document.getElementById("membersList"), reports=document.getElementById("reportsList");
   reports.style.display="none"; list.style.display="block";
-  list.innerHTML="<p>جاري تحميل الأعضاء...</p>";
-  let q=getSupabaseClient().from("members").select("*").order("created_at",{ascending:false});
-  if(status) q=q.eq("account_status",status);
+  const isPending=status==="pending";
+  list.innerHTML=isPending?"<p>جاري تحميل طلبات المتطوعين الجديدة...</p>":"<p>جاري تحميل المتطوعين الفعّالين...</p>";
+
+  // المرفوضون لا يظهرون في لوحة الإدارة أو القوائم النشطة.
+  let q=getSupabaseClient().from("members").select("*").eq("account_status",isPending?"pending":"approved").order("created_at",{ascending:false});
   const {data,error}=await q;
   if(error){console.error(error);list.innerHTML="<p>تعذر تحميل الأعضاء. تحقق من صلاحيات المدير في Supabase.</p>";return;}
-  if(!data?.length){list.innerHTML="<p>لا توجد طلبات في هذه القائمة.</p>";return;}
-  const statusName={pending:"بانتظار الموافقة",approved:"مقبول",rejected:"مرفوض"};
+  if(!data?.length){list.innerHTML=isPending?"<p>لا توجد طلبات متطوعين جديدة حاليًا.</p>":"<p>لا يوجد متطوعون فعّالون حاليًا.</p>";return;}
+
   const roleName={volunteer:"متطوع",operator:"مشغل بلاغات",supervisor:"مشرف",admin:"مدير"};
-  list.innerHTML=data.map(m=>`<div class="member-row">
-    <div style="display:flex;align-items:center;gap:12px"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><h3 style="margin:0">${esc(m.full_name)} <span class="status-pill">${statusName[m.account_status]||esc(m.account_status||"غير محدد")}</span> <span class="status-pill">${roleName[m.role||"volunteer"]||esc(m.role||"متطوع")}</span></h3></div>
-    <div class="member-meta">
-      <div><b>السجل المدني:</b> ${esc(m.national_id)}</div><div><b>الميلاد:</b> ${esc(m.birth_date)}</div>
-      <div><b>التخصص:</b> ${m.specialty==="paramedic"?"مسعف":"منقذ"}</div><div><b>الجوال:</b> ${esc(m.phone)}</div>
-      <div><b>المدينة:</b> ${esc(m.city)}</div><div><b>تاريخ الطلب:</b> ${esc(formatDateTime(m.created_at))}</div>
-      <div><b>آخر دخول:</b> ${m.last_login_at?esc(formatDateTime(m.last_login_at)):"لم يسجل دخولًا بعد"}</div>
-      <div><b>الصفة:</b> ${roleName[m.role||"volunteer"]||"متطوع"}</div>
-      <div><b>الساعات التطوعية:</b> ${formatMinutes(m.total_volunteer_minutes||0)}</div>
-    </div>
-    <div class="row-actions">
-      <button onclick="changeMemberStatus('${m.id}','approved')">قبول</button>
-      <button onclick="changeMemberStatus('${m.id}','rejected')">رفض</button>
-      <button onclick="openEdit('${m.id}')">تعديل البيانات</button><button onclick="openAchievementAdmin('${m.id}')">إرسال شهادة</button>
-      <select class="role-select" id="role-${m.id}">
-        <option value="volunteer" ${(m.role||"volunteer")==="volunteer"?"selected":""}>متطوع</option>
-        <option value="operator" ${m.role==="operator"?"selected":""}>مشغل بلاغات</option>
-        <option value="supervisor" ${m.role==="supervisor"?"selected":""}>مشرف</option>
-        <option value="admin" ${m.role==="admin"?"selected":""}>مدير</option>
-      </select>
-      <button onclick="changeMemberRole('${m.id}')">حفظ الصلاحية</button>
-    </div>
-  </div>`).join("");
+  list.innerHTML=data.map(m=>{
+    const isApproved=m.account_status==="approved";
+    const actions=isPending
+      ? `<button class="success" onclick="changeMemberStatus('${m.id}','approved')">قبول</button><button class="danger" onclick="changeMemberStatus('${m.id}','rejected')">رفض</button>`
+      : `<button onclick="openEdit('${m.id}')">تعديل</button><button class="danger" onclick="deleteVolunteer('${m.id}','${escJs(m.full_name||"المتطوع")}')">حذف المتطوع</button><button onclick="openAchievementAdmin('${m.id}')">إرسال شهادة</button>
+         <select class="role-select" id="role-${m.id}">
+           <option value="volunteer" ${(m.role||"volunteer")==="volunteer"?"selected":""}>متطوع</option>
+           <option value="operator" ${m.role==="operator"?"selected":""}>مشغل بلاغات</option>
+           <option value="supervisor" ${m.role==="supervisor"?"selected":""}>مشرف</option>
+           <option value="admin" ${m.role==="admin"?"selected":""}>مدير</option>
+         </select>
+         <button onclick="changeMemberRole('${m.id}')">حفظ الصلاحية</button>`;
+    return `<div class="member-row">
+      <div style="display:flex;align-items:center;gap:12px"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><h3 style="margin:0">${esc(m.full_name)} <span class="status-pill">${isApproved?"متطوع فعّال":"طلب جديد"}</span> <span class="status-pill">${roleName[m.role||"volunteer"]||esc(m.role||"متطوع")}</span></h3></div>
+      <div class="member-meta">
+        <div><b>السجل المدني:</b> ${esc(m.national_id)}</div><div><b>الميلاد:</b> ${esc(m.birth_date)}</div>
+        <div><b>التخصص:</b> ${m.specialty==="paramedic"?"مسعف":"منقذ"}</div><div><b>الجوال:</b> ${esc(m.phone)}</div>
+        <div><b>المدينة:</b> ${esc(m.city)}</div><div><b>تاريخ الطلب:</b> ${esc(formatDateTime(m.created_at))}</div>
+        <div><b>آخر دخول:</b> ${m.last_login_at?esc(formatDateTime(m.last_login_at)):"لم يسجل دخولًا بعد"}</div>
+        <div><b>الصفة:</b> ${roleName[m.role||"volunteer"]||"متطوع"}</div>
+        <div><b>الساعات التطوعية:</b> ${formatMinutes(m.total_volunteer_minutes||0)}</div>
+      </div>
+      <div class="row-actions">${actions}</div>
+    </div>`;
+  }).join("");
 }
+
+function escJs(v){return String(v??"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\r?\n/g," ");}
 
 function formatDateTime(value){
   if(!value)return "";
@@ -778,7 +783,7 @@ async function changeMemberRole(id){
   const {error}=await getSupabaseClient().from("members").update({role}).eq("id",id);
   if(error){console.error(error);alert("تعذر تحديث صلاحية العضو: "+(error.message||""));return;}
   alert("تم تحديث صلاحية العضو بنجاح.");
-  await loadMembers();
+  await loadMembers("approved");
 }
 
 async function loadReports(){
@@ -841,6 +846,18 @@ async function changeMemberStatus(id,status){
   alert(status==="approved"?"تم قبول المتطوع.":"تم رفض الطلب."); await loadMembers("pending");
 }
 
+
+async function deleteVolunteer(id,name){
+  if(!confirm(`هل تريد حذف المتطوع ${name} من قائمة المتطوعين الفعّالين؟`))return;
+  const {data:{user}}=await getSupabaseClient().auth.getUser();
+  if(user?.id===id){alert("لا يمكنك حذف حسابك الإداري أثناء تسجيل الدخول.");return;}
+  // نحافظ على السجل التاريخي للمهام والساعات، لكن نخرجه نهائيًا من القوائم النشطة.
+  const {error}=await getSupabaseClient().from("members").update({account_status:"rejected"}).eq("id",id);
+  if(error){console.error(error);alert("تعذر حذف المتطوع: "+(error.message||""));return;}
+  alert("تم حذف المتطوع من القوائم النشطة.");
+  await loadMembers("approved");
+}
+
 async function openEdit(id){
   const {data:m,error}=await getSupabaseClient().from("members").select("*").eq("id",id).single();
   if(error||!m){alert("تعذر تحميل بيانات المتطوع.");return;}
@@ -859,7 +876,7 @@ async function saveMemberEdit(){
   const payload={full_name:document.getElementById("editName").value.trim(),national_id,birth_date:document.getElementById("editBirthDate").value,specialty:document.getElementById("editSpecialty").value,phone,city:document.getElementById("editCity").value.trim()};
   const {error}=await getSupabaseClient().from("members").update(payload).eq("id",id);
   if(error){console.error(error);msg.textContent="تعذر حفظ التعديلات: "+error.message;return;}
-  closeEdit();alert("تم تعديل بيانات المتطوع.");await loadMembers();
+  closeEdit();alert("تم تعديل بيانات المتطوع.");await loadMembers("approved");
 }
 
 async function openMyProfile(){currentIsAdmin=true;await openMemberDashboard();}
