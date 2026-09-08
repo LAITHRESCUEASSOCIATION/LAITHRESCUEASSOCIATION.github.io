@@ -90,8 +90,37 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 <footer><div class="wrap">جمعية ليث للإنقاذ — منصة رقمية متخصصة في إدارة البلاغات والإنقاذ والتطوع.</div></footer>
 
 <script>
-function openReport(){
- alert("نموذج البلاغ في هذه النسخة هو نموذج واجهة أولي. يمكن ربطه لاحقاً بقاعدة البيانات ونظام البلاغات الفعلي.");
+function openReport() {
+  const name = prompt("اكتب اسمك:");
+  if (!name) return;
+
+  const phone = prompt("اكتب رقم الجوال:");
+  if (!phone) return;
+
+  const location = prompt("اكتب موقع البلاغ:");
+  if (!location) return;
+
+  const description = prompt("اكتب وصف البلاغ:");
+  if (!description) return;
+
+  supabase
+    .from("reports")
+    .insert([
+      {
+        name: name,
+        phone: phone,
+        location: location,
+        description: description
+      }
+    ])
+    .then(({ error }) => {
+      if (error) {
+        console.error(error);
+        alert("حدث خطأ أثناء إرسال البلاغ.");
+        return;
+      }
+
+      alert("تم إرسال البلاغ بنجاح.");
+    });
 }
 </script>
-</body></html>
