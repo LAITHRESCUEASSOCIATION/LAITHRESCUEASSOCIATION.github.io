@@ -69,56 +69,19 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 .post-meta{font-size:12px;color:#788692;font-weight:700}
 @media(max-width:800px){.cms-grid,.posts-grid{grid-template-columns:1fr}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = "https://mijabxmjrzkzntqpnsnc.supabase.co";
   const SUPABASE_KEY = "sb_publishable_1tg-mHlBnpPQqrjUHVmHyA_ao62TBjc";
   let supabase = null;
-  let supabaseLoadingPromise = null;
 
-  function loadScript(src){
-    return new Promise((resolve,reject)=>{
-      const s=document.createElement("script");
-      s.src=src;
-      s.async=true;
-      s.onload=()=>resolve();
-      s.onerror=()=>reject(new Error("تعذر تحميل مكتبة الاتصال من: "+src));
-      document.head.appendChild(s);
-    });
-  }
-
-  async function ensureSupabase(){
-    if(supabase) return supabase;
-    if(supabaseLoadingPromise) return supabaseLoadingPromise;
-
-    supabaseLoadingPromise=(async()=>{
-      const sources=[
-        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js",
-        "https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"
-      ];
-
-      let lastError=null;
-      for(const src of sources){
-        try{
-          await loadScript(src);
-          if(window.supabase?.createClient){
-            supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-            return supabase;
-          }
-        }catch(e){
-          lastError=e;
-          console.error(e);
-        }
-      }
-
-      throw lastError || new Error("تعذر تحميل مكتبة Supabase.");
-    })();
-
-    try{
-      return await supabaseLoadingPromise;
-    }catch(e){
-      supabaseLoadingPromise=null;
-      throw e;
+  function ensureSupabase(){
+    if(supabase) return Promise.resolve(supabase);
+    if(!window.supabase || !window.supabase.createClient){
+      return Promise.reject(new Error("تعذر تحميل مكتبة Supabase."));
     }
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    return Promise.resolve(supabase);
   }
 
   function withTimeout(promise,ms=15000){
