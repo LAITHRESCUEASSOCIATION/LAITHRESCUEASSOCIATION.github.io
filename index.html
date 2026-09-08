@@ -73,6 +73,19 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 .post-card p{color:#66747e;line-height:1.8}
 .post-meta{font-size:12px;color:#788692;font-weight:700}
 @media(max-width:800px){.cms-grid,.posts-grid{grid-template-columns:1fr}}
+.avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;background:#e9eef1;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.avatar.sm{width:48px;height:48px;border-width:2px}
+.profile-head{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #e3e8eb;border-radius:20px;padding:20px;margin-bottom:16px}
+.member-directory{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.directory-card{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e3e8eb;border-radius:16px;padding:14px}
+.directory-card b{display:block}.directory-card small{color:#687680}
+.task-card{background:#fff;border:1px solid #e3e8eb;border-radius:18px;padding:18px;margin-bottom:12px}
+.task-alert{background:#fff3cd;border:1px solid #ffe69c;border-radius:14px;padding:12px 14px;font-weight:800;margin-bottom:12px}
+.timer{font-variant-numeric:tabular-nums;font-weight:800;font-size:18px}
+.danger{background:#8d1f2d!important;color:#fff!important}.success{background:#17633b!important;color:#fff!important}
+.assignment-list{margin-top:12px;padding-top:12px;border-top:1px solid #e6eaee;font-size:14px;color:#53616d;line-height:1.9}
+.dispatch-members{max-height:380px;overflow:auto;margin:14px 0}.dispatch-member{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #edf1f4}.dispatch-member input{width:18px;height:18px}
+@media(max-width:800px){.member-directory{grid-template-columns:1fr}.profile-head{align-items:flex-start}.admin-top{align-items:flex-start;flex-direction:column}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -247,7 +260,7 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
   <div class="admin-wrap">
     <div class="admin-top">
       <div><h2 style="margin:0">لوحة إدارة المتطوعين</h2><small>قبول ورفض وتعديل طلبات العضوية</small></div>
-      <button class="btn light" type="button" onclick="logoutUser()">تسجيل خروج</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn light" type="button" onclick="openMyProfile()">ملفي الشخصي</button><button class="btn light" type="button" onclick="logoutUser()">تسجيل خروج</button></div>
     </div>
     <div class="admin-actions">
       <button class="btn" type="button" onclick="loadMembers('pending')">طلبات جديدة</button>
@@ -335,6 +348,28 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
   </div>
 </div>
 
+<div id="memberPanel" class="admin-shell" style="z-index:10002">
+  <div class="admin-wrap">
+    <div class="admin-top">
+      <div><h2 style="margin:0">بوابة العضو</h2><small>الملف الشخصي، البلاغات، والساعات التطوعية</small></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="backToAdminBtn" class="btn light" type="button" onclick="backToAdmin()" style="display:none">العودة للإدارة</button><button class="btn light" type="button" onclick="logoutUser()">تسجيل خروج</button></div>
+    </div>
+    <div id="myProfileBox"></div>
+    <div class="cms-box"><h3>بلاغاتي ومهامي</h3><div id="myTasks"><p>جاري التحميل...</p></div></div>
+    <div class="cms-box"><h3>أعضاء الجمعية</h3><p style="color:#687680">تظهر للأعضاء البيانات العامة فقط: الاسم، الصورة الشخصية، والساعات التطوعية.</p><div id="memberDirectory" class="member-directory"></div></div>
+  </div>
+</div>
+
+<div id="dispatchOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10004;align-items:center;justify-content:center;padding:20px">
+  <div class="auth-card" style="width:min(720px,100%)">
+    <div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="margin:0">ترحيل البلاغ</h2><small>اختر عضوًا أو أكثر لإرسال البلاغ إليهم</small></div><button type="button" onclick="closeDispatch()" style="font-size:26px;border:0;background:none;cursor:pointer">×</button></div>
+    <input id="dispatchReportId" type="hidden">
+    <div id="dispatchMembers" class="dispatch-members"><p>جاري تحميل الأعضاء...</p></div>
+    <button class="btn" type="button" onclick="submitDispatch()" style="width:100%">إرسال البلاغ للأعضاء المحددين</button>
+    <p id="dispatchMsg" class="form-msg"></p>
+  </div>
+</div>
+
 <div id="editOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10001;align-items:center;justify-content:center;padding:20px">
   <div class="auth-card">
     <div style="display:flex;justify-content:space-between;align-items:center"><h2>تعديل بيانات المتطوع</h2><button type="button" onclick="closeEdit()" style="font-size:26px;border:0;background:none;cursor:pointer">×</button></div>
@@ -362,6 +397,9 @@ function closeEdit(){ document.getElementById("editOverlay").style.display="none
 function openPolicy(){ document.getElementById("policyOverlay").style.display="flex"; }
 function closePolicy(){ document.getElementById("policyOverlay").style.display="none"; }
 function acceptPolicy(){ document.getElementById("policyConsent").checked=true; closePolicy(); }
+let currentIsAdmin=false;
+let taskTimerHandle=null;
+let taskPollHandle=null;
 async function uploadSiteImage(file,prefix){
   if(!file) return null;
   const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
@@ -605,6 +643,7 @@ async function loginVolunteer(){
     ]);
     if(!adminError&&isAdmin===true){
       closeAuth();
+      currentIsAdmin=true;
       document.getElementById("adminPanel").style.display="block";
       await loadMembers("pending");
       await loadSiteSettings();
@@ -620,7 +659,8 @@ async function loginVolunteer(){
     if(member.account_status==="pending"){msg.textContent="طلب عضويتك بانتظار موافقة الإدارة.";await client.auth.signOut();return;}
     if(member.account_status==="rejected"){msg.textContent="تم رفض طلب العضوية. يرجى التواصل مع إدارة الجمعية.";await client.auth.signOut();return;}
     closeAuth();
-    alert("مرحبًا "+member.full_name+"، تم تسجيل الدخول بنجاح.");
+    currentIsAdmin=false;
+    await openMemberDashboard();
   }catch(err){
     console.error(err);
     if(err?.message==="TIMEOUT"){
@@ -643,13 +683,14 @@ async function loadMembers(status=null){
   const statusName={pending:"بانتظار الموافقة",approved:"مقبول",rejected:"مرفوض"};
   const roleName={volunteer:"متطوع",operator:"مشغل بلاغات",supervisor:"مشرف",admin:"مدير"};
   list.innerHTML=data.map(m=>`<div class="member-row">
-    <h3>${esc(m.full_name)} <span class="status-pill">${statusName[m.account_status]||esc(m.account_status||"غير محدد")}</span> <span class="status-pill">${roleName[m.role||"volunteer"]||esc(m.role||"متطوع")}</span></h3>
+    <div style="display:flex;align-items:center;gap:12px"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><h3 style="margin:0">${esc(m.full_name)} <span class="status-pill">${statusName[m.account_status]||esc(m.account_status||"غير محدد")}</span> <span class="status-pill">${roleName[m.role||"volunteer"]||esc(m.role||"متطوع")}</span></h3></div>
     <div class="member-meta">
       <div><b>السجل المدني:</b> ${esc(m.national_id)}</div><div><b>الميلاد:</b> ${esc(m.birth_date)}</div>
       <div><b>التخصص:</b> ${m.specialty==="paramedic"?"مسعف":"منقذ"}</div><div><b>الجوال:</b> ${esc(m.phone)}</div>
       <div><b>المدينة:</b> ${esc(m.city)}</div><div><b>تاريخ الطلب:</b> ${esc(formatDateTime(m.created_at))}</div>
       <div><b>آخر دخول:</b> ${m.last_login_at?esc(formatDateTime(m.last_login_at)):"لم يسجل دخولًا بعد"}</div>
       <div><b>الصفة:</b> ${roleName[m.role||"volunteer"]||"متطوع"}</div>
+      <div><b>الساعات التطوعية:</b> ${formatMinutes(m.total_volunteer_minutes||0)}</div>
     </div>
     <div class="row-actions">
       <button onclick="changeMemberStatus('${m.id}','approved')">قبول</button>
@@ -687,19 +728,49 @@ async function loadReports(){
   const {data,error}=await getSupabaseClient().from("reports").select("*").order("created_at",{ascending:false});
   if(error){console.error(error);list.innerHTML="<p>تعذر تحميل البلاغات. تحقق من صلاحيات جدول reports في Supabase.</p>";return;}
   if(!data?.length){list.innerHTML="<p>لا توجد بلاغات حتى الآن.</p>";return;}
-  const statusName={new:"جديد",in_progress:"قيد المعالجة",closed:"مغلق",completed:"مكتمل"};
-  list.innerHTML=`<h2 style="margin-top:0">البلاغات الواردة</h2>`+data.map(r=>`<div class="report-row">
-    <h3>بلاغ ${esc(r.name||"بدون اسم")} <span class="status-pill">${statusName[r.status]||esc(r.status||"جديد")}</span></h3>
-    <div class="report-meta">
-      <div><b>رقم الجوال:</b> ${esc(r.phone||"")}</div>
-      <div><b>الموقع:</b> ${esc(r.location||"")}</div>
-      <div><b>نوع البلاغ:</b> ${r.report_type==="rescue"?"إنقاذ":esc(r.report_type||"")}</div>
-      <div><b>الأولوية:</b> ${esc(r.priority||"normal")}</div>
-      <div><b>تاريخ البلاغ:</b> ${esc(formatDateTime(r.created_at))}</div>
-    </div>
-    <div class="report-desc"><b>وصف البلاغ:</b><br>${esc(r.description||"")}</div>
-  </div>`).join("");
+  const ids=data.map(r=>r.id);
+  const {data:assignments,error:aerr}=await getSupabaseClient().from("report_assignments").select("id,report_id,member_id,status,assigned_at,accepted_at,ended_at,volunteer_minutes,members(full_name)").in("report_id",ids);
+  if(aerr) console.error(aerr);
+  const workflowName={new:"جديد",dispatched:"تم الترحيل",in_progress:"قيد التنفيذ",completed:"مكتمل",cancelled:"ملغي"};
+  list.innerHTML=`<h2 style="margin-top:0">البلاغات الواردة</h2>`+data.map(r=>{
+    const ra=(assignments||[]).filter(a=>a.report_id===r.id);
+    const assignmentHtml=ra.length?`<div class="assignment-list"><b>الأعضاء المرحل إليهم:</b><br>${ra.map(a=>`${esc(a.members?.full_name||"عضو")} — ${assignmentStatusName(a.status)}${a.volunteer_minutes?` — ${formatMinutes(a.volunteer_minutes)}`:""}`).join("<br>")}</div>`:"";
+    const wf=r.workflow_status||"new";
+    const actions=wf==="completed"||wf==="cancelled"?"":`<div class="row-actions">${wf==="new"||wf==="dispatched"?`<button class="success" onclick="openDispatch('${r.id}')">ترحيل البلاغ</button>`:""}<button class="danger" onclick="cancelReport('${r.id}')">إلغاء البلاغ</button>${wf==="dispatched"||wf==="in_progress"?`<button onclick="closeWholeReport('${r.id}')">إيقاف البلاغ كاملًا</button>`:""}</div>`;
+    return `<div class="report-row">
+      <h3>بلاغ ${esc(r.name||"بدون اسم")} <span class="status-pill">${workflowName[wf]||esc(wf)}</span></h3>
+      <div class="report-meta">
+        <div><b>رقم الجوال:</b> ${esc(r.phone||"")}</div><div><b>الموقع:</b> ${esc(r.location||"")}</div>
+        <div><b>نوع البلاغ:</b> ${r.report_type==="rescue"?"إنقاذ":esc(r.report_type||"")}</div><div><b>الأولوية:</b> ${esc(r.priority||"normal")}</div>
+        <div><b>تاريخ البلاغ:</b> ${esc(formatDateTime(r.created_at))}</div>
+      </div>
+      <div class="report-desc"><b>وصف البلاغ:</b><br>${esc(r.description||"")}</div>${assignmentHtml}${actions}
+    </div>`;
+  }).join("");
 }
+
+function assignmentStatusName(v){return ({assigned:"بانتظار قبول العضو",accepted:"مشارك الآن",completed:"أنهى مشاركته",cancelled:"ملغي"})[v]||v;}
+function formatMinutes(v){const min=Math.max(0,Number(v)||0);const h=Math.floor(min/60),m=min%60;return h?`${h} ساعة${m?` و ${m} دقيقة`:""}`:`${m} دقيقة`;}
+function avatarPlaceholder(name){const ch=encodeURIComponent((name||"ل").trim().charAt(0)||"ل");return `https://ui-avatars.com/api/?name=${ch}&background=e9eef1&color=17232d&size=128`;}
+
+async function openDispatch(reportId){
+  document.getElementById("dispatchReportId").value=reportId;document.getElementById("dispatchMsg").textContent="";document.getElementById("dispatchOverlay").style.display="flex";
+  const box=document.getElementById("dispatchMembers");box.innerHTML="<p>جاري تحميل الأعضاء...</p>";
+  const {data,error}=await getSupabaseClient().from("members").select("id,full_name,specialty,avatar_url,total_volunteer_minutes").eq("account_status","approved").neq("role","admin").order("full_name");
+  if(error){console.error(error);box.innerHTML="<p>تعذر تحميل الأعضاء.</p>";return;}
+  if(!data?.length){box.innerHTML="<p>لا يوجد أعضاء مقبولون حاليًا.</p>";return;}
+  box.innerHTML=data.map(m=>`<label class="dispatch-member"><input type="checkbox" name="dispatchMember" value="${m.id}"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><span><b>${esc(m.full_name)}</b><br><small>${m.specialty==="paramedic"?"مسعف":"منقذ"} · ${formatMinutes(m.total_volunteer_minutes||0)}</small></span></label>`).join("");
+}
+function closeDispatch(){document.getElementById("dispatchOverlay").style.display="none";}
+async function submitDispatch(){
+  const reportId=document.getElementById("dispatchReportId").value;
+  const memberIds=[...document.querySelectorAll('input[name="dispatchMember"]:checked')].map(x=>x.value);
+  const msg=document.getElementById("dispatchMsg");if(!memberIds.length){msg.textContent="اختر عضوًا واحدًا على الأقل.";return;}msg.textContent="جاري إرسال البلاغ...";
+  const {error}=await getSupabaseClient().rpc("dispatch_report",{p_report_id:reportId,p_member_ids:memberIds});
+  if(error){console.error(error);msg.textContent="تعذر ترحيل البلاغ: "+error.message;return;}closeDispatch();alert("تم ترحيل البلاغ للأعضاء المحددين.");await loadReports();
+}
+async function cancelReport(id){if(!confirm("هل تريد إلغاء هذا البلاغ؟ سيتم إلغاء جميع التكليفات غير المنتهية."))return;const {error}=await getSupabaseClient().rpc("cancel_report",{p_report_id:id});if(error){alert("تعذر إلغاء البلاغ: "+error.message);return;}await loadReports();}
+async function closeWholeReport(id){if(!confirm("هل تريد إيقاف البلاغ كاملًا؟ سيتم احتساب مدة كل عضو منذ وقت قبوله للمهمة."))return;const {error}=await getSupabaseClient().rpc("close_report",{p_report_id:id});if(error){alert("تعذر إيقاف البلاغ: "+error.message);return;}alert("تم إيقاف البلاغ واحتساب الساعات التطوعية.");await loadReports();}
 
 async function changeMemberStatus(id,status){
   const {error}=await getSupabaseClient().from("members").update({account_status:status}).eq("id",id);
@@ -727,6 +798,46 @@ async function saveMemberEdit(){
   if(error){console.error(error);msg.textContent="تعذر حفظ التعديلات: "+error.message;return;}
   closeEdit();alert("تم تعديل بيانات المتطوع.");await loadMembers();
 }
+
+async function openMyProfile(){currentIsAdmin=true;await openMemberDashboard();}
+async function backToAdmin(){document.getElementById("memberPanel").style.display="none";if(taskTimerHandle){clearInterval(taskTimerHandle);taskTimerHandle=null;}if(taskPollHandle){clearInterval(taskPollHandle);taskPollHandle=null;}document.getElementById("adminPanel").style.display="block";}
+async function openMemberDashboard(){
+  document.getElementById("memberPanel").style.display="block";
+  document.getElementById("backToAdminBtn").style.display=currentIsAdmin?"inline-flex":"none";
+  await Promise.all([loadMyProfile(),loadMyAssignments(),loadMemberDirectory()]);
+  if(taskTimerHandle)clearInterval(taskTimerHandle);taskTimerHandle=setInterval(refreshLiveTimers,1000);if(taskPollHandle)clearInterval(taskPollHandle);taskPollHandle=setInterval(loadMyAssignments,20000);refreshLiveTimers();
+}
+async function loadMyProfile(){
+  const box=document.getElementById("myProfileBox");box.innerHTML="<p>جاري تحميل الملف الشخصي...</p>";
+  const {data:{user}}=await getSupabaseClient().auth.getUser();if(!user)return;
+  const {data:m,error}=await getSupabaseClient().from("members").select("id,full_name,avatar_url,total_volunteer_minutes,role").eq("id",user.id).maybeSingle();
+  if(error){console.error(error);box.innerHTML="<p>تعذر تحميل الملف الشخصي.</p>";return;}
+  const name=m?.full_name||user.user_metadata?.full_name||user.email;
+  box.innerHTML=`<div class="profile-head"><img class="avatar" id="myAvatar" src="${esc(m?.avatar_url||avatarPlaceholder(name))}" alt=""><div style="flex:1"><h3 style="margin:0 0 6px">${esc(name)}</h3><div>الساعات التطوعية: <b>${formatMinutes(m?.total_volunteer_minutes||0)}</b></div><div style="margin-top:10px"><input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp" style="max-width:300px"><button class="btn light" type="button" onclick="uploadMyAvatar()" style="margin-inline-start:8px">تحديث الصورة الشخصية</button></div><small id="avatarMsg" class="form-msg"></small></div></div>`;
+}
+async function uploadMyAvatar(){
+  const f=document.getElementById("avatarFile")?.files?.[0],msg=document.getElementById("avatarMsg");if(!f){msg.textContent="اختر صورة أولًا.";return;}if(f.size>5*1024*1024){msg.textContent="حجم الصورة يجب ألا يتجاوز 5MB.";return;}msg.textContent="جاري رفع الصورة...";
+  const {data:{user}}=await getSupabaseClient().auth.getUser();const ext=(f.name.split('.').pop()||'jpg').toLowerCase();const path=`${user.id}/${Date.now()}.${ext}`;
+  const {error:upErr}=await getSupabaseClient().storage.from("profile-photos").upload(path,f,{upsert:false});if(upErr){console.error(upErr);msg.textContent="تعذر رفع الصورة: "+upErr.message;return;}
+  const {data:urlData}=getSupabaseClient().storage.from("profile-photos").getPublicUrl(path);const avatar_url=urlData.publicUrl;
+  const {error}=await getSupabaseClient().rpc("set_my_avatar",{p_avatar_url:avatar_url});if(error){msg.textContent="رفعت الصورة لكن تعذر حفظها بالملف: "+error.message;return;}msg.textContent="تم تحديث الصورة.";await Promise.all([loadMyProfile(),loadMemberDirectory()]);
+}
+async function loadMemberDirectory(){
+  const box=document.getElementById("memberDirectory");box.innerHTML="<p>جاري تحميل الأعضاء...</p>";
+  const {data,error}=await getSupabaseClient().rpc("get_member_directory");if(error){console.error(error);box.innerHTML="<p>تعذر تحميل دليل الأعضاء.</p>";return;}
+  box.innerHTML=(data||[]).map(m=>`<div class="directory-card"><img class="avatar sm" src="${esc(m.avatar_url||avatarPlaceholder(m.full_name))}" alt=""><div><b>${esc(m.full_name)}</b><small>${formatMinutes(m.total_volunteer_minutes||0)} تطوعية</small></div></div>`).join("")||"<p>لا يوجد أعضاء ظاهرون.</p>";
+}
+async function loadMyAssignments(){
+  const box=document.getElementById("myTasks");box.innerHTML="<p>جاري تحميل المهام...</p>";
+  const {data,error}=await getSupabaseClient().from("report_assignments").select("id,status,assigned_at,accepted_at,ended_at,volunteer_minutes,report_id,reports(name,phone,location,description,report_type,workflow_status,created_at)").order("assigned_at",{ascending:false});
+  if(error){console.error(error);box.innerHTML="<p>تعذر تحميل المهام.</p>";return;}
+  const pending=(data||[]).filter(a=>a.status==="assigned").length;
+  const alertHtml=pending?`<div class="task-alert">لديك ${pending} بلاغ جديد بانتظار قبولك.</div>`:"";
+  box.innerHTML=alertHtml+((data||[]).map(a=>{const r=a.reports||{};const live=a.status==="accepted"?`<div>الوقت الحالي: <span class="timer live-timer" data-start="${esc(a.accepted_at)}">00:00:00</span></div>`:"";const btn=a.status==="assigned"?`<button class="btn success" onclick="acceptAssignment('${a.id}')">قبول وبدء المهمة</button>`:a.status==="accepted"?`<button class="btn danger" onclick="stopMyAssignment('${a.id}')">إيقاف مشاركتي</button>`:"";return `<div class="task-card"><h3 style="margin-top:0">بلاغ: ${esc(r.description||"بلاغ إنقاذ")}</h3><div class="member-meta"><div><b>الحالة:</b> ${assignmentStatusName(a.status)}</div><div><b>الموقع:</b> ${esc(r.location||"")}</div><div><b>وقت الإرسال:</b> ${esc(formatDateTime(a.assigned_at))}</div><div><b>وقت القبول:</b> ${a.accepted_at?esc(formatDateTime(a.accepted_at)):"—"}</div><div><b>الساعات المحتسبة:</b> ${formatMinutes(a.volunteer_minutes||0)}</div></div>${live}<div class="report-desc">${esc(r.description||"")}</div><div class="row-actions">${btn}</div></div>`;}).join(""))||"<p>لا توجد بلاغات مرسلة لك حاليًا.</p>";refreshLiveTimers();
+}
+function refreshLiveTimers(){document.querySelectorAll('.live-timer').forEach(el=>{const start=new Date(el.dataset.start).getTime();if(!start)return;let sec=Math.max(0,Math.floor((Date.now()-start)/1000));const h=String(Math.floor(sec/3600)).padStart(2,'0');sec%=3600;const m=String(Math.floor(sec/60)).padStart(2,'0'),s=String(sec%60).padStart(2,'0');el.textContent=`${h}:${m}:${s}`;});}
+async function acceptAssignment(id){const {error}=await getSupabaseClient().rpc("accept_assignment",{p_assignment_id:id});if(error){alert("تعذر قبول البلاغ: "+error.message);return;}await loadMyAssignments();}
+async function stopMyAssignment(id){if(!confirm("هل تريد إيقاف مشاركتك؟ سيتم تثبيت الوقت المحتسب وإضافته لساعاتك التطوعية."))return;const {error}=await getSupabaseClient().rpc("stop_assignment",{p_assignment_id:id});if(error){alert("تعذر إيقاف المشاركة: "+error.message);return;}await Promise.all([loadMyAssignments(),loadMyProfile(),loadMemberDirectory()]);}
 
 async function logoutUser(){await getSupabaseClient().auth.signOut();document.getElementById("adminPanel").style.display="none";location.reload();}
 
@@ -764,10 +875,14 @@ window.addEventListener("DOMContentLoaded",async()=>{
       new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),10000))
     ]);
     if(isAdmin===true){
+      currentIsAdmin=true;
       document.getElementById("adminPanel").style.display="block";
       await loadMembers("pending");
       await loadSiteSettings();
       await loadAdminPosts();
+    }else{
+      const {data:m}=await client.from("members").select("account_status").eq("id",session.user.id).maybeSingle();
+      if(m?.account_status==="approved"){currentIsAdmin=false;await openMemberDashboard();}
     }
   }catch(e){
     console.error("Supabase startup error:",e);
