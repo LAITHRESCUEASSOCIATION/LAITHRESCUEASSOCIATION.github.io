@@ -160,11 +160,53 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
       <input id="signupEmail" type="email" autocomplete="email" placeholder="example@email.com">
       <label for="signupPassword">كلمة المرور</label>
       <input id="signupPassword" type="password" autocomplete="new-password" minlength="8" placeholder="8 أحرف على الأقل">
-      <p style="font-size:12px;color:#74818b;line-height:1.8">بإرسال الطلب، يوافق المتطوع على استخدام بياناته لأغراض إدارة طلب العضوية والتحقق منه من قبل إدارة الجمعية.</p>
+      <div style="display:flex;gap:10px;align-items:flex-start;margin:12px 0 16px;padding:12px;border:1px solid #dce3e8;border-radius:12px;background:#f8fafb">
+        <input id="policyConsent" type="checkbox" style="width:18px;height:18px;margin:3px 0 0;flex:0 0 auto">
+        <label for="policyConsent" style="margin:0;line-height:1.8;font-weight:600">
+          أوافق على <button type="button" onclick="openPolicy()" style="border:0;background:none;padding:0;color:#0b5ea8;text-decoration:underline;cursor:pointer;font-family:inherit;font-weight:800">سياسة التطوع والخصوصية وشروط استخدام المنصة</button>.
+        </label>
+      </div>
       <button type="button" class="btn" onclick="signupVolunteer()" style="width:100%">إرسال طلب التسجيل</button>
       <p id="signupMsg" class="form-msg"></p>
       <button type="button" class="auth-link" onclick="showLogin()">لدي حساب بالفعل</button>
     </div>
+  </div>
+</div>
+
+<div id="policyOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.60);z-index:10002;align-items:center;justify-content:center;padding:20px">
+  <div class="auth-card" style="width:min(820px,100%)">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;position:sticky;top:-26px;background:#fff;padding:20px 0 12px;z-index:2">
+      <div><h2 style="margin:0">سياسة التطوع والخصوصية</h2><small>جمعية ليث للإنقاذ — نسخة تشغيلية أولية</small></div>
+      <button type="button" onclick="closePolicy()" style="font-size:26px;border:0;background:none;cursor:pointer">×</button>
+    </div>
+    <div style="line-height:2;color:#34434f;font-size:14px">
+      <p><b>1. نطاق السياسة:</b> تنظم هذه السياسة التسجيل في منصة الجمعية، إدارة العضوية التطوعية، المشاركة في المهام، استخدام الأنظمة الرقمية، ومعالجة بيانات المتطوعين. ويعد التسجيل طلباً للانضمام وليس قبولاً نهائياً.</p>
+      <p><b>2. أهلية القبول:</b> للجمعية حق التحقق من البيانات والمؤهلات والتخصصات والمتطلبات اللازمة لطبيعة العمل التطوعي، وقبول أو رفض أو تعليق الطلب وفق الأنظمة واللوائح والسياسات المعتمدة ودون أن يترتب على تقديم الطلب حق مكتسب في العضوية.</p>
+      <p><b>3. صحة البيانات:</b> يلتزم المتطوع بتقديم بيانات صحيحة وحديثة وعدم انتحال صفة أو تقديم مستندات أو مؤهلات غير صحيحة، وإبلاغ الجمعية عند تغير البيانات التي يلزم تحديثها.</p>
+      <p><b>4. البيانات التي تجمعها المنصة:</b> قد تشمل الاسم، رقم الهوية/السجل المدني، تاريخ الميلاد، رقم الجوال، البريد الإلكتروني، المدينة، التخصص، حالة العضوية، وسجلات المشاركة والمهام، بالقدر اللازم لإدارة العضوية وأعمال الجمعية.</p>
+      <p><b>5. أغراض المعالجة:</b> تستخدم البيانات للتحقق من طلب العضوية، التواصل، إدارة الصلاحيات، توزيع المهام، توثيق المشاركة، الأمن والسلامة، إدارة السجلات، والوفاء بالمتطلبات النظامية ذات الصلة.</p>
+      <p><b>6. السرية والأمن:</b> تلتزم الجمعية باتخاذ التدابير التنظيمية والتقنية المناسبة لحماية البيانات، ويمنع على المتطوع مشاركة بيانات الدخول أو تمكين الغير من استخدام حسابه.</p>
+      <p><b>7. الإفصاح:</b> لا تفصح الجمعية عن البيانات إلا في الحدود اللازمة للأغراض المعلنة أو عند وجود مسوغ نظامي أو طلب من جهة مختصة، ومع مراعاة الأنظمة السارية.</p>
+      <p><b>8. حقوق صاحب البيانات:</b> تمارس حقوق الاطلاع والوصول والتصحيح وطلب الإتلاف أو سحب الموافقة متى كان ذلك منطبقاً، وفق نظام حماية البيانات الشخصية ولوائحه والمسـوغ النظامي للمعالجة.</p>
+      <p><b>9. الاحتفاظ والإتلاف:</b> تحتفظ الجمعية بالبيانات للمدة اللازمة لتحقيق الغرض أو للمدة التي يوجبها مسوغ نظامي، ثم تتخذ إجراءات الإتلاف أو إخفاء الهوية بحسب المتطلبات النظامية. لا تعني هذه السياسة الاحتفاظ الدائم برقم الهوية دون مسوغ نظامي.</p>
+      <p><b>10. عدم النشاط لمدة 90 يوماً:</b> إذا لم يسجل المتطوع أي مشاركة معتمدة أو نشاط تطوعي لدى الجمعية لمدة تسعين (90) يوماً متصلة، فيجوز للجمعية تعليق أو إغلاق حسابه وسحب الصلاحيات الرقمية والتشغيلية بعد تطبيق الإجراءات الداخلية المعتمدة. ويجوز تقييد إعادة التسجيل بالهوية متى كان ذلك ضرورياً ومتناسباً ومسموحاً نظاماً، مع عدم الاحتفاظ بالبيانات الشخصية بعد انتفاء الغرض إلا بمسوغ نظامي.</p>
+      <p><b>11. المهام الميدانية:</b> لا يجوز للمتطوع مباشرة مهمة أو تمثيل الجمعية إلا بعد التكليف أو الإذن وفق الصلاحيات المعتمدة، ويلتزم بتعليمات قائد المهمة ومتطلبات السلامة وعدم تجاوز نطاق التدريب أو الاختصاص.</p>
+      <p><b>12. السلامة:</b> للمتطوع رفض أو إيقاف المشاركة عند وجود خطر غير مقبول أو عند عدم امتلاكه التدريب أو التجهيز المطلوب، وعليه إبلاغ المسؤول فوراً. ولا يجوز اتخاذ تصرفات تعرض الأشخاص أو الممتلكات للخطر دون ضرورة أو صلاحية.</p>
+      <p><b>13. الهوية والصفة:</b> يمنع استخدام اسم الجمعية أو شعارها أو بطاقاتها أو الزي أو الصفة التطوعية لأغراض شخصية أو تجارية أو إعلامية غير مصرح بها.</p>
+      <p><b>14. التصوير والنشر:</b> يمنع نشر صور المصابين أو المفقودين أو مواقع الحالات أو بيانات البلاغات أو المحادثات الداخلية أو أي معلومات سرية دون تصريح ومسوغ مناسب، مع احترام الخصوصية والأنظمة.</p>
+      <p><b>15. سرية البلاغات:</b> تعتبر معلومات البلاغات والمهام والبيانات التي يطلع عليها المتطوع بحكم مشاركته معلومات مخصصة للعمل، ويحظر نسخها أو تداولها خارج القنوات المعتمدة.</p>
+      <p><b>16. السلوك المهني:</b> يلتزم المتطوع بالاحترام وعدم الإساءة أو التحرش أو التمييز أو الاستغلال أو طلب المقابل المالي من المستفيدين، وبالمحافظة على سمعة الجمعية أثناء أداء العمل التطوعي.</p>
+      <p><b>17. تضارب المصالح:</b> يجب الإفصاح عن أي مصلحة شخصية أو مالية قد تؤثر في الحياد عند تنفيذ مهمة أو التعامل مع مستفيد أو مورد أو جهة أخرى.</p>
+      <p><b>18. الأجهزة والحسابات:</b> يتحمل المستخدم مسؤولية المحافظة على سرية بيانات دخوله، وإبلاغ الإدارة عن الاشتباه في اختراق الحساب أو فقد الجهاز أو أي استخدام غير مصرح به.</p>
+      <p><b>19. الصلاحيات:</b> جميع الصلاحيات الرقمية والميدانية تمنح بحسب الدور والحاجة، وللجمعية تعديلها أو تعليقها أو سحبها عند انتهاء الحاجة أو تغير حالة العضوية أو وجود سبب أمني أو تنظيمي مشروع.</p>
+      <p><b>20. المخالفات:</b> يجوز اتخاذ إجراءات إدارية متدرجة بحسب طبيعة المخالفة، ومنها التنبيه أو تقييد الصلاحيات أو التعليق أو إنهاء العضوية، مع مراعاة الأنظمة واللوائح والإجراءات الداخلية المعتمدة.</p>
+      <p><b>21. المحتوى المنشور:</b> الأخبار والمقالات والصور التي تنشر عبر حساب الإدارة يجب أن تكون مصرحاً بها، وألا تنتهك حقوق الملكية الفكرية أو الخصوصية أو الأنظمة أو حقوق الغير.</p>
+      <p><b>22. الطوارئ:</b> المنصة أداة تنظيمية ولا تحل محل الجهات الرسمية المختصة بالطوارئ، وعلى المستخدمين اتباع تعليمات الجهات المختصة عند الحالات التي تستوجب ذلك.</p>
+      <p><b>23. التعديلات:</b> يجوز للجمعية تحديث هذه السياسة عند الحاجة، ويعرض الإصدار المحدث عبر المنصة، ويطلب تجديد الموافقة متى كان ذلك مطلوباً نظاماً أو عند تغير جوهري في أغراض المعالجة.</p>
+      <p><b>24. المرجعية النظامية:</b> تطبق هذه السياسة بما لا يتعارض مع الأنظمة واللوائح السارية في المملكة العربية السعودية، وعند التعارض تكون النصوص النظامية الملزمة هي المرجع.</p>
+      <p style="background:#fff7df;padding:12px;border-radius:12px"><b>تنبيه:</b> هذه صياغة تشغيلية أولية وليست بديلاً عن المراجعة القانونية واعتماد مجلس إدارة الجمعية وسياسات حماية البيانات الداخلية.</p>
+    </div>
+    <button type="button" class="btn" onclick="acceptPolicy()" style="width:100%">أوافق وأغلق السياسة</button>
   </div>
 </div>
 
@@ -181,6 +223,14 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
       <button class="btn light" type="button" onclick="loadMembers()">الجميع</button>
     </div>
     <div id="membersList"></div>
+    <div style="margin-top:32px;border-top:1px solid #dfe5e9;padding-top:24px">
+      <h2>إدارة محتوى الموقع</h2>
+      <p style="color:#66747e">هذه الواجهة جاهزة لإدارة الشعار والألوان والأخبار والمقالات. يلزم إنشاء جداول المحتوى والتخزين في Supabase قبل تفعيل الحفظ والنشر.</p>
+      <div class="cards">
+        <article class="card"><div><span>الهوية</span><h3>الشعار وألوان الموقع</h3><p>تغيير شعار المنصة والألوان الرئيسية من حساب المدير.</p><button class="btn light" type="button" onclick="cmsNotReady()">إدارة الهوية</button></div></article>
+        <article class="card"><div><span>المحتوى</span><h3>الأخبار والمقالات</h3><p>إضافة خبر أو مقال وصورة وتاريخ نشر والتحكم في ظهوره.</p><button class="btn light" type="button" onclick="cmsNotReady()">إدارة الأخبار</button></div></article>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -208,6 +258,10 @@ function closeAuth(){ document.getElementById("authOverlay").style.display="none
 function showLogin(){ document.getElementById("loginForm").style.display="block"; document.getElementById("signupForm").style.display="none"; }
 function showSignup(){ document.getElementById("loginForm").style.display="none"; document.getElementById("signupForm").style.display="block"; }
 function closeEdit(){ document.getElementById("editOverlay").style.display="none"; }
+function openPolicy(){ document.getElementById("policyOverlay").style.display="flex"; }
+function closePolicy(){ document.getElementById("policyOverlay").style.display="none"; }
+function acceptPolicy(){ document.getElementById("policyConsent").checked=true; closePolicy(); }
+function cmsNotReady(){ alert("واجهة الإدارة جاهزة، لكن يلزم الآن إنشاء جداول الأخبار وإعداد تخزين الصور في Supabase. سنفعّلها في الخطوة التالية."); }
 function esc(v){ return String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c])); }
 
 async function signupVolunteer(){
@@ -226,38 +280,17 @@ async function signupVolunteer(){
   if(!/^\d{10}$/.test(nationalId)){msg.textContent="السجل المدني يجب أن يكون 10 أرقام.";return;}
   if(!/^05\d{8}$/.test(phone)){msg.textContent="رقم الجوال يجب أن يكون بصيغة 05XXXXXXXX.";return;}
   if(password.length<8){msg.textContent="كلمة المرور يجب أن تكون 8 أحرف على الأقل.";return;}
+  if(!document.getElementById("policyConsent").checked){msg.textContent="يجب قراءة سياسة التطوع والخصوصية والموافقة عليها قبل إرسال الطلب.";return;}
   msg.textContent="جاري إنشاء الحساب...";
   try{
-    const signupPromise = supabase.auth.signUp({
-      email,
-      password,
-      options:{data:{full_name:fullName,national_id:nationalId,birth_date:birthDate,specialty,phone,city}}
-    });
-
-    const timeoutPromise = new Promise((_,reject)=>{
-      setTimeout(()=>reject(new Error("TIMEOUT")),15000);
-    });
-
+    const signupPromise=supabase.auth.signUp({email,password,options:{data:{full_name:fullName,national_id:nationalId,birth_date:birthDate,specialty,phone,city,policy_accepted:true,policy_version:"2026-09-08"}}});
+    const timeoutPromise=new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),15000));
     const {data,error}=await Promise.race([signupPromise,timeoutPromise]);
-
-    if(error){
-      console.error(error);
-      msg.textContent="تعذر إنشاء الحساب: "+(error.message||"خطأ غير معروف");
-      return;
-    }
-
-    if(data?.user){
-      msg.textContent="تم استلام طلب التسجيل بنجاح. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التأكيد أولًا. وبعدها يبقى الطلب بانتظار موافقة الإدارة.";
-    }else{
-      msg.textContent="تم إرسال الطلب، لكن لم يرجع النظام بيانات المستخدم. جرّب تسجيل الدخول بعد قليل.";
-    }
+    if(error){console.error(error);msg.textContent="تعذر إنشاء الحساب: "+(error.message||"خطأ غير معروف");return;}
+    msg.textContent=data?.user?"تم استلام طلب التسجيل بنجاح. الطلب الآن بانتظار موافقة الإدارة.":"تم إرسال الطلب، لكن لم يرجع النظام بيانات المستخدم.";
   }catch(err){
     console.error(err);
-    if(err?.message==="TIMEOUT"){
-      msg.textContent="تعذر الاتصال بخدمة التسجيل خلال 15 ثانية. تحقق من إعدادات Supabase ثم حاول مرة أخرى.";
-    }else{
-      msg.textContent="حدث خطأ أثناء إنشاء الحساب: "+(err?.message||"خطأ غير معروف");
-    }
+    msg.textContent=err?.message==="TIMEOUT"?"تعذر الاتصال بخدمة التسجيل خلال 15 ثانية. سنراجع إعدادات Supabase.":"حدث خطأ أثناء إنشاء الحساب: "+(err?.message||"خطأ غير معروف");
   }
 }
 
