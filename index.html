@@ -1745,7 +1745,49 @@ function renderOpsCenter(d){
   }
 }
 async function showOpsTimeline(reportId){opsSelectedReport=reportId;showOpsTab("timeline",document.querySelector('[data-opstab="timeline"]'));const box=document.getElementById("opsTimeline");box.innerHTML="<small>جاري التحميل...</small>";const {data,error}=await getSupabaseClient().rpc("get_report_timeline",{p_report_id:reportId});if(error){box.innerHTML=`<small>${esc(error.message)}</small>`;return;}box.innerHTML=(data||[]).map(x=>`<div class="timeline-item"><time>${new Date(x.created_at).toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"})}</time><div><b>${esc(x.event_label||x.event_type)}</b><br><small>${esc(x.details||"")}</small></div></div>`).join("")||"<small>لا يوجد سجل بعد.</small>";}
-async function createOpsTeam(){const name=document.getElementById("teamName").value.trim(),team_type=document.getElementById("teamType").value,region=document.getElementById("teamRegion").value.trim();if(!name){alert("اكتب اسم الفريق.");return;}const {error}=await getSupabaseClient().rpc("create_operation_team",{p_name:name,p_team_type:team_type,p_region:region||null});if(error){alert("تعذر إنشاء الفريق: "+error.message);return;}document.getElementById("teamName").value="";await refreshOpsCenter();}
+async function createOpsTeam(){
+  const nameEl=document.getElementById("teamName");
+  const typeEl=document.getElementById("teamType");
+  const regionEl=document.getElementById("teamRegion");
+  if(!nameEl||!typeEl||!regionEl){alert("تعذر العثور على نموذج إنشاء الفريق.");return;}
+
+  const name=String(nameEl.value||"").trim();
+  const team_type=String(typeEl.value||"general").trim();
+  const region=String(regionEl.value||"").trim();
+
+  if(!name){
+    alert("اكتب اسم الفريق.");
+    nameEl.focus();
+    return;
+  }
+
+  const btn=document.querySelector('#ops-teams button[onclick="createOpsTeam()"]');
+  if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent="جاري إنشاء الفريق...";}
+
+  try{
+    const {data,error}=await getSupabaseClient().rpc("create_operation_team",{
+      p_name:name,
+      p_team_type:team_type,
+      p_region:region||null
+    });
+    if(error){
+      console.error(error);
+      alert("تعذر إنشاء الفريق: "+error.message);
+      return;
+    }
+
+    // لا نمسح الحقول إلا بعد نجاح الإنشاء فعليًا.
+    nameEl.value="";
+    regionEl.value="";
+    alert(`تم إنشاء فريق "${name}" بنجاح.`);
+    await refreshOpsCenter(false);
+  }catch(e){
+    console.error(e);
+    alert("تعذر إنشاء الفريق: "+(e?.message||e));
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent=btn.dataset.oldText||"إنشاء الفريق";}
+  }
+}
 async function createDutyShift(){const title=document.getElementById("shiftTitle").value.trim(),team=document.getElementById("shiftTeam").value||null,leader=document.getElementById("shiftLeader").value||null,vehicle=document.getElementById("shiftVehicle").value||null,start=document.getElementById("shiftStart").value,end=document.getElementById("shiftEnd").value,notes=document.getElementById("shiftNotes").value.trim()||null;if(!title||!start||!end){alert("اكتب اسم المناوبة وحدد البداية والنهاية.");return;}const {error}=await getSupabaseClient().rpc("create_duty_shift",{p_title:title,p_team_id:team,p_leader_id:leader,p_vehicle_id:vehicle,p_starts_at:new Date(start).toISOString(),p_ends_at:new Date(end).toISOString(),p_notes:notes});if(error){alert("تعذر حفظ المناوبة: "+error.message);return;}document.getElementById("shiftTitle").value="";document.getElementById("shiftNotes").value="";await refreshOpsCenter();}
 
 async function loadMyReadiness(){
