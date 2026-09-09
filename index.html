@@ -2416,6 +2416,48 @@ async function queueBulkVolunteerSms(){
   }catch(e){
     console.error(e);
 
+    let details=e?.message || String(e);
+
+    try{
+      // Supabase FunctionsHttpError يضع استجابة Edge Function في context
+      // و body تكون ReadableStream، لذلك نقرأ الاستجابة فعليًا بدل عرض [object ReadableStream].
+      if(e?.context){
+        const response=e.context;
+        const cloned=typeof response.clone==="function" ? response.clone() : response;
+
+        try{
+          const body=await cloned.json();
+          if(body){
+            const providerDetails =
+              body?.details?.message ||
+              body?.details?.error ||
+              body?.details?.errors ||
+              body?.details ||
+              body?.error;
+
+            if(typeof providerDetails==="string"){
+              details=providerDetails;
+            }else if(providerDetails){
+              details=JSON.stringify(providerDetails);
+            }else{
+              details=JSON.stringify(body);
+            }
+          }
+        }catch(_jsonErr){
+          try{
+            const text=await (typeof response.clone==="function" ? response.clone() : response).text();
+            if(text) details=text;
+          }catch(_textErr){}
+        }
+
+        if(response.status){
+          details=`HTTP ${response.status}: ${details}`;
+        }
+      }
+    }catch(parseErr){
+      console.warn("Could not parse Edge Function error:",parseErr);
+    }
+
     try{
       const sb=getSupabaseClient();
       const failedRows=recipients.map(x=>({
@@ -2424,14 +2466,13 @@ async function queueBulkVolunteerSms(){
         message,
         status:"failed",
         provider:"4jawaly",
-        error_message:String(e?.message||e).slice(0,1000)
+        error_message:String(details).slice(0,1000)
       }));
       await sb.from("sms_messages").insert(failedRows);
     }catch(logErr){
       console.warn("Failed to log SMS failure:",logErr);
     }
 
-    const details=e?.context?.body || e?.message || String(e);
     msg.textContent="تعذر إرسال الرسالة فعليًا: "+details;
   }finally{
     btn.disabled=false;
