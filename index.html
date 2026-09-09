@@ -287,6 +287,23 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 @media(max-width:600px){.ops-center-overlay{padding:0}.ops-center-card{border-radius:0;min-height:100vh}.ops-body{padding:10px}.ops-kpis{grid-template-columns:repeat(2,1fr)}.ops-kpi b{font-size:22px}.form-grid-ops{grid-template-columns:1fr}.track-row{flex-direction:column}.ops-map{height:300px}}
 </style>
 
+
+<style id="laith-command-center-phase1-styles">
+.command-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.command-card{background:#fff;border:1px solid #e0e6ea;border-radius:18px;padding:14px}.command-card b{font-size:25px;display:block}.command-card span{font-size:12px;color:#667681}
+.call-card{border:1px solid #dce5ea;border-radius:16px;padding:13px;margin-bottom:10px;background:#fff}.call-card.urgent{border-inline-start:5px solid #9f1d20}
+.call-response-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:10px}
+.response-chip{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:900;background:#eef2f4;margin:2px}
+.readiness-panel{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.readiness-btn{border:1px solid #d8e0e4;background:#fff;border-radius:999px;padding:9px 13px;font-family:inherit;font-weight:900;cursor:pointer}
+.readiness-btn.active{outline:3px solid rgba(23,35,45,.12);background:#17232d;color:#fff}
+.shift-card{border:1px solid #e0e6ea;border-radius:16px;padding:13px;margin-bottom:9px;background:#fff}.shift-card.active{border-inline-start:5px solid #1f9d55;background:#f3fbf6}
+.live-event{display:grid;grid-template-columns:120px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid #edf1f3}.live-event time{font-size:12px;color:#667681}
+.map-legend{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.map-legend span{font-size:12px;background:#fff;border:1px solid #e0e6ea;border-radius:999px;padding:5px 9px}
+.member-ops-box{border:1px solid #dfe5e9;border-radius:18px;padding:15px;background:#fff;margin:14px 0}
+@media(max-width:1000px){.command-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:650px){.command-grid{grid-template-columns:repeat(2,1fr)}.call-response-grid{grid-template-columns:1fr 1fr}.live-event{grid-template-columns:1fr}}
+</style>
+
 </head>
 <body>
 <header><div class="wrap nav">
@@ -620,6 +637,15 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="backToHomeBtn" class="btn light" type="button" onclick="backToPublicSite()">العودة للموقع</button><button id="backToAdminBtn" class="btn light" type="button" onclick="backToAdmin()" style="display:none">العودة للإدارة</button><button class="btn light" type="button" onclick="logoutUser()">تسجيل خروج</button></div>
     </div>
     <div id="myProfileBox"></div>
+    <div class="member-ops-box">
+      <h3 style="margin-top:0">جاهزيتي الآن</h3>
+      <div id="myReadiness" class="readiness-panel"><small>جاري تحميل الحالة...</small></div>
+    </div>
+    <div class="member-ops-box">
+      <h3 style="margin-top:0">نداءات الاستجابة</h3>
+      <p style="color:#667681;font-size:13px">هذه النداءات لا تعرض بيانات المبلّغ الحساسة. اختر قدرتك على الاستجابة، وتظهر إجابتك للإدارة لحظيًا.</p>
+      <div id="myResponseCalls"><small>جاري تحميل النداءات...</small></div>
+    </div>
     <div class="cms-box"><h3>بلاغاتي ومهامي</h3><div id="myTasks"><p>جاري التحميل...</p></div></div>
     <div class="cms-box"><h3>إنجازاتي</h3><div id="myAchievements"><p>جاري تحميل الإنجازات...</p></div></div>
     <div class="cms-box"><h3>أعضاء الجمعية</h3><p style="color:#687680">تظهر للأعضاء البيانات العامة فقط: الاسم، الصورة الشخصية، والساعات التطوعية.</p><div id="memberDirectory" class="member-directory"></div></div>
@@ -1181,7 +1207,7 @@ async function openMemberDashboard(){
   document.getElementById("memberPanel").style.display="block";
   document.getElementById("backToAdminBtn").style.display=currentIsAdmin?"inline-flex":"none";
   document.getElementById("backToHomeBtn").style.display=currentIsAdmin?"none":"inline-flex";
-  await Promise.all([loadMyProfile(),loadMyAssignments(),loadMemberDirectory(),loadMyAchievements()]);
+  await Promise.all([loadMyProfile(),loadMyAssignments(),loadMemberDirectory(),loadMyAchievements(),loadMyReadiness(),loadMyResponseCalls()]);
   if(taskTimerHandle)clearInterval(taskTimerHandle);taskTimerHandle=setInterval(refreshLiveTimers,1000);if(taskPollHandle)clearInterval(taskPollHandle);taskPollHandle=setInterval(loadMyAssignments,60000);refreshLiveTimers();
 }
 async function loadMyProfile(){
@@ -1491,6 +1517,21 @@ async function startRealtimeUpdates(){
     .on("postgres_changes",{event:"*",schema:"public",table:"report_media"},()=>{
       scheduleRealtimeOperationalRefresh();
     })
+    .on("postgres_changes",{event:"*",schema:"public",table:"response_calls"},()=>{
+      if(document.getElementById("memberPanel")?.style.display==="block")loadMyResponseCalls();
+      if(opsCenterOpen)refreshOpsCenter(false);
+    })
+    .on("postgres_changes",{event:"*",schema:"public",table:"response_call_recipients"},()=>{
+      if(document.getElementById("memberPanel")?.style.display==="block")loadMyResponseCalls();
+      if(opsCenterOpen)refreshOpsCenter(false);
+    })
+    .on("postgres_changes",{event:"*",schema:"public",table:"volunteer_operational_status"},()=>{
+      if(document.getElementById("memberPanel")?.style.display==="block")loadMyReadiness();
+      if(opsCenterOpen)refreshOpsCenter(false);
+    })
+    .on("postgres_changes",{event:"*",schema:"public",table:"duty_shifts"},()=>{
+      if(opsCenterOpen)refreshOpsCenter(false);
+    })
     .subscribe(status=>{
       realtimeConnected=status==="SUBSCRIBED";
       if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")console.warn("اتصال التحديث اللحظي غير متاح مؤقتًا:",status);
@@ -1541,85 +1582,166 @@ window.addEventListener("DOMContentLoaded",async()=>{
 <div id="opsCenterOverlay" class="ops-center-overlay">
   <div class="ops-center-card">
     <div class="ops-center-head">
-      <div><h2>مركز عمليات جمعية ليث</h2><small><span class="ops-live-dot"></span>تحديث لحظي</small></div>
+      <div><h2>مركز قيادة جمعية ليث</h2><small><span class="ops-live-dot"></span>خريطة وعمليات واستجابات مباشرة</small></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn light" onclick="refreshOpsCenter()">تحديث الآن</button><button class="btn light" onclick="closeOpsCenter()">إغلاق</button></div>
     </div>
     <div class="ops-tabs">
-      <button class="active" data-opstab="overview" onclick="showOpsTab('overview',this)">العمليات</button>
+      <button class="active" data-opstab="overview" onclick="showOpsTab('overview',this)">مركز القيادة</button>
+      <button data-opstab="calls" onclick="showOpsTab('calls',this)">نداء الاستجابة</button>
+      <button data-opstab="shifts" onclick="showOpsTab('shifts',this)">المناوبات</button>
       <button data-opstab="teams" onclick="showOpsTab('teams',this)">الفرق</button>
-      <button data-opstab="volunteers" onclick="showOpsTab('volunteers',this)">المتطوعون</button>
-      <button data-opstab="timeline" onclick="showOpsTab('timeline',this)">السجل الزمني</button>
-      <button data-opstab="assets" onclick="showOpsTab('assets',this)">المعدات والمركبات</button>
-      <button data-opstab="events" onclick="showOpsTab('events',this)">الفعاليات</button>
-      <button data-opstab="audit" onclick="showOpsTab('audit',this)">سجل التدقيق</button>
+      <button data-opstab="volunteers" onclick="showOpsTab('volunteers',this)">الجاهزية</button>
+      <button data-opstab="assets" onclick="showOpsTab('assets',this)">المركبات والمعدات</button>
+      <button data-opstab="timeline" onclick="showOpsTab('timeline',this)">سجل البلاغ</button>
+      <button data-opstab="events" onclick="showOpsTab('events',this)">آخر الأحداث</button>
     </div>
     <div class="ops-body">
-      <div id="opsKpis" class="ops-kpis"></div>
+      <div id="opsKpis" class="command-grid"></div>
       <section id="ops-overview" class="ops-panel active">
         <div class="ops-two">
-          <div class="ops-box"><h3>البلاغات المباشرة</h3><div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>البلاغ</th><th>الأولوية</th><th>المنطقة</th><th>الحالة</th><th>أقرب مورد</th><th>الإجراء</th></tr></thead><tbody id="opsReportsBody"></tbody></table></div></div>
-          <div class="ops-box"><h3>الخريطة التشغيلية</h3><div id="opsCenterMap" class="ops-map"></div></div>
+          <div class="ops-box">
+            <h3>البلاغات الحالية</h3>
+            <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>البلاغ</th><th>الخطورة</th><th>المنطقة</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="opsReportsBody"></tbody></table></div>
+          </div>
+          <div class="ops-box">
+            <h3>خريطة ليث الحية</h3>
+            <div class="map-legend"><span>🔴 البلاغات</span><span>🔵 الفرق</span><span>🟢 المتطوعون</span><span>🚙 المركبات</span></div>
+            <div id="opsCenterMap" class="ops-map"></div>
+          </div>
         </div>
       </section>
-      <section id="ops-teams" class="ops-panel">
+      <section id="ops-calls" class="ops-panel"><div class="ops-box"><h3>نداءات الاستجابة المفتوحة</h3><div id="opsCallsList"></div></div></section>
+      <section id="ops-shifts" class="ops-panel">
         <div class="ops-two">
-          <div class="ops-box"><h3>الفرق</h3><div id="opsTeamsList"></div></div>
-          <div class="ops-box"><h3>إنشاء فريق</h3><div class="form-grid-ops"><input id="teamName" placeholder="اسم الفريق"><select id="teamType"><option value="rescue">إنقاذ</option><option value="search">بحث</option><option value="medical">إسعاف</option><option value="logistics">دعم لوجستي</option><option value="general">عام</option></select><input id="teamRegion" placeholder="منطقة التغطية"><button class="btn full" onclick="createOpsTeam()">إنشاء الفريق</button></div></div>
+          <div class="ops-box"><h3>المناوبات الحالية والقادمة</h3><div id="opsShiftsList"></div></div>
+          <div class="ops-box"><h3>إنشاء مناوبة</h3>
+            <div class="form-grid-ops">
+              <input id="shiftTitle" placeholder="مثال: مناوبة فريق البحث">
+              <select id="shiftTeam"><option value="">بدون فريق محدد</option></select>
+              <select id="shiftLeader"><option value="">بدون قائد محدد</option></select>
+              <select id="shiftVehicle"><option value="">بدون مركبة محددة</option></select>
+              <div><label>البداية</label><input id="shiftStart" type="datetime-local"></div>
+              <div><label>النهاية</label><input id="shiftEnd" type="datetime-local"></div>
+              <textarea id="shiftNotes" class="full" placeholder="ملاحظات المناوبة"></textarea>
+              <button class="btn full" onclick="createDutyShift()">حفظ المناوبة</button>
+            </div>
+          </div>
         </div>
       </section>
-      <section id="ops-volunteers" class="ops-panel"><div class="ops-box"><h3>المتطوعون والحالة التشغيلية</h3><div id="opsVolunteersList"></div></div></section>
+      <section id="ops-teams" class="ops-panel"><div class="ops-two"><div class="ops-box"><h3>الفرق المتحركة</h3><div id="opsTeamsList"></div></div><div class="ops-box"><h3>إنشاء فريق</h3><div class="form-grid-ops"><input id="teamName" placeholder="اسم الفريق"><select id="teamType"><option value="rescue">إنقاذ</option><option value="search">بحث</option><option value="medical">إسعاف</option><option value="logistics">دعم لوجستي</option><option value="general">عام</option></select><input id="teamRegion" placeholder="منطقة التغطية"><button class="btn full" onclick="createOpsTeam()">إنشاء الفريق</button></div></div></div></section>
+      <section id="ops-volunteers" class="ops-panel"><div class="ops-box"><h3>جاهزية المتطوعين</h3><div id="opsVolunteersList"></div></div></section>
+      <section id="ops-assets" class="ops-panel"><div class="ops-two"><div class="ops-box"><h3>المركبات</h3><div id="opsVehicles"></div></div><div class="ops-box"><h3>المعدات</h3><div id="opsEquipment"></div></div></section>
       <section id="ops-timeline" class="ops-panel"><div class="ops-two"><div class="ops-box"><h3>اختر بلاغًا</h3><div id="opsTimelineReports"></div></div><div class="ops-box"><h3>السجل الزمني</h3><div id="opsTimeline" class="timeline"><small>اختر بلاغًا لعرض السجل.</small></div></div></section>
-      <section id="ops-assets" class="ops-panel"><div class="ops-two"><div class="ops-box"><h3>المعدات</h3><div id="opsEquipment"></div></div><div class="ops-box"><h3>المركبات</h3><div id="opsVehicles"></div></div></section>
-      <section id="ops-events" class="ops-panel"><div class="ops-box"><h3>الفعاليات</h3><div id="opsEvents"></div></div></section>
-      <section id="ops-audit" class="ops-panel"><div class="ops-box"><h3>سجل التدقيق</h3><div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>الوقت</th><th>المستخدم</th><th>الإجراء</th><th>الكيان</th></tr></thead><tbody id="opsAuditBody"></tbody></table></div></div></section>
+      <section id="ops-events" class="ops-panel"><div class="ops-box"><h3>آخر الأحداث</h3><div id="opsEvents"></div></div></section>
     </div>
   </div>
 </div>
 <div id="offlineBanner" class="offline-banner">أنت تعمل بدون اتصال. ستتم مزامنة الإجراءات المحفوظة عند عودة الإنترنت.</div>
 
 
-<script id="laith-ops-v2-script">
+<script id="laith-command-center-phase1-script">
 let opsCenterMap=null,opsCenterLayer=null,opsCenterOpen=false,opsSelectedReport=null,opsRefreshHandle=null;
-const OPS_CACHE_KEY="laith_ops_cache_v2", OPS_QUEUE_KEY="laith_offline_queue_v2";
+const OPS_CACHE_KEY="laith_command_center_v1", OPS_QUEUE_KEY="laith_offline_queue_v2";
 
 function priorityMeta(v){const x=String(v||"normal");return x==="critical"?["عاجل جدًا","p-critical","🔴"]:x==="high"?["عاجل","p-high","🟠"]:x==="medium"?["متوسط","p-medium","🟡"]:["عادي","p-normal","🟢"];}
 function workflowArabic(v){return ({new:"جديد",verifying:"جاري التحقق",dispatched:"تم توجيه فريق",in_progress:"الفريق في الطريق",arrived:"تم الوصول",completed:"تم التعامل",cancelled:"ملغي"})[v]||v||"—";}
+function readinessArabic(v){return ({available:"🟢 متاح",busy:"🟠 مشغول",unavailable:"🔴 غير متاح",off_duty:"🌙 خارج المناوبة",offline:"🔴 غير متاح"})[v]||"🔴 غير متاح";}
+function responseArabic(v,delay){return v==="can"?"أستطيع الاستجابة":v==="cannot"?"لا أستطيع":v==="delayed"?`بعد ${Number(delay||0)} دقيقة`:"بانتظار الرد";}
 function saveOpsCache(data){try{localStorage.setItem(OPS_CACHE_KEY,JSON.stringify({at:Date.now(),data}))}catch(e){}}
 function loadOpsCache(){try{return JSON.parse(localStorage.getItem(OPS_CACHE_KEY)||"null")?.data||null}catch(e){return null}}
-function haversineKm(a,b,c,d){const R=6371,toRad=x=>x*Math.PI/180,dl=toRad(c-a),dn=toRad(d-b);const q=Math.sin(dl/2)**2+Math.cos(toRad(a))*Math.cos(toRad(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(q));}
 
 async function openOpsCenter(){
-  if(!currentIsAdmin){alert("مركز العمليات متاح للإدارة فقط.");return;}
+  if(!currentIsAdmin){alert("مركز القيادة متاح للإدارة فقط.");return;}
   opsCenterOpen=true;document.getElementById("opsCenterOverlay").style.display="flex";
-  if(!opsCenterMap){opsCenterMap=L.map("opsCenterMap").setView([24.2,45.0],5);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}).addTo(opsCenterMap);opsCenterLayer=L.layerGroup().addTo(opsCenterMap);}
+  if(!opsCenterMap){
+    opsCenterMap=L.map("opsCenterMap").setView([24.2,45.0],5);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}).addTo(opsCenterMap);
+    opsCenterLayer=L.layerGroup().addTo(opsCenterMap);
+  }
   setTimeout(()=>opsCenterMap.invalidateSize(),120);
   await refreshOpsCenter();
-  if(opsRefreshHandle)clearInterval(opsRefreshHandle);opsRefreshHandle=setInterval(()=>{if(opsCenterOpen)refreshOpsCenter(false)},15000);
+  if(opsRefreshHandle)clearInterval(opsRefreshHandle);
+  opsRefreshHandle=setInterval(()=>{if(opsCenterOpen)refreshOpsCenter(false)},10000);
 }
 function closeOpsCenter(){opsCenterOpen=false;document.getElementById("opsCenterOverlay").style.display="none";if(opsRefreshHandle)clearInterval(opsRefreshHandle);}
 function showOpsTab(name,btn){document.querySelectorAll(".ops-panel").forEach(x=>x.classList.remove("active"));document.querySelectorAll("[data-opstab]").forEach(x=>x.classList.remove("active"));document.getElementById("ops-"+name)?.classList.add("active");btn?.classList.add("active");if(name==="overview")setTimeout(()=>opsCenterMap?.invalidateSize(),50);}
+
 async function refreshOpsCenter(showError=true){
-  const c=getSupabaseClient();let data=null;
-  const {data:d,error}=await c.rpc("get_operations_center");
-  if(error){console.warn(error);data=loadOpsCache();if(!data&&showError)alert("تعذر تحميل مركز العمليات: "+error.message);}else{data=Array.isArray(d)?d[0]:d;saveOpsCache(data);}
-  if(!data)return;renderOpsCenter(data);
+  let data=null;
+  const {data:d,error}=await getSupabaseClient().rpc("get_command_center_v1");
+  if(error){console.warn(error);data=loadOpsCache();if(!data&&showError)alert("تعذر تحميل مركز القيادة: "+error.message);}
+  else{data=Array.isArray(d)?d[0]:d;saveOpsCache(data);}
+  if(data)renderOpsCenter(data);
 }
 function renderOpsCenter(d){
-  const k=d.kpis||{};document.getElementById("opsKpis").innerHTML=[
-    ["البلاغات الحالية",k.open_reports],["فرق نشطة",k.active_teams],["متطوعون متاحون",k.available_volunteers],["مهام مفتوحة",k.open_tasks],["مهام مغلقة",k.closed_tasks],["متوسط الاستجابة",`${Number(k.avg_response_minutes||0).toFixed(0)} د`]
-  ].map(x=>`<div class="ops-kpi"><b>${esc(x[1]??0)}</b><span>${x[0]}</span></div>`).join("");
-  const reports=d.reports||[];document.getElementById("opsReportsBody").innerHTML=reports.map(r=>{const p=priorityMeta(r.priority_level);return `<tr><td><b>#${esc(r.report_number)}</b><br><small>${esc(r.report_type||"")}</small></td><td><span class="priority-pill ${p[1]}">${p[2]} ${p[0]}</span></td><td>${esc(r.region||"—")}</td><td>${esc(workflowArabic(r.workflow_status))}</td><td>${r.nearest_name?`${esc(r.nearest_name)}<br><small>${Number(r.nearest_distance_km||0).toFixed(1)} كم · ${esc(r.eta_minutes||"—")} د</small>`:"—"}</td><td><button class="btn light" onclick="showOpsTimeline('${r.id}')">السجل</button></td></tr>`}).join("")||'<tr><td colspan="6">لا توجد بلاغات.</td></tr>';
+  const k=d.kpis||{};
+  document.getElementById("opsKpis").innerHTML=[
+    ["البلاغات الحالية",k.open_reports],["الفرق المتحركة",k.moving_teams],["المتطوعون المتاحون",k.available_volunteers],["المركبات الجاهزة",k.vehicles_ready],["نداءات مفتوحة",k.open_calls]
+  ].map(x=>`<div class="command-card"><b>${esc(x[1]??0)}</b><span>${x[0]}</span></div>`).join("");
+
+  const reports=d.reports||[];
+  document.getElementById("opsReportsBody").innerHTML=reports.map(r=>{const p=priorityMeta(r.priority_level);return `<tr><td><b>#${esc(r.report_number)}</b><br><small>${esc(r.report_type||"")}</small></td><td><span class="priority-pill ${p[1]}">${p[2]} ${p[0]}</span></td><td>${esc(r.region||"—")}</td><td>${esc(workflowArabic(r.workflow_status))}</td><td><button class="btn light" onclick="showOpsTimeline('${r.id}')">السجل</button></td></tr>`}).join("")||'<tr><td colspan="5">لا توجد بلاغات حالية.</td></tr>';
   document.getElementById("opsTimelineReports").innerHTML=reports.map(r=>`<button class="btn light" style="margin:4px" onclick="showOpsTimeline('${r.id}')">#${esc(r.report_number)} · ${esc(r.region||"")}</button>`).join("")||"<small>لا توجد بلاغات.</small>";
-  document.getElementById("opsTeamsList").innerHTML=(d.teams||[]).map(t=>`<div class="team-card"><b>${esc(t.name)}</b> · ${esc(t.team_type)}<br><small>${esc(t.region||"كل المناطق")} · ${Number(t.member_count||0)} أعضاء · ${t.is_active?"نشط":"غير نشط"}</small></div>`).join("")||"<small>لم يتم إنشاء فرق بعد.</small>";
-  document.getElementById("opsVolunteersList").innerHTML=(d.volunteers||[]).map(v=>`<div class="resource-card"><b>${esc(v.full_name)}</b> · <span class="${v.availability_status==="available"?"status-available":v.availability_status==="busy"?"status-busy":"status-offline"}">${esc(v.availability_status==="available"?"متاح":v.availability_status==="busy"?"مشغول":"غير متاح")}</span><br><small>${esc(v.specialty||"متطوع")} · ${esc(v.team_name||"بدون فريق")} · ${Number(v.points||0)} نقطة</small></div>`).join("")||"<small>لا توجد بيانات متطوعين.</small>";
-  document.getElementById("opsEquipment").innerHTML=(d.equipment||[]).map(x=>`<div class="asset-card"><b>${esc(x.name)}</b><br><small>${esc(x.category||"معدات")} · ${esc(x.status||"available")} · الكمية ${esc(x.quantity||1)}</small></div>`).join("")||"<small>لا توجد معدات مسجلة.</small>";
-  document.getElementById("opsVehicles").innerHTML=(d.vehicles||[]).map(x=>`<div class="asset-card"><b>${esc(x.name)}</b><br><small>${esc(x.plate_number||"")} · ${esc(x.status||"available")}</small></div>`).join("")||"<small>لا توجد مركبات مسجلة.</small>";
-  document.getElementById("opsEvents").innerHTML=(d.events||[]).map(x=>`<div class="asset-card"><b>${esc(x.title)}</b><br><small>${esc(x.location||"")} · ${esc(formatDateTime(x.starts_at))} · مطلوب ${esc(x.required_volunteers||0)} متطوع</small></div>`).join("")||"<small>لا توجد فعاليات قادمة.</small>";
-  document.getElementById("opsAuditBody").innerHTML=(d.audit||[]).map(a=>`<tr><td>${esc(formatDateTime(a.created_at))}</td><td>${esc(a.actor_name||"النظام")}</td><td>${esc(a.action)}</td><td>${esc(a.entity_type)} ${esc(a.entity_id||"")}</td></tr>`).join("")||'<tr><td colspan="4">لا توجد سجلات.</td></tr>';
-  if(opsCenterLayer){opsCenterLayer.clearLayers();const bounds=[];for(const r of reports){if(r.latitude==null||r.longitude==null)continue;const ll=[Number(r.latitude),Number(r.longitude)];bounds.push(ll);const p=priorityMeta(r.priority_level);L.circleMarker(ll,{radius:8}).bindPopup(`<b>${p[2]} بلاغ #${esc(r.report_number)}</b><br>${esc(r.region||"")}<br>${esc(workflowArabic(r.workflow_status))}`).addTo(opsCenterLayer);}for(const v of (d.volunteers||[])){if(v.latitude==null||v.longitude==null)continue;const ll=[Number(v.latitude),Number(v.longitude)];bounds.push(ll);L.marker(ll).bindPopup(`<b>${esc(v.full_name)}</b><br>${esc(v.availability_status)}`).addTo(opsCenterLayer);}if(bounds.length)opsCenterMap.fitBounds(bounds,{padding:[25,25],maxZoom:11});}
+
+  const calls=d.calls||[];
+  document.getElementById("opsCallsList").innerHTML=calls.map(c=>{const p=priorityMeta(c.priority_level);return `<div class="call-card ${c.priority_level==="critical"?"urgent":""}"><div><b>نداء البلاغ #${esc(c.report_number)}</b> <span class="priority-pill ${p[1]}">${p[2]} ${p[0]}</span></div><small>${esc(c.report_type||"")} · ${esc(c.region||"—")} · ${esc(formatDateTime(c.created_at))}</small><div style="margin-top:8px"><span class="response-chip">✅ يستطيع: ${esc(c.can_count||0)}</span><span class="response-chip">❌ لا يستطيع: ${esc(c.cannot_count||0)}</span><span class="response-chip">⏱️ متأخر: ${esc(c.delayed_count||0)}</span><span class="response-chip">… بانتظار: ${esc(c.pending_count||0)}</span></div><div style="margin-top:9px">${(c.responses||[]).map(x=>`<div class="resource-card"><b>${esc(x.member_name||"متطوع")}</b> — ${esc(responseArabic(x.response_status,x.delay_minutes))}${x.responded_at?`<br><small>${esc(formatDateTime(x.responded_at))}</small>`:""}</div>`).join("")||"<small>لا توجد ردود حتى الآن.</small>"}</div></div>`}).join("")||"<small>لا توجد نداءات استجابة مفتوحة.</small>";
+
+  const teams=d.teams||[];
+  document.getElementById("opsTeamsList").innerHTML=teams.map(t=>`<div class="team-card"><b>🔵 ${esc(t.name)}</b><br><small>${esc(t.team_type||"")} · ${esc(t.region||"كل المناطق")} · ${Number(t.member_count||0)} أعضاء${t.leader_name?` · القائد: ${esc(t.leader_name)}`:""}</small></div>`).join("")||"<small>لا توجد فرق مسجلة.</small>";
+
+  const volunteers=d.volunteers||[];
+  document.getElementById("opsVolunteersList").innerHTML=volunteers.map(v=>`<div class="resource-card"><b>${esc(v.full_name)}</b> · ${esc(readinessArabic(v.availability_status))}<br><small>${esc(v.specialty||"متطوع")} · ${esc(v.team_name||"بدون فريق")}${v.location_at?` · آخر موقع ${esc(formatDateTime(v.location_at))}`:""}</small></div>`).join("")||"<small>لا توجد بيانات متطوعين.</small>";
+
+  const vehicles=d.vehicles||[];
+  document.getElementById("opsVehicles").innerHTML=vehicles.map(v=>`<div class="asset-card"><b>🚙 ${esc(v.name)}</b><br><small>${esc(v.plate_number||"بدون لوحة")} · ${esc(v.status||"غير محدد")}</small></div>`).join("")||"<small>لا توجد مركبات مسجلة.</small>";
+  const equipment=document.getElementById("opsEquipment"); if(equipment) equipment.innerHTML="<small>إدارة المعدات الذكية وQR ستكون في المرحلة التالية.</small>";
+
+  const shifts=d.shifts||[];
+  document.getElementById("opsShiftsList").innerHTML=shifts.map(s=>`<div class="shift-card ${s.status==="active"?"active":""}"><b>${s.status==="active"?"🟢 المناوب الآن":"📅"} ${esc(s.title)}</b><br><small>${esc(s.team_name||"بدون فريق")} · القائد: ${esc(s.leader_name||"غير محدد")} · ${Number(s.member_count||0)} متطوع · المركبة: ${esc(s.vehicle_name||"غير محددة")} ${s.vehicle_plate?`(${esc(s.vehicle_plate)})`:""}</small><br><small>${esc(formatDateTime(s.starts_at))} — ${esc(formatDateTime(s.ends_at))}</small></div>`).join("")||"<small>لا توجد مناوبات حالية أو قادمة.</small>";
+
+  // خيارات إنشاء المناوبة
+  const teamSel=document.getElementById("shiftTeam"),leaderSel=document.getElementById("shiftLeader"),vehicleSel=document.getElementById("shiftVehicle");
+  if(teamSel){const old=teamSel.value;teamSel.innerHTML='<option value="">بدون فريق محدد</option>'+teams.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");teamSel.value=old;}
+  if(leaderSel){const old=leaderSel.value;leaderSel.innerHTML='<option value="">بدون قائد محدد</option>'+volunteers.map(v=>`<option value="${esc(v.id)}">${esc(v.full_name)}</option>`).join("");leaderSel.value=old;}
+  if(vehicleSel){const old=vehicleSel.value;vehicleSel.innerHTML='<option value="">بدون مركبة محددة</option>'+vehicles.map(v=>`<option value="${esc(v.id)}">${esc(v.name)} ${esc(v.plate_number||"")}</option>`).join("");vehicleSel.value=old;}
+
+  document.getElementById("opsEvents").innerHTML=(d.events||[]).map(e=>`<div class="live-event"><time>${esc(formatDateTime(e.created_at))}</time><div><b>${esc(e.event_label||"حدث")}</b><br><small>${esc(e.details||"")}</small></div></div>`).join("")||"<small>لا توجد أحداث مسجلة حتى الآن.</small>";
+
+  if(opsCenterLayer){
+    opsCenterLayer.clearLayers(); const bounds=[];
+    for(const r of reports){if(r.latitude==null||r.longitude==null)continue;const ll=[Number(r.latitude),Number(r.longitude)];bounds.push(ll);const p=priorityMeta(r.priority_level);L.circleMarker(ll,{radius:9,weight:3}).bindPopup(`<b>🔴 بلاغ #${esc(r.report_number)}</b><br>${esc(r.region||"")}<br>${esc(p[0])}`).addTo(opsCenterLayer);}
+    for(const t of teams){if(t.latitude==null||t.longitude==null)continue;const ll=[Number(t.latitude),Number(t.longitude)];bounds.push(ll);L.marker(ll).bindPopup(`<b>🔵 ${esc(t.name)}</b><br>${esc(t.region||"")}`).addTo(opsCenterLayer);}
+    for(const v of volunteers){if(v.latitude==null||v.longitude==null)continue;const ll=[Number(v.latitude),Number(v.longitude)];bounds.push(ll);L.circleMarker(ll,{radius:6,weight:2}).bindPopup(`<b>🟢 ${esc(v.full_name)}</b><br>${esc(readinessArabic(v.availability_status))}`).addTo(opsCenterLayer);}
+    for(const v of vehicles){if(v.latitude==null||v.longitude==null)continue;const ll=[Number(v.latitude),Number(v.longitude)];bounds.push(ll);L.marker(ll).bindPopup(`<b>🚙 ${esc(v.name)}</b><br>${esc(v.plate_number||"")}`).addTo(opsCenterLayer);}
+    if(bounds.length)opsCenterMap.fitBounds(bounds,{padding:[25,25],maxZoom:12});
+  }
 }
 async function showOpsTimeline(reportId){opsSelectedReport=reportId;showOpsTab("timeline",document.querySelector('[data-opstab="timeline"]'));const box=document.getElementById("opsTimeline");box.innerHTML="<small>جاري التحميل...</small>";const {data,error}=await getSupabaseClient().rpc("get_report_timeline",{p_report_id:reportId});if(error){box.innerHTML=`<small>${esc(error.message)}</small>`;return;}box.innerHTML=(data||[]).map(x=>`<div class="timeline-item"><time>${new Date(x.created_at).toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"})}</time><div><b>${esc(x.event_label||x.event_type)}</b><br><small>${esc(x.details||"")}</small></div></div>`).join("")||"<small>لا يوجد سجل بعد.</small>";}
 async function createOpsTeam(){const name=document.getElementById("teamName").value.trim(),team_type=document.getElementById("teamType").value,region=document.getElementById("teamRegion").value.trim();if(!name){alert("اكتب اسم الفريق.");return;}const {error}=await getSupabaseClient().rpc("create_operation_team",{p_name:name,p_team_type:team_type,p_region:region||null});if(error){alert("تعذر إنشاء الفريق: "+error.message);return;}document.getElementById("teamName").value="";await refreshOpsCenter();}
+async function createDutyShift(){const title=document.getElementById("shiftTitle").value.trim(),team=document.getElementById("shiftTeam").value||null,leader=document.getElementById("shiftLeader").value||null,vehicle=document.getElementById("shiftVehicle").value||null,start=document.getElementById("shiftStart").value,end=document.getElementById("shiftEnd").value,notes=document.getElementById("shiftNotes").value.trim()||null;if(!title||!start||!end){alert("اكتب اسم المناوبة وحدد البداية والنهاية.");return;}const {error}=await getSupabaseClient().rpc("create_duty_shift",{p_title:title,p_team_id:team,p_leader_id:leader,p_vehicle_id:vehicle,p_starts_at:new Date(start).toISOString(),p_ends_at:new Date(end).toISOString(),p_notes:notes});if(error){alert("تعذر حفظ المناوبة: "+error.message);return;}document.getElementById("shiftTitle").value="";document.getElementById("shiftNotes").value="";await refreshOpsCenter();}
+
+async function loadMyReadiness(){
+  const box=document.getElementById("myReadiness");if(!box)return;
+  const {data:{user}}=await getSupabaseClient().auth.getUser();if(!user)return;
+  const {data}=await getSupabaseClient().from("volunteer_operational_status").select("availability_status").eq("member_id",user.id).maybeSingle();
+  const current=data?.availability_status||"unavailable";
+  const opts=[["available","🟢 متاح"],["busy","🟠 مشغول"],["unavailable","🔴 غير متاح"],["off_duty","🌙 خارج المناوبة"]];
+  box.innerHTML=opts.map(([v,l])=>`<button class="readiness-btn ${current===v?"active":""}" onclick="setMyReadiness('${v}')">${l}</button>`).join("");
+}
+async function setMyReadiness(status){
+  const {error}=await getSupabaseClient().rpc("set_my_readiness",{p_status:status});
+  if(error){alert("تعذر تحديث الجاهزية: "+error.message);return;}
+  await Promise.all([loadMyReadiness(),loadMyResponseCalls()]);
+  if(opsCenterOpen)refreshOpsCenter(false);
+}
+async function loadMyResponseCalls(){
+  const box=document.getElementById("myResponseCalls");if(!box)return;
+  const {data,error}=await getSupabaseClient().rpc("get_my_response_calls");
+  if(error){box.innerHTML=`<small>تعذر تحميل النداءات: ${esc(error.message)}</small>`;return;}
+  box.innerHTML=(data||[]).map(c=>{const p=priorityMeta(c.priority_level);return `<div class="call-card ${c.priority_level==="critical"?"urgent":""}"><b>نداء استجابة للبلاغ #${esc(c.report_number)}</b> <span class="priority-pill ${p[1]}">${p[2]} ${p[0]}</span><br><small>${esc(c.report_type||"")} · ${esc(c.region||"—")} · ${esc(formatDateTime(c.created_at))}</small><div style="margin-top:10px"><b>ردك الحالي:</b> ${esc(responseArabic(c.response_status,c.delay_minutes))}</div><div class="call-response-grid"><button class="btn success" onclick="respondToCall('${c.call_id}','can')">أستطيع الاستجابة</button><button class="btn light" onclick="respondToCall('${c.call_id}','cannot')">لا أستطيع</button><button class="btn light" onclick="respondToCall('${c.call_id}','delayed',15)">بعد 15 دقيقة</button><button class="btn light" onclick="respondToCallCustom('${c.call_id}')">بعد مدة أخرى</button></div></div>`}).join("")||"<small>لا توجد نداءات موجهة لك حاليًا. اجعل حالتك «متاح» لاستقبال النداءات المناسبة.</small>";
+}
+async function respondToCall(callId,response,delay=null){const {error}=await getSupabaseClient().rpc("respond_to_call",{p_call_id:callId,p_response:response,p_delay_minutes:delay});if(error){alert("تعذر تسجيل الاستجابة: "+error.message);return;}await loadMyResponseCalls();if(opsCenterOpen)refreshOpsCenter(false);}
+function respondToCallCustom(callId){const n=Number(prompt("بعد كم دقيقة تستطيع الاستجابة؟","30"));if(!Number.isFinite(n)||n<1||n>240){alert("اكتب مدة صحيحة من 1 إلى 240 دقيقة.");return;}respondToCall(callId,"delayed",Math.round(n));}
 
 async function trackCitizenReport(){
   const n=document.getElementById("citizenTrackNumber").value.trim(),box=document.getElementById("citizenTrackResult");if(!n){box.innerHTML="<small>اكتب رقم البلاغ.</small>";return;}box.innerHTML="<small>جاري التحقق...</small>";
@@ -1627,11 +1749,9 @@ async function trackCitizenReport(){
   const order=["new","verifying","dispatched","in_progress","completed"],idx=Math.max(0,order.indexOf(r.workflow_status));const labels=[["تم استلام البلاغ","✅"],["جاري التحقق","🔄"],["تم توجيه فريق","🚙"],["الفريق في الطريق","📍"],["تم التعامل مع البلاغ","✅"]];
   box.innerHTML=`<div><b>بلاغ رقم #${esc(r.report_number)}</b> · ${esc(r.region||"")}</div>`+labels.map((x,i)=>`<div class="track-step ${i<idx?"done":i===idx?"current":""}">${x[1]} ${x[0]}</div>`).join("");
 }
-
 async function classifyAllOpenReports(){const {error}=await getSupabaseClient().rpc("classify_open_reports");if(error)console.warn(error);}
 async function flushOfflineQueue(){if(!navigator.onLine)return;let q=[];try{q=JSON.parse(localStorage.getItem(OPS_QUEUE_KEY)||"[]")}catch(e){}if(!q.length)return;for(const item of [...q]){try{if(item.type==="arrival")await getSupabaseClient().rpc("mark_assignment_arrived",item.payload);q.shift();localStorage.setItem(OPS_QUEUE_KEY,JSON.stringify(q));}catch(e){break;}}}
 function setupOfflineMode(){const b=document.getElementById("offlineBanner"),sync=()=>{b.style.display=navigator.onLine?"none":"block";if(navigator.onLine)flushOfflineQueue();};window.addEventListener("online",sync);window.addEventListener("offline",sync);sync();}
-
 window.addEventListener("DOMContentLoaded",()=>{setupOfflineMode();setTimeout(classifyAllOpenReports,2500);});
 </script>
 
