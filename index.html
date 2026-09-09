@@ -1004,6 +1004,19 @@ async function loadMembers(status="approved"){
   if(error){console.error(error);list.innerHTML="<p>تعذر تحميل الأعضاء. تحقق من صلاحيات المدير في Supabase.</p>";return;}
   if(!data?.length){list.innerHTML=isPending?"<p>لا توجد طلبات متطوعين جديدة حاليًا.</p>":"<p>لا يوجد متطوعون فعّالون حاليًا.</p>";return;}
 
+  // في صفحة المتطوعين نعرض عدد البلاغات المغلقة فقط، دون أي تفاصيل للبلاغات السابقة.
+  const missionCounts={};
+  if(!isPending){
+    const ids=data.map(m=>m.id);
+    const {data:done,error:doneErr}=await getSupabaseClient()
+      .from("report_assignments")
+      .select("member_id")
+      .in("member_id",ids)
+      .eq("status","completed");
+    if(doneErr)console.error("تعذر تحميل أعداد البلاغات:",doneErr);
+    for(const row of (done||[])) missionCounts[row.member_id]=(missionCounts[row.member_id]||0)+1;
+  }
+
   const roleName={volunteer:"متطوع",operator:"مشغل بلاغات",supervisor:"مشرف",admin:"مدير"};
   list.innerHTML=data.map(m=>{
     const isApproved=m.account_status==="approved";
@@ -1026,6 +1039,7 @@ async function loadMembers(status="approved"){
         <div><b>آخر دخول:</b> ${m.last_login_at?esc(formatDateTime(m.last_login_at)):"لم يسجل دخولًا بعد"}</div>
         <div><b>الصفة:</b> ${roleName[m.role||"volunteer"]||"متطوع"}</div>
         <div><b>الساعات التطوعية:</b> ${formatMinutes(m.total_volunteer_minutes||0)}</div>
+        ${isPending?"":`<div><b>عدد البلاغات التي باشرها:</b> ${missionCounts[m.id]||0}</div>`}
       </div>
       <div class="row-actions">${actions}</div>
     </div>`;
@@ -1038,6 +1052,15 @@ function formatDateTime(value){
   if(!value)return "";
   try{return new Intl.DateTimeFormat("ar-SA",{dateStyle:"medium",timeStyle:"short"}).format(new Date(value));}
   catch{return String(value);}
+}
+
+function googleMapsReportUrl(report){
+  const lat=Number(report?.latitude),lng=Number(report?.longitude);
+  if(Number.isFinite(lat)&&Number.isFinite(lng)){
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lat+","+lng)}`;
+  }
+  const place=String(report?.location||"").trim();
+  return place?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`:"";
 }
 
 async function changeMemberRole(id){
@@ -1164,10 +1187,14 @@ async function openMemberDashboard(){
 async function loadMyProfile(){
   const box=document.getElementById("myProfileBox");box.innerHTML="<p>جاري تحميل الملف الشخصي...</p>";
   const {data:{user}}=await getSupabaseClient().auth.getUser();if(!user)return;
-  const {data:m,error}=await getSupabaseClient().from("members").select("id,full_name,avatar_url,total_volunteer_minutes,role").eq("id",user.id).maybeSingle();
+  const [{data:m,error},{count:completedCount,error:countErr}]=await Promise.all([
+    getSupabaseClient().from("members").select("id,full_name,avatar_url,total_volunteer_minutes,role").eq("id",user.id).maybeSingle(),
+    getSupabaseClient().from("report_assignments").select("id",{count:"exact",head:true}).eq("member_id",user.id).eq("status","completed")
+  ]);
   if(error){console.error(error);box.innerHTML="<p>تعذر تحميل الملف الشخصي.</p>";return;}
+  if(countErr)console.error("تعذر تحميل عدد البلاغات:",countErr);
   const name=m?.full_name||user.user_metadata?.full_name||user.email;
-  box.innerHTML=`<div class="profile-head"><img class="avatar" id="myAvatar" src="${esc(m?.avatar_url||avatarPlaceholder(name))}" alt=""><div style="flex:1"><h3 style="margin:0 0 6px">${esc(name)}</h3><div>الساعات التطوعية: <b>${formatMinutes(m?.total_volunteer_minutes||0)}</b></div><div style="margin-top:10px"><input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp" style="max-width:300px"><button class="btn light" type="button" onclick="uploadMyAvatar()" style="margin-inline-start:8px">تحديث الصورة الشخصية</button></div><small id="avatarMsg" class="form-msg"></small></div></div>`;
+  box.innerHTML=`<div class="profile-head"><img class="avatar" id="myAvatar" src="${esc(m?.avatar_url||avatarPlaceholder(name))}" alt=""><div style="flex:1"><h3 style="margin:0 0 6px">${esc(name)}</h3><div>الساعات التطوعية: <b>${formatMinutes(m?.total_volunteer_minutes||0)}</b></div><div style="margin-top:4px">عدد البلاغات التي باشرتها: <b>${completedCount||0}</b></div><div style="margin-top:10px"><input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp" style="max-width:300px"><button class="btn light" type="button" onclick="uploadMyAvatar()" style="margin-inline-start:8px">تحديث الصورة الشخصية</button></div><small id="avatarMsg" class="form-msg"></small></div></div>`;
 }
 async function uploadMyAvatar(){
   const f=document.getElementById("avatarFile")?.files?.[0],msg=document.getElementById("avatarMsg");if(!f){msg.textContent="اختر صورة أولًا.";return;}if(f.size>5*1024*1024){msg.textContent="حجم الصورة يجب ألا يتجاوز 5MB.";return;}msg.textContent="جاري رفع الصورة...";
@@ -1183,14 +1210,43 @@ async function loadMemberDirectory(){
 }
 async function loadMyAssignments(){
   const box=document.getElementById("myTasks");box.innerHTML="<p>جاري تحميل المهام...</p>";
-  const {data,error}=await getSupabaseClient().from("report_assignments").select("id,status,assigned_at,accepted_at,arrived_at,arrival_proof_url,arrival_proof_at,completion_proof_url,completion_proof_at,ended_at,volunteer_minutes,report_id,reports(name,phone,location,region,description,report_type,report_number,workflow_status,created_at,latitude,longitude)").order("assigned_at",{ascending:false});
+  const {data:{user}}=await getSupabaseClient().auth.getUser();
+  if(!user){box.innerHTML="<p>تعذر تحديد حساب المتطوع.</p>";return;}
+
+  // تفاصيل البلاغات تظهر فقط أثناء كون المهمة معينة أو مقبولة.
+  // بعد الإغلاق لا يتم تحميل بيانات البلاغ إطلاقًا؛ يتم احتساب العدد فقط.
+  const [activeRes,completedRes]=await Promise.all([
+    getSupabaseClient()
+      .from("report_assignments")
+      .select("id,status,assigned_at,accepted_at,arrived_at,arrival_proof_url,arrival_proof_at,completion_proof_url,completion_proof_at,ended_at,volunteer_minutes,report_id,reports(name,phone,location,region,description,report_type,report_number,workflow_status,created_at,latitude,longitude)")
+      .eq("member_id",user.id)
+      .in("status",["assigned","accepted"])
+      .order("assigned_at",{ascending:false}),
+    getSupabaseClient()
+      .from("report_assignments")
+      .select("id",{count:"exact",head:true})
+      .eq("member_id",user.id)
+      .eq("status","completed")
+  ]);
+
+  const {data,error}=activeRes;
   if(error){console.error(error);box.innerHTML="<p>تعذر تحميل المهام: "+esc(error.message)+"</p>";return;}
+  if(completedRes.error)console.error("تعذر تحميل عدد البلاغات المنتهية:",completedRes.error);
+
   const reportIds=[...new Set((data||[]).map(a=>a.report_id).filter(Boolean))];
   let media=[];
-  if(reportIds.length){const mr=await getSupabaseClient().from("report_media").select("report_id,file_url,media_type").in("report_id",reportIds);if(mr.error)console.error(mr.error);else media=mr.data||[];}
+  if(reportIds.length){
+    const mr=await getSupabaseClient().from("report_media").select("report_id,file_url,media_type").in("report_id",reportIds);
+    if(mr.error)console.error(mr.error);else media=mr.data||[];
+  }
+
   const pending=(data||[]).filter(a=>a.status==="assigned").length;
+  const completedCount=completedRes.count||0;
   const alertHtml=pending?`<div class="task-alert">لديك ${pending} بلاغ جديد بانتظار قبولك.</div>`:"";
-  box.innerHTML=alertHtml+((data||[]).map(a=>renderVolunteerTaskCard(a,(media||[]).filter(x=>x.report_id===a.report_id))).join(""))||"<p>لا توجد بلاغات مرسلة لك حاليًا.</p>";
+  const historyHtml=`<div class="tracking-consent" style="margin-bottom:12px"><b>البلاغات التي باشرتها سابقًا:</b> ${completedCount} بلاغ. حفاظًا على خصوصية المبلّغين لا تظهر تفاصيل البلاغ بعد إغلاقه.</div>`;
+  const cards=(data||[]).map(a=>renderVolunteerTaskCard(a,(media||[]).filter(x=>x.report_id===a.report_id))).join("");
+  box.innerHTML=alertHtml+historyHtml+(cards||"<p>لا توجد بلاغات نشطة مرسلة لك حاليًا.</p>");
+
   refreshLiveTimers();
   for(const a of (data||[])) loadTaskMessages(a.id,"member");
   const active=(data||[]).find(a=>a.status==="accepted");
@@ -1216,7 +1272,9 @@ function renderVolunteerTaskCard(a,media){
   else if(a.status==="accepted"&&completionProof) action=`<div class="required-note">اكتملت جميع المراحل. عند الضغط على الزر أدناه سيتم إغلاق البلاغ نهائيًا واحتساب وقت المهمة.</div><button class="btn success" type="button" onclick="finishMyAssignment('${a.id}')">إنهاء البلاغ وإغلاقه نهائيًا</button>`;
   else if(completed) action=`<div class="tracking-consent"><b>تم إغلاق البلاغ بنجاح.</b> تم احتساب مدة مشاركتك ضمن ساعاتك التطوعية.</div>`;
   const proofHtml=`<div class="proof-links">${a.arrival_proof_url?`<a class="btn light" target="_blank" rel="noopener" href="${esc(a.arrival_proof_url)}">عرض إثبات الوصول</a>`:""}${a.completion_proof_url?`<a class="btn light" target="_blank" rel="noopener" href="${esc(a.completion_proof_url)}">عرض إثبات انتهاء المساعدة</a>`:""}</div>`;
-  return `<div class="task-card enhanced"><div class="task-report-head"><div><h3 style="margin:0 0 5px">${reportTypeName(r.report_type)} — ${esc(r.description||"بلاغ")}</h3><small>تم ترحيل البلاغ إليك من إدارة جمعية ليث</small></div><span class="task-report-number">رقم البلاغ: ${esc(r.report_number||"—")}</span></div>${progress}<div class="task-details-grid"><div><b>اسم المبلّغ</b><span>${esc(r.name||"غير محدد")}</span></div><div><b>رقم الجوال</b><span><a href="tel:${esc(r.phone||"")}">${esc(r.phone||"غير محدد")}</a></span></div><div><b>المنطقة</b><span>${esc(r.region||"غير محددة")}</span></div><div><b>الموقع</b><span>${esc(r.location||"غير محدد")}</span></div><div><b>نوع البلاغ</b><span>${reportTypeName(r.report_type)}</span></div><div><b>وقت تسجيل البلاغ</b><span>${esc(formatDateTime(r.created_at))}</span></div></div><div class="report-desc"><b>وصف الحالة:</b><br>${esc(r.description||"")}</div>${renderReportMedia(media)}${live}${proofHtml}${consent}<div class="row-actions" style="margin-top:12px">${action}</div><div class="task-chat"><h4 style="margin:0 0 7px">التواصل مع الإدارة / المشرف</h4><div id="memberChatThread-${a.id}" class="chat-thread"><small>جاري تحميل الرسائل...</small></div><div class="chat-compose"><textarea id="memberChatText-${a.id}" placeholder="اكتب رسالة للإدارة أو المشرف..."></textarea><input id="memberChatImage-${a.id}" type="file" accept="image/*"><button class="btn" type="button" onclick="sendTaskMessage('${a.id}','member')">إرسال الرسالة</button></div></div></div>`;
+  const mapsUrl=googleMapsReportUrl(r);
+  const mapAction=mapsUrl?`<div class="row-actions" style="margin:10px 0"><a class="btn" target="_blank" rel="noopener" href="${esc(mapsUrl)}">فتح موقع البلاغ في Google Maps</a></div>`:`<div class="tracking-consent" style="margin:10px 0">لم يرفق المبلّغ موقعًا يمكن فتحه على الخريطة.</div>`;
+  return `<div class="task-card enhanced"><div class="task-report-head"><div><h3 style="margin:0 0 5px">${reportTypeName(r.report_type)} — ${esc(r.description||"بلاغ")}</h3><small>تم ترحيل البلاغ إليك من إدارة جمعية ليث</small></div><span class="task-report-number">رقم البلاغ: ${esc(r.report_number||"—")}</span></div>${progress}<div class="task-details-grid"><div><b>اسم المبلّغ</b><span>${esc(r.name||"غير محدد")}</span></div><div><b>رقم الجوال</b><span><a href="tel:${esc(r.phone||"")}">${esc(r.phone||"غير محدد")}</a></span></div><div><b>المنطقة</b><span>${esc(r.region||"غير محددة")}</span></div><div><b>الموقع</b><span>${esc(r.location||"غير محدد")}</span></div><div><b>نوع البلاغ</b><span>${reportTypeName(r.report_type)}</span></div><div><b>وقت تسجيل البلاغ</b><span>${esc(formatDateTime(r.created_at))}</span></div></div>${mapAction}<div class="report-desc"><b>وصف الحالة:</b><br>${esc(r.description||"")}</div>${renderReportMedia(media)}${live}${proofHtml}${consent}<div class="row-actions" style="margin-top:12px">${action}</div><div class="task-chat"><h4 style="margin:0 0 7px">التواصل مع الإدارة / المشرف</h4><div id="memberChatThread-${a.id}" class="chat-thread"><small>جاري تحميل الرسائل...</small></div><div class="chat-compose"><textarea id="memberChatText-${a.id}" placeholder="اكتب رسالة للإدارة أو المشرف..."></textarea><input id="memberChatImage-${a.id}" type="file" accept="image/*"><button class="btn" type="button" onclick="sendTaskMessage('${a.id}','member')">إرسال الرسالة</button></div></div></div>`;
 }
 function refreshLiveTimers(){document.querySelectorAll('.live-timer').forEach(el=>{const start=new Date(el.dataset.start).getTime();if(!start)return;let sec=Math.max(0,Math.floor((Date.now()-start)/1000));const h=String(Math.floor(sec/3600)).padStart(2,'0');sec%=3600;const m=String(Math.floor(sec/60)).padStart(2,'0'),s=String(sec%60).padStart(2,'0');el.textContent=`${h}:${m}:${s}`;});}
 function requestInitialPosition(){
