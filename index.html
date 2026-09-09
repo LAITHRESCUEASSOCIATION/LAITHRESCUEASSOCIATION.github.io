@@ -597,7 +597,7 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 
     <p id="smsMsg" class="form-msg" style="margin-top:10px"></p>
     <div style="background:#fff7df;padding:10px 12px;border-radius:12px;margin-top:10px;font-size:12px;line-height:1.8">
-      سيتم إرسال الرسالة فعليًا عبر 4jawaly إلى أرقام الجوال المحددة، ثم حفظ نتيجة الإرسال في سجل الرسائل.
+      سيتم إرسال الرسالة فعليًا عبر 4jawaly إلى أرقام الجوال المحددة، ثم حفظ نتيجة الإرسال في سجل الرسائل. (SMS v2)
     </div>
   </div>
 </div>
@@ -2355,7 +2355,8 @@ function applySmsTemplate(){
 }
 async function queueBulkVolunteerSms(){
   const selected=getSelectedSmsMembers();
-  const ids=(document.getElementById("smsMemberIds").value||"").split(",").map(x=>x.trim()).filter(Boolean);
+  const ids=(document.getElementById("smsMemberIds").value||"")
+    .split(",").map(x=>x.trim()).filter(Boolean);
   const message=(document.getElementById("smsMessage").value||"").trim();
   const msg=document.getElementById("smsMsg");
 
@@ -2379,17 +2380,48 @@ async function queueBulkVolunteerSms(){
   try{
     const sb=getSupabaseClient();
 
-    const {data:fnData,error:fnError}=await sb.functions.invoke("send-sms",{
-      body:{
+    // نأخذ جلسة المدير الحالية ونستدعي Edge Function مباشرة.
+    // هذا يتجنب مشكلة Supabase FunctionsHttpError / ReadableStream في المتصفح.
+    const {data:{session},error:sessionError}=await sb.auth.getSession();
+    if(sessionError) throw sessionError;
+    if(!session?.access_token) throw new Error("انتهت جلسة الدخول. سجل الدخول كمدير مرة أخرى.");
+
+    const response=await fetch(`${SUPABASE_URL}/functions/v1/send-sms`,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":`Bearer ${session.access_token}`,
+        "apikey":SUPABASE_KEY
+      },
+      body:JSON.stringify({
         numbers:recipients.map(x=>x.phone),
         message
-      }
+      })
     });
 
-    if(fnError)throw fnError;
-    if(!fnData?.success){
-      throw new Error(fnData?.error || "رفض مزود الرسائل طلب الإرسال.");
+    const raw=await response.text();
+    let result=null;
+    try{ result=raw ? JSON.parse(raw) : {}; }
+    catch(_){ result={raw}; }
+
+    if(!response.ok || result?.success===false){
+      let reason=
+        result?.details?.message ||
+        result?.details?.error ||
+        result?.error ||
+        result?.message ||
+        result?.raw ||
+        `HTTP ${response.status}`;
+
+      if(typeof reason!=="string"){
+        try{ reason=JSON.stringify(reason); }
+        catch(_){ reason=String(reason); }
+      }
+
+      throw new Error(`HTTP ${response.status}: ${reason}`);
     }
+
+    const sentCount=Number(result?.sent_to || recipients.length);
 
     const sentRows=recipients.map(x=>({
       member_id:x.id,
@@ -2397,66 +2429,30 @@ async function queueBulkVolunteerSms(){
       message,
       status:"sent",
       provider:"4jawaly",
+      provider_message_id:
+        result?.data?.id ||
+        result?.data?.message_id ||
+        null,
       sent_at:new Date().toISOString()
     }));
 
     const {error:logError}=await sb.from("sms_messages").insert(sentRows);
+
     if(logError){
-      console.warn("SMS sent but log insert failed:",logError);
-      msg.textContent=`تم إرسال الرسالة فعليًا إلى ${fnData.sent_to || recipients.length} رقم عبر 4jawaly، لكن تعذر حفظ سجل الإرسال: ${logError.message}`;
+      msg.textContent=`تم إرسال الرسالة إلى ${sentCount} رقم عبر 4jawaly، لكن تعذر حفظ سجل الإرسال: ${logError.message}`;
     }else{
-      msg.textContent=`تم إرسال الرسالة فعليًا إلى ${fnData.sent_to || recipients.length} رقم عبر 4jawaly${skipped?`، وتم تجاوز ${skipped} متطوع بدون رقم جوال.`:"."}`;
+      msg.textContent=`تم إرسال الرسالة إلى ${sentCount} رقم عبر 4jawaly${skipped?`، وتم تجاوز ${skipped} متطوع بدون رقم جوال.`:"."}`;
     }
 
     setTimeout(()=>{
       closeSmsComposer();
       toggleAllSmsMembers(false);
-    },2200);
+    },2400);
 
   }catch(e){
-    console.error(e);
+    console.error("4jawaly send error:",e);
 
     let details=e?.message || String(e);
-
-    try{
-      // Supabase FunctionsHttpError يضع استجابة Edge Function في context
-      // و body تكون ReadableStream، لذلك نقرأ الاستجابة فعليًا بدل عرض [object ReadableStream].
-      if(e?.context){
-        const response=e.context;
-        const cloned=typeof response.clone==="function" ? response.clone() : response;
-
-        try{
-          const body=await cloned.json();
-          if(body){
-            const providerDetails =
-              body?.details?.message ||
-              body?.details?.error ||
-              body?.details?.errors ||
-              body?.details ||
-              body?.error;
-
-            if(typeof providerDetails==="string"){
-              details=providerDetails;
-            }else if(providerDetails){
-              details=JSON.stringify(providerDetails);
-            }else{
-              details=JSON.stringify(body);
-            }
-          }
-        }catch(_jsonErr){
-          try{
-            const text=await (typeof response.clone==="function" ? response.clone() : response).text();
-            if(text) details=text;
-          }catch(_textErr){}
-        }
-
-        if(response.status){
-          details=`HTTP ${response.status}: ${details}`;
-        }
-      }
-    }catch(parseErr){
-      console.warn("Could not parse Edge Function error:",parseErr);
-    }
 
     try{
       const sb=getSupabaseClient();
