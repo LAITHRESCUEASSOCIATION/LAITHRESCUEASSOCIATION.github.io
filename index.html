@@ -591,13 +591,13 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
     </div>
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
-      <button type="button" id="queueSmsBtn" class="btn" onclick="queueBulkVolunteerSms()">حفظ الرسالة للمستلمين</button>
+      <button type="button" id="queueSmsBtn" class="btn" onclick="queueBulkVolunteerSms()">إرسال الرسالة الآن</button>
       <button type="button" class="btn light" onclick="closeSmsComposer()">إلغاء</button>
     </div>
 
     <p id="smsMsg" class="form-msg" style="margin-top:10px"></p>
     <div style="background:#fff7df;padding:10px 12px;border-radius:12px;margin-top:10px;font-size:12px;line-height:1.8">
-      الإرسال الفعلي إلى شبكة الجوال يحتاج ربط مزود SMS. هذه الصفحة تحفظ الرسائل وحالتها الآن، وبمجرد ربط المزود يمكن إرسالها مباشرة من نفس الزر.
+      سيتم إرسال الرسالة فعليًا عبر 4jawaly إلى أرقام الجوال المحددة، ثم حفظ نتيجة الإرسال في سجل الرسائل.
     </div>
   </div>
 </div>
@@ -2354,34 +2354,88 @@ function applySmsTemplate(){
   updateSmsCounter();
 }
 async function queueBulkVolunteerSms(){
+  const selected=getSelectedSmsMembers();
   const ids=(document.getElementById("smsMemberIds").value||"").split(",").map(x=>x.trim()).filter(Boolean);
   const message=(document.getElementById("smsMessage").value||"").trim();
   const msg=document.getElementById("smsMsg");
+
   if(!ids.length){msg.textContent="لم يتم تحديد مستلمين.";return;}
   if(!message){msg.textContent="اكتب نص الرسالة أولاً.";return;}
   if(message.length>500){msg.textContent="الرسالة تتجاوز 500 حرف.";return;}
 
+  const recipients=selected.filter(x=>String(x.phone||"").trim());
+  const skipped=selected.length-recipients.length;
+
+  if(!recipients.length){
+    msg.textContent="لا يوجد رقم جوال مسجل لأي من المتطوعين المحددين.";
+    return;
+  }
+
   const btn=document.getElementById("queueSmsBtn");
-  btn.disabled=true;btn.textContent="جاري حفظ الرسالة...";
+  btn.disabled=true;
+  btn.textContent="جاري الإرسال عبر 4jawaly...";
+  msg.textContent="جاري إرسال الرسالة إلى شبكة الجوال...";
+
   try{
-    const {data,error}=await getSupabaseClient().rpc("queue_bulk_volunteer_sms",{
-      p_member_ids:ids,
-      p_message:message
+    const sb=getSupabaseClient();
+
+    const {data:fnData,error:fnError}=await sb.functions.invoke("send-sms",{
+      body:{
+        numbers:recipients.map(x=>x.phone),
+        message
+      }
     });
-    if(error)throw error;
-    const result=Array.isArray(data)?data[0]:data;
-    const queued=Number(result?.queued_count??ids.length);
-    const skipped=Number(result?.skipped_count??0);
-    msg.textContent=`تم حفظ الرسالة لـ ${queued} متطوع${skipped?`، وتم تجاوز ${skipped} بدون رقم جوال.`:"."} تصبح قابلة للإرسال الفعلي بعد ربط مزود SMS.`;
+
+    if(fnError)throw fnError;
+    if(!fnData?.success){
+      throw new Error(fnData?.error || "رفض مزود الرسائل طلب الإرسال.");
+    }
+
+    const sentRows=recipients.map(x=>({
+      member_id:x.id,
+      phone:String(x.phone||"").trim(),
+      message,
+      status:"sent",
+      provider:"4jawaly",
+      sent_at:new Date().toISOString()
+    }));
+
+    const {error:logError}=await sb.from("sms_messages").insert(sentRows);
+    if(logError){
+      console.warn("SMS sent but log insert failed:",logError);
+      msg.textContent=`تم إرسال الرسالة فعليًا إلى ${fnData.sent_to || recipients.length} رقم عبر 4jawaly، لكن تعذر حفظ سجل الإرسال: ${logError.message}`;
+    }else{
+      msg.textContent=`تم إرسال الرسالة فعليًا إلى ${fnData.sent_to || recipients.length} رقم عبر 4jawaly${skipped?`، وتم تجاوز ${skipped} متطوع بدون رقم جوال.`:"."}`;
+    }
+
     setTimeout(()=>{
       closeSmsComposer();
       toggleAllSmsMembers(false);
-    },1800);
+    },2200);
+
   }catch(e){
     console.error(e);
-    msg.textContent="تعذر حفظ الرسالة: "+(e?.message||e);
+
+    try{
+      const sb=getSupabaseClient();
+      const failedRows=recipients.map(x=>({
+        member_id:x.id,
+        phone:String(x.phone||"").trim(),
+        message,
+        status:"failed",
+        provider:"4jawaly",
+        error_message:String(e?.message||e).slice(0,1000)
+      }));
+      await sb.from("sms_messages").insert(failedRows);
+    }catch(logErr){
+      console.warn("Failed to log SMS failure:",logErr);
+    }
+
+    const details=e?.context?.body || e?.message || String(e);
+    msg.textContent="تعذر إرسال الرسالة فعليًا: "+details;
   }finally{
-    btn.disabled=false;btn.textContent="حفظ الرسالة للمستلمين";
+    btn.disabled=false;
+    btn.textContent="إرسال الرسالة الآن";
   }
 }
 
