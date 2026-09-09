@@ -1274,7 +1274,38 @@ async function submitMissingInfo(){const missing_person_id=document.getElementBy
 async function shareMissing(id,name){const url=location.origin+location.pathname+"#missing";const text=`بلاغ مفقود: ${name} - جمعية ليث للإنقاذ`;if(navigator.share)await navigator.share({title:text,text,url});else{await navigator.clipboard.writeText(text+" "+url);alert("تم نسخ رابط البلاغ.");}}
 async function setReportWorkflow(id,status){const {error}=await getSupabaseClient().rpc("set_report_workflow_status",{p_report_id:id,p_status:status});if(error){alert("تعذر تحديث الحالة: "+error.message);return;}await loadReports();}
 async function markMyArrival(id){let pos=null;try{pos=await requestInitialPosition();}catch(e){alert("لتسجيل الوصول يجب السماح للموقع بتحديد موقعك الحالي.");return;}const {error}=await getSupabaseClient().rpc("mark_assignment_arrived",{p_assignment_id:id,p_latitude:pos?.coords?.latitude??null,p_longitude:pos?.coords?.longitude??null});if(error){alert("تعذر تسجيل الوصول: "+error.message);return;}await loadMyAssignments();}
-async function uploadTaskImage(file,pathPrefix){if(!file)throw new Error("اختر صورة أولًا.");if(!String(file.type||"").startsWith("image/"))throw new Error("المرفق يجب أن يكون صورة.");if(file.size>15*1024*1024)throw new Error("حجم الصورة يجب ألا يتجاوز 15MB.");const ext=(file.name.split(".").pop()||"jpg").toLowerCase();const path=`tasks/${pathPrefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;const c=getSupabaseClient();const {error}=await c.storage.from("report-media").upload(path,file,{contentType:file.type,upsert:false});if(error)throw error;return c.storage.from("report-media").getPublicUrl(path).data.publicUrl;}
+async function normalizeTaskImage(file){
+  if(!file) throw new Error("اختر صورة أولًا.");
+  if(!String(file.type||"").startsWith("image/")) throw new Error("المرفق يجب أن يكون صورة.");
+  if(file.size>20*1024*1024) throw new Error("حجم الصورة يجب ألا يتجاوز 20MB.");
+  try{
+    const bitmap=await createImageBitmap(file);
+    const maxSide=1800,scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
+    const w=Math.max(1,Math.round(bitmap.width*scale)),h=Math.max(1,Math.round(bitmap.height*scale));
+    const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext("2d");ctx.drawImage(bitmap,0,0,w,h);
+    if(bitmap.close) bitmap.close();
+    const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("تعذر تجهيز الصورة للرفع.")),"image/jpeg",0.82));
+    return new File([blob],"evidence.jpg",{type:"image/jpeg",lastModified:Date.now()});
+  }catch(e){
+    console.warn("تعذر ضغط الصورة، سيتم رفع الأصل",e);
+    return file;
+  }
+}
+async function uploadTaskImage(file,pathPrefix){
+  const prepared=await normalizeTaskImage(file);
+  const ext=String(prepared.type||"").includes("jpeg")?"jpg":((prepared.name.split(".").pop()||"jpg").toLowerCase());
+  const path=`tasks/${pathPrefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const c=getSupabaseClient();
+  let result=await c.storage.from("report-media").upload(path,prepared,{contentType:prepared.type||"image/jpeg",cacheControl:"3600",upsert:false});
+  if(result.error){
+    console.warn("محاولة الرفع الأولى فشلت، إعادة المحاولة",result.error);
+    await new Promise(r=>setTimeout(r,700));
+    result=await c.storage.from("report-media").upload(path,prepared,{contentType:prepared.type||"image/jpeg",cacheControl:"3600",upsert:false});
+  }
+  if(result.error) throw new Error(result.error.message||"تعذر رفع الصورة إلى التخزين.");
+  return c.storage.from("report-media").getPublicUrl(path).data.publicUrl;
+}
 async function uploadAssignmentEvidence(id,kind){const input=document.getElementById(`${kind==="arrival"?"arrivalProof":"completionProof"}-${id}`);const file=input?.files?.[0];if(!file){alert("اختر صورة الإثبات أولًا.");return;}try{const url=await uploadTaskImage(file,`${id}/evidence-${kind}`);const {error}=await getSupabaseClient().rpc("submit_assignment_evidence",{p_assignment_id:id,p_kind:kind,p_file_url:url});if(error)throw error;await loadMyAssignments();}catch(e){alert("تعذر رفع الإثبات: "+(e.message||e));}}
 async function finishMyAssignment(id){if(!confirm("هل تؤكد انتهاء المساعدة وإغلاق البلاغ نهائيًا؟ بعد الإغلاق لا يمكن التراجع."))return;const {error}=await getSupabaseClient().rpc("finish_assignment",{p_assignment_id:id});if(error){alert("تعذر إنهاء البلاغ: "+error.message);return;}stopLocationTracking();alert("تم إغلاق البلاغ واحتساب وقت المهمة بنجاح.");await Promise.all([loadMyAssignments(),loadMyProfile(),loadMemberDirectory()]);}
 async function loadTaskMessages(id,view="member"){const target=document.getElementById(`${view==="admin"?"admin":"member"}ChatThread-${id}`);if(!target)return;const {data,error}=await getSupabaseClient().rpc("get_assignment_messages",{p_assignment_id:id});if(error){target.innerHTML=`<small>تعذر تحميل الرسائل: ${esc(error.message)}</small>`;return;}target.innerHTML=(data||[]).map(m=>`<div class="chat-msg ${m.is_mine?"mine":""} ${m.sender_is_admin?"admin":""}"><small>${esc(m.sender_name||"")} · ${esc(formatDateTime(m.created_at))}</small>${m.body?`<div>${esc(m.body)}</div>`:""}${m.image_url?`<a target="_blank" rel="noopener" href="${esc(m.image_url)}"><img src="${esc(m.image_url)}" alt="صورة مرفقة"></a>`:""}</div>`).join("")||"<small>لا توجد رسائل حتى الآن.</small>";target.scrollTop=target.scrollHeight;}
