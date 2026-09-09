@@ -304,6 +304,22 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 @media(max-width:650px){.command-grid{grid-template-columns:repeat(2,1fr)}.call-response-grid{grid-template-columns:1fr 1fr}.live-event{grid-template-columns:1fr}}
 </style>
 
+
+<style id="team-manager-fix-styles">
+#teamManageOverlay{
+  position:fixed !important; inset:0 !important; z-index:100000 !important;
+  background:rgba(10,20,28,.72) !important;
+  display:none; align-items:center; justify-content:center;
+  padding:18px; overflow:auto;
+}
+#teamManageOverlay.team-manager-open{display:flex !important}
+#teamManageOverlay .team-manager-card{
+  width:min(760px,100%); max-height:92vh; overflow:auto;
+  background:#fff; border-radius:22px; padding:18px;
+  box-shadow:0 24px 70px rgba(0,0,0,.28);
+}
+</style>
+
 </head>
 <body>
 <header><div class="wrap nav">
@@ -1637,8 +1653,8 @@ window.addEventListener("DOMContentLoaded",async()=>{
   </div>
 </div>
 
-<div id="teamManageOverlay" class="overlay" style="display:none">
-  <div class="modal-card" style="max-width:760px">
+<div id="teamManageOverlay" aria-hidden="true">
+  <div class="team-manager-card">
     <div class="modal-head">
       <h3 id="teamManageTitle">إدارة الفريق</h3>
       <button class="btn light" onclick="closeTeamManager()">إغلاق</button>
@@ -1716,7 +1732,7 @@ function renderOpsCenter(d){
   const volunteers=d.volunteers||[];
   window.__opsTeams=teams;
   window.__opsVolunteers=volunteers;
-  document.getElementById("opsTeamsList").innerHTML=teams.map(t=>`<div class="team-card"><b>🔵 ${esc(t.name)}</b><br><small>${esc(t.team_type||"")} · ${esc(t.region||"كل المناطق")} · ${Number(t.member_count||0)} أعضاء${t.leader_name?` · القائد: ${esc(t.leader_name)}`:""}</small><div class="row-actions" style="margin-top:9px"><button class="btn light" onclick="openTeamManager('${t.id}')">إدارة الأعضاء</button><button class="btn danger" onclick="deleteTeamDirect('${t.id}','${escJs(t.name)}')">حذف الفريق</button></div></div>`).join("")||"<small>لا توجد فرق مسجلة.</small>";
+  document.getElementById("opsTeamsList").innerHTML=teams.map(t=>`<div class="team-card"><b>🔵 ${esc(t.name)}</b><br><small>${esc(t.team_type||"")} · ${esc(t.region||"كل المناطق")} · ${Number(t.member_count||0)} أعضاء${t.leader_name?` · القائد: ${esc(t.leader_name)}`:""}</small><div class="row-actions" style="margin-top:9px"><button type="button" class="btn light" onclick="openTeamManager('${t.id}');return false;">إدارة الأعضاء</button><button type="button" class="btn danger" onclick="deleteTeamDirect('${t.id}','${escJs(t.name)}');return false;">حذف الفريق</button></div></div>`).join("")||"<small>لا توجد فرق مسجلة.</small>";
 
   document.getElementById("opsVolunteersList").innerHTML=volunteers.map(v=>`<div class="resource-card"><b>${esc(v.full_name)}</b> · ${esc(readinessArabic(v.availability_status))}<br><small>${esc(v.specialty||"متطوع")} · ${esc(v.team_name||"بدون فريق")}${v.location_at?` · آخر موقع ${esc(formatDateTime(v.location_at))}`:""}</small></div>`).join("")||"<small>لا توجد بيانات متطوعين.</small>";
 
@@ -1817,30 +1833,51 @@ function respondToCallCustom(callId){const n=Number(prompt("بعد كم دقيق
 let currentManagedTeamId=null;
 
 async function openTeamManager(teamId){
-  currentManagedTeamId=teamId;
-  const team=(window.__opsTeams||[]).find(x=>x.id===teamId);
-  document.getElementById("teamManageTitle").textContent="إدارة الفريق: "+(team?.name||"");
-  document.getElementById("teamManageOverlay").style.display="flex";
-  await loadTeamManager();
+  try{
+    currentManagedTeamId=teamId;
+    const overlay=document.getElementById("teamManageOverlay");
+    const title=document.getElementById("teamManageTitle");
+    if(!overlay)throw new Error("نافذة إدارة الفريق غير موجودة في الصفحة");
+    const team=(window.__opsTeams||[]).find(x=>String(x.id)===String(teamId));
+    if(title)title.textContent="إدارة الفريق: "+(team?.name||"");
+    overlay.classList.add("team-manager-open");
+    overlay.setAttribute("aria-hidden","false");
+    document.body.style.overflow="hidden";
+    await loadTeamManager();
+  }catch(e){
+    console.error("openTeamManager",e);
+    alert("تعذر فتح إدارة الأعضاء: "+(e?.message||e));
+  }
 }
 function closeTeamManager(){
   currentManagedTeamId=null;
-  document.getElementById("teamManageOverlay").style.display="none";
+  const overlay=document.getElementById("teamManageOverlay");
+  if(overlay){
+    overlay.classList.remove("team-manager-open");
+    overlay.setAttribute("aria-hidden","true");
+  }
+  document.body.style.overflow="";
 }
 
 async function loadTeamManager(){
   if(!currentManagedTeamId)return;
+  const list=document.getElementById("teamMembersList");
+  const sel=document.getElementById("teamMemberSelect");
+  if(list)list.innerHTML="<small>جاري تحميل أعضاء الفريق...</small>";
+  if(sel)sel.innerHTML='<option value="">جاري تحميل المتطوعين...</option>';
   const [{data:members,error},{data:allMembers,error:allErr}]=await Promise.all([
     getSupabaseClient().rpc("get_team_members",{p_team_id:currentManagedTeamId}),
     getSupabaseClient().from("members").select("id,full_name,specialty").eq("account_status","approved").order("full_name")
   ]);
-  const list=document.getElementById("teamMembersList");
   if(error){list.innerHTML=`<small>تعذر تحميل أعضاء الفريق: ${esc(error.message)}</small>`;return;}
-  if(allErr)console.error(allErr);
+  if(allErr){
+    console.error(allErr);
+    if(list)list.innerHTML=`<small>تعذر تحميل قائمة المتطوعين: ${esc(allErr.message)}</small>`;
+    return;
+  }
 
   const inTeam=new Set((members||[]).map(x=>x.member_id));
   const available=(allMembers||[]).filter(x=>!inTeam.has(x.id));
-  const sel=document.getElementById("teamMemberSelect");
   sel.innerHTML=available.length
     ? `<option value="">اختر متطوعًا</option>`+available.map(m=>`<option value="${esc(m.id)}">${esc(m.full_name)} · ${esc(m.specialty||"متطوع")}</option>`).join("")
     : `<option value="">لا يوجد متطوعون متاحون للإضافة</option>`;
