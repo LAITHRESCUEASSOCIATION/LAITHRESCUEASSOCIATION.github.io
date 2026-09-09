@@ -1636,6 +1636,32 @@ window.addEventListener("DOMContentLoaded",async()=>{
     </div>
   </div>
 </div>
+
+<div id="teamManageOverlay" class="overlay" style="display:none">
+  <div class="modal-card" style="max-width:760px">
+    <div class="modal-head">
+      <h3 id="teamManageTitle">إدارة الفريق</h3>
+      <button class="btn light" onclick="closeTeamManager()">إغلاق</button>
+    </div>
+    <div class="cms-box" style="margin-top:12px">
+      <h4>إضافة عضو</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="teamMemberSelect" style="flex:1;min-width:220px"></select>
+        <button class="btn" onclick="addSelectedTeamMember()">إضافة للفريق</button>
+      </div>
+    </div>
+    <div class="cms-box" style="margin-top:12px">
+      <h4>أعضاء الفريق</h4>
+      <div id="teamMembersList"><small>جاري التحميل...</small></div>
+    </div>
+    <div class="cms-box" style="margin-top:12px;border-color:#efc2c2">
+      <h4>حذف الفريق</h4>
+      <p style="font-size:13px;color:#667681">سيتم حذف الفريق وفك ارتباط أعضائه به. لن يتم حذف حسابات المتطوعين أو البلاغات السابقة.</p>
+      <button class="btn danger" onclick="deleteCurrentTeam()">حذف الفريق كامل</button>
+    </div>
+  </div>
+</div>
+
 <div id="offlineBanner" class="offline-banner">أنت تعمل بدون اتصال. ستتم مزامنة الإجراءات المحفوظة عند عودة الإنترنت.</div>
 
 
@@ -1687,7 +1713,9 @@ function renderOpsCenter(d){
   document.getElementById("opsCallsList").innerHTML=calls.map(c=>{const p=priorityMeta(c.priority_level);return `<div class="call-card ${c.priority_level==="critical"?"urgent":""}"><div><b>نداء البلاغ #${esc(c.report_number)}</b> <span class="priority-pill ${p[1]}">${p[2]} ${p[0]}</span></div><small>${esc(c.report_type||"")} · ${esc(c.region||"—")} · ${esc(formatDateTime(c.created_at))}</small><div style="margin-top:8px"><span class="response-chip">✅ يستطيع: ${esc(c.can_count||0)}</span><span class="response-chip">❌ لا يستطيع: ${esc(c.cannot_count||0)}</span><span class="response-chip">⏱️ متأخر: ${esc(c.delayed_count||0)}</span><span class="response-chip">… بانتظار: ${esc(c.pending_count||0)}</span></div><div style="margin-top:9px">${(c.responses||[]).map(x=>`<div class="resource-card"><b>${esc(x.member_name||"متطوع")}</b> — ${esc(responseArabic(x.response_status,x.delay_minutes))}${x.responded_at?`<br><small>${esc(formatDateTime(x.responded_at))}</small>`:""}</div>`).join("")||"<small>لا توجد ردود حتى الآن.</small>"}</div></div>`}).join("")||"<small>لا توجد نداءات استجابة مفتوحة.</small>";
 
   const teams=d.teams||[];
-  document.getElementById("opsTeamsList").innerHTML=teams.map(t=>`<div class="team-card"><b>🔵 ${esc(t.name)}</b><br><small>${esc(t.team_type||"")} · ${esc(t.region||"كل المناطق")} · ${Number(t.member_count||0)} أعضاء${t.leader_name?` · القائد: ${esc(t.leader_name)}`:""}</small></div>`).join("")||"<small>لا توجد فرق مسجلة.</small>";
+  window.__opsTeams=teams;
+  window.__opsVolunteers=volunteers;
+  document.getElementById("opsTeamsList").innerHTML=teams.map(t=>`<div class="team-card"><b>🔵 ${esc(t.name)}</b><br><small>${esc(t.team_type||"")} · ${esc(t.region||"كل المناطق")} · ${Number(t.member_count||0)} أعضاء${t.leader_name?` · القائد: ${esc(t.leader_name)}`:""}</small><div class="row-actions" style="margin-top:9px"><button class="btn light" onclick="openTeamManager('${t.id}')">إدارة الأعضاء</button><button class="btn danger" onclick="deleteTeamDirect('${t.id}','${escJs(t.name)}')">حذف الفريق</button></div></div>`).join("")||"<small>لا توجد فرق مسجلة.</small>";
 
   const volunteers=d.volunteers||[];
   document.getElementById("opsVolunteersList").innerHTML=volunteers.map(v=>`<div class="resource-card"><b>${esc(v.full_name)}</b> · ${esc(readinessArabic(v.availability_status))}<br><small>${esc(v.specialty||"متطوع")} · ${esc(v.team_name||"بدون فريق")}${v.location_at?` · آخر موقع ${esc(formatDateTime(v.location_at))}`:""}</small></div>`).join("")||"<small>لا توجد بيانات متطوعين.</small>";
@@ -1742,6 +1770,74 @@ async function loadMyResponseCalls(){
 }
 async function respondToCall(callId,response,delay=null){const {error}=await getSupabaseClient().rpc("respond_to_call",{p_call_id:callId,p_response:response,p_delay_minutes:delay});if(error){alert("تعذر تسجيل الاستجابة: "+error.message);return;}await loadMyResponseCalls();if(opsCenterOpen)refreshOpsCenter(false);}
 function respondToCallCustom(callId){const n=Number(prompt("بعد كم دقيقة تستطيع الاستجابة؟","30"));if(!Number.isFinite(n)||n<1||n>240){alert("اكتب مدة صحيحة من 1 إلى 240 دقيقة.");return;}respondToCall(callId,"delayed",Math.round(n));}
+
+
+let currentManagedTeamId=null;
+
+async function openTeamManager(teamId){
+  currentManagedTeamId=teamId;
+  const team=(window.__opsTeams||[]).find(x=>x.id===teamId);
+  document.getElementById("teamManageTitle").textContent="إدارة الفريق: "+(team?.name||"");
+  document.getElementById("teamManageOverlay").style.display="flex";
+  await loadTeamManager();
+}
+function closeTeamManager(){
+  currentManagedTeamId=null;
+  document.getElementById("teamManageOverlay").style.display="none";
+}
+
+async function loadTeamManager(){
+  if(!currentManagedTeamId)return;
+  const [{data:members,error},{data:allMembers,error:allErr}]=await Promise.all([
+    getSupabaseClient().rpc("get_team_members",{p_team_id:currentManagedTeamId}),
+    getSupabaseClient().from("members").select("id,full_name,specialty").eq("account_status","approved").order("full_name")
+  ]);
+  const list=document.getElementById("teamMembersList");
+  if(error){list.innerHTML=`<small>تعذر تحميل أعضاء الفريق: ${esc(error.message)}</small>`;return;}
+  if(allErr)console.error(allErr);
+
+  const inTeam=new Set((members||[]).map(x=>x.member_id));
+  const available=(allMembers||[]).filter(x=>!inTeam.has(x.id));
+  const sel=document.getElementById("teamMemberSelect");
+  sel.innerHTML=available.length
+    ? `<option value="">اختر متطوعًا</option>`+available.map(m=>`<option value="${esc(m.id)}">${esc(m.full_name)} · ${esc(m.specialty||"متطوع")}</option>`).join("")
+    : `<option value="">لا يوجد متطوعون متاحون للإضافة</option>`;
+
+  list.innerHTML=(members||[]).map(m=>`<div class="resource-card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><b>${m.is_leader?"⭐ ":""}${esc(m.full_name)}</b><br><small>${esc(m.specialty||"متطوع")} ${m.phone?`· ${esc(m.phone)}`:""}</small></div><div class="row-actions">${m.is_leader?`<span class="status-pill">قائد الفريق</span>`:`<button class="btn light" onclick="makeTeamLeader('${m.member_id}')">تعيين قائد</button>`}<button class="btn danger" onclick="removeTeamMember('${m.member_id}','${escJs(m.full_name)}')">إزالة</button></div></div></div>`).join("")||"<small>لا يوجد أعضاء في هذا الفريق حتى الآن.</small>";
+}
+async function addSelectedTeamMember(){
+  const memberId=document.getElementById("teamMemberSelect").value;
+  if(!memberId){alert("اختر متطوعًا أولاً.");return;}
+  const {error}=await getSupabaseClient().rpc("add_team_member",{p_team_id:currentManagedTeamId,p_member_id:memberId});
+  if(error){alert("تعذر إضافة العضو: "+error.message);return;}
+  await Promise.all([loadTeamManager(),refreshOpsCenter(false)]);
+}
+async function removeTeamMember(memberId,name){
+  if(!confirm(`إزالة ${name} من الفريق؟`))return;
+  const {error}=await getSupabaseClient().rpc("remove_team_member",{p_team_id:currentManagedTeamId,p_member_id:memberId});
+  if(error){alert("تعذر إزالة العضو: "+error.message);return;}
+  await Promise.all([loadTeamManager(),refreshOpsCenter(false)]);
+}
+async function makeTeamLeader(memberId){
+  const {error}=await getSupabaseClient().rpc("set_team_leader",{p_team_id:currentManagedTeamId,p_member_id:memberId});
+  if(error){alert("تعذر تعيين قائد الفريق: "+error.message);return;}
+  await Promise.all([loadTeamManager(),refreshOpsCenter(false)]);
+}
+async function deleteCurrentTeam(){
+  if(!currentManagedTeamId)return;
+  const team=(window.__opsTeams||[]).find(x=>x.id===currentManagedTeamId);
+  if(!confirm(`هل أنت متأكد من حذف فريق "${team?.name||""}" بالكامل؟`))return;
+  const {error}=await getSupabaseClient().rpc("delete_operation_team",{p_team_id:currentManagedTeamId});
+  if(error){alert("تعذر حذف الفريق: "+error.message);return;}
+  closeTeamManager();
+  await refreshOpsCenter(false);
+}
+async function deleteTeamDirect(teamId,name){
+  if(!confirm(`هل أنت متأكد من حذف فريق "${name}" بالكامل؟`))return;
+  const {error}=await getSupabaseClient().rpc("delete_operation_team",{p_team_id:teamId});
+  if(error){alert("تعذر حذف الفريق: "+error.message);return;}
+  await refreshOpsCenter(false);
+}
 
 async function trackCitizenReport(){
   const n=document.getElementById("citizenTrackNumber").value.trim(),box=document.getElementById("citizenTrackResult");if(!n){box.innerHTML="<small>اكتب رقم البلاغ.</small>";return;}box.innerHTML="<small>جاري التحقق...</small>";
