@@ -202,6 +202,22 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 .leaderboard-podium{display:grid!important;grid-template-columns:1fr!important;gap:12px!important;align-items:stretch!important;max-width:760px;margin-inline:auto;min-height:0!important}
 .podium-card,.podium-card.first,.podium-card.second,.podium-card.third{width:100%!important;min-height:0!important;transform:none!important}
 @media(max-width:800px){.podium-card{display:grid!important;grid-template-columns:auto 70px 1fr!important;width:100%!important}}
+
+/* === LAITH Operations Platform Upgrade === */
+.quick-services{padding:26px 0 8px}.quick-services-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.quick-action{border:1px solid #dfe6ea;background:#fff;border-radius:22px;padding:22px 16px;text-align:center;cursor:pointer;box-shadow:0 8px 24px rgba(20,40,60,.05);transition:.2s;font-family:inherit;font-weight:900;font-size:18px;color:#17232d}
+.quick-action:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(20,40,60,.09)}.quick-action.emergency{background:#9d1d2e;color:#fff;border-color:#9d1d2e}.quick-action .qa-icon{display:block;font-size:28px;margin-bottom:8px}
+.live-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.live-stat{background:#fff;border:1px solid #e3e8eb;border-radius:20px;padding:18px;text-align:center}.live-stat b{display:block;font-size:28px}.live-stat span{color:#65737d;font-weight:700;font-size:13px}
+.ops-section{padding:48px 0}.ops-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.ops-card{background:#fff;border:1px solid #e3e8eb;border-radius:22px;padding:22px}.ops-card h3{margin:0 0 8px}
+.report-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.report-modal-grid .full{grid-column:1/-1}.report-map{height:260px;border-radius:16px;border:1px solid #dfe5e9;overflow:hidden;margin:10px 0}.emergency-card{width:min(620px,100%);background:#fff;border-radius:26px;padding:28px;max-height:92vh;overflow:auto}.emergency-big{display:block;width:100%;border:0;border-radius:22px;background:#9d1d2e;color:#fff;font-family:inherit;font-weight:950;font-size:26px;padding:26px;cursor:pointer}
+.file-preview{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:#53616d}.report-number-box{background:#edf8f1;border:1px solid #bcdcc7;border-radius:16px;padding:16px;text-align:center;margin-top:12px}.report-number-box b{font-size:24px;letter-spacing:1px}
+.status-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.status-actions button{border:1px solid #dce3e8;background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;font-family:inherit;font-weight:800}.status-actions button.active{background:#17232d;color:#fff}
+.missing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.missing-card{background:#fff;border:1px solid #e3e8eb;border-radius:22px;overflow:hidden}.missing-card img{width:100%;aspect-ratio:16/11;object-fit:cover}.missing-body{padding:16px}.missing-body h3{margin:0 0 8px}.share-btn{background:#f3f6f8;border:0;border-radius:10px;padding:9px 12px;font-family:inherit;font-weight:800;cursor:pointer}
+.achievements-live{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.achievement-stat{background:linear-gradient(145deg,#17232d,#31424e);color:#fff;border-radius:24px;padding:24px;text-align:center}.achievement-stat b{display:block;font-size:34px}.achievement-stat small{opacity:.75}
+.pwa-install{position:fixed;bottom:18px;left:18px;z-index:9000;display:none;border:0;border-radius:14px;padding:12px 16px;background:#17232d;color:#fff;font-family:inherit;font-weight:900;box-shadow:0 8px 28px rgba(0,0,0,.2)}
+@media(max-width:900px){.quick-services-grid{grid-template-columns:1fr 1fr}.live-stats{grid-template-columns:1fr 1fr}.ops-grid,.missing-grid{grid-template-columns:1fr 1fr}.achievements-live{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.quick-services{padding-top:14px}.quick-services-grid{grid-template-columns:1fr 1fr;gap:8px}.quick-action{padding:16px 8px;font-size:14px;border-radius:16px}.quick-action .qa-icon{font-size:22px}.live-stats{grid-template-columns:1fr 1fr;gap:8px}.live-stat{padding:14px 8px}.live-stat b{font-size:24px}.report-modal-grid{grid-template-columns:1fr}.report-modal-grid .full{grid-column:auto}.ops-grid,.missing-grid,.achievements-live{grid-template-columns:1fr}.emergency-card{padding:18px}.emergency-big{font-size:22px;padding:22px}.report-map{height:220px}}
+
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -223,7 +239,7 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
     return sbClient;
   }
 </script>
-</head>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#17232d"><meta name="apple-mobile-web-app-capable" content="yes"></head>
 <body>
 <header><div class="wrap nav">
 <div class="brand"><div class="logo" id="brandLogoBox"><span id="brandFallback">ل</span><img id="brandLogoImg" alt="شعار الجمعية" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:12px"></div><div id="brandSiteName">جمعية ليث للإنقاذ</div></div>
@@ -241,12 +257,29 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 <span class="kicker">المنصة الرقمية لجمعية ليث للإنقاذ</span>
 <h1>نحو إنقاذ أسرع،<br>وتنظيم أكثر احترافية.</h1>
 <p>منظومة موحدة لاستقبال البلاغات، إدارة حالات الطوارئ والبحث والإنقاذ، استدعاء المتطوعين، متابعة المهام، وتوثيق ساعات التطوع.</p>
-<div class="actions"><a class="btn" href="#report">إرسال بلاغ</a><a class="btn light" href="#about">استكشف المنصة</a></div>
+<div class="actions"><button class="btn" onclick="openEmergency()">طلب إنقاذ عاجل</button><a class="btn light" href="#leaderboard">استكشف المنصة</a></div>
 </div>
 <div class="visual" id="homeVisual"><div id="heroSlides" class="hero-slides"></div><div class="dashboard">جمعية ليث للإنقاذ</div><div class="map"><i class="pin p1"></i><i class="pin p2"></i><i class="pin p3"></i></div></div>
 </div></section>
 
-<section style="padding:28px 0"><div class="wrap"><div class="public-report-stat"><b id="publicReportCount">—</b><span>بلاغ تم تقديمه عبر المنصة حتى الآن</span></div></div></section>
+
+<section class="quick-services"><div class="wrap">
+  <div class="quick-services-grid">
+    <button class="quick-action emergency" onclick="openEmergency()"><span class="qa-icon">🚨</span>طلب إنقاذ</button>
+    <button class="quick-action" onclick="openReport('missing')"><span class="qa-icon">🔎</span>بلاغ مفقود</button>
+    <button class="quick-action" onclick="openReport('assistance')"><span class="qa-icon">🆘</span>أحتاج مساعدة</button>
+    <button class="quick-action" onclick="openSignup()"><span class="qa-icon">🤝</span>تطوع معنا</button>
+  </div>
+</div></section>
+<section style="padding:18px 0 34px"><div class="wrap">
+  <div class="live-stats">
+    <div class="live-stat"><b id="publicReportCount">—</b><span>إجمالي البلاغات</span></div>
+    <div class="live-stat"><b id="statRescues">—</b><span>عمليات مكتملة</span></div>
+    <div class="live-stat"><b id="statVolunteers">—</b><span>متطوعون</span></div>
+    <div class="live-stat"><b id="statHours">—</b><span>ساعات تطوع</span></div>
+    <div class="live-stat"><b id="statRegions">—</b><span>مناطق مخدومة</span></div>
+  </div>
+</div></section>
 
 
 <section class="leaderboard-section" id="leaderboard"><div class="wrap">
@@ -259,6 +292,20 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
   <div id="publicPosts" class="posts-grid"><p>جاري تحميل المحتوى...</p></div>
 </div></section>
 
+
+<section class="ops-section" id="missing"><div class="wrap">
+  <div class="section-head"><div><h2>المفقودون</h2><p>بلاغات المفقودين النشطة والمعلومات الواردة من المجتمع.</p></div></div>
+  <div id="publicMissingPersons" class="missing-grid"><p>جاري تحميل البلاغات...</p></div>
+</div></section>
+<section class="ops-section" id="achievements"><div class="wrap">
+  <div class="section-head"><div><h2>إنجازات الجمعية</h2><p>مؤشرات حية تتحدث تلقائيًا من النظام.</p></div></div>
+  <div class="achievements-live">
+    <div class="achievement-stat"><b id="achRescues">—</b><small>عملية إنقاذ مكتملة</small></div>
+    <div class="achievement-stat"><b id="achVolunteers">—</b><small>متطوع</small></div>
+    <div class="achievement-stat"><b id="achHours">—</b><small>ساعة تطوعية</small></div>
+    <div class="achievement-stat"><b id="achRegions">—</b><small>منطقة مخدومة</small></div>
+  </div>
+</div></section>
 <section id="about"><div class="wrap">
 <div class="section-head"><div><h2>منصة واحدة لكل عمليات الإنقاذ</h2><p>تصميم رسمي، حديث، واضح، ومتجاوب مع الجوال والكمبيوتر.</p></div></div>
 <div class="cards"><article class="card"><div class="num">01</div><div><span>عن الجمعية</span><h3>جمعية ليث للإنقاذ</h3><p>منظومة رقمية متكاملة لتنظيم أعمال الإنقاذ والبلاغات والمتطوعين وربط الإدارة بالميدان والمواطنين.</p></div></article><article class="card"><div class="num">02</div><div><span>البلاغات</span><h3>استقبال البلاغات وإدارتها</h3><p>تقديم البلاغات من المواطنين بدون إنشاء حساب، مع رقم مرجعي ومتابعة حالة البلاغ.</p></div></article><article class="card"><div class="num">03</div><div><span>المتطوعون</span><h3>إدارة المتطوعين والمهام</h3><p>ملفات متكاملة للمتطوعين، قبول ورفض المهام، تسجيل المشاركة وساعات التطوع تلقائياً.</p></div></article><article class="card"><div class="num">04</div><div><span>الخريطة المباشرة</span><h3>متابعة المتطوعين أثناء المهمة</h3><p>عرض موقع البلاغ والمتطوعين المشاركين ومسارات الحركة على خريطة الإدارة.</p></div></article></div>
@@ -278,12 +325,46 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 
 <section id="report"><div class="wrap"><div class="cta">
 <div><h2>هل لديك بلاغ؟</h2><p>يمكن للمواطن تقديم البلاغ مباشرة دون إنشاء حساب.</p></div>
-<button class="btn" onclick="openReport()">فتح نموذج البلاغ</button>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="openReport('rescue')">فتح نموذج البلاغ</button><button class="btn light" onclick="openEmergency()">وضع الطوارئ</button></div>
 </div></div></section>
 </main>
 
 <footer><div class="wrap">جمعية ليث للإنقاذ — منصة رقمية متخصصة في إدارة البلاغات والإنقاذ والتطوع.</div></footer>
 
+
+<div id="emergencyOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:11000;align-items:center;justify-content:center;padding:14px">
+  <div class="emergency-card">
+    <div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="margin:0">وضع الطوارئ</h2><small>أقل عدد ممكن من الخطوات</small></div><button onclick="closeEmergency()" style="border:0;background:none;font-size:28px;cursor:pointer">×</button></div>
+    <p>بعد موافقتك على تحديد الموقع، سيتم فتح بلاغ إنقاذ بالموقع تلقائيًا لتكمل رقم الجوال ووصفًا مختصرًا.</p>
+    <button class="emergency-big" onclick="startEmergencyReport()">🚨 أرسل طلب إنقاذ</button>
+    <p id="emergencyMsg" class="form-msg"></p>
+  </div>
+</div>
+
+<div id="reportOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:10900;align-items:center;justify-content:center;padding:14px">
+  <div class="auth-card" style="width:min(820px,100%);max-height:94vh;overflow:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;position:sticky;top:-26px;background:#fff;padding:12px 0;z-index:5">
+      <div><h2 style="margin:0">تقديم بلاغ</h2><small>لا يتطلب تسجيل حساب</small></div><button onclick="closeReport()" style="border:0;background:none;font-size:28px;cursor:pointer">×</button>
+    </div>
+    <div class="report-modal-grid">
+      <div><label>نوع البلاغ</label><select id="reportType"><option value="rescue">طلب إنقاذ</option><option value="missing">بلاغ مفقود</option><option value="assistance">أحتاج مساعدة</option><option value="medical">حالة إسعافية</option><option value="search">بحث وإنقاذ</option><option value="other">أخرى</option></select></div>
+      <div><label>الاسم</label><input id="reportName" placeholder="الاسم"></div>
+      <div><label>رقم الجوال</label><input id="reportPhone" type="tel" inputmode="tel" placeholder="05XXXXXXXX"></div>
+      <div><label>المنطقة / المدينة</label><input id="reportRegion" placeholder="مثال: الرياض"></div>
+      <div class="full"><label>وصف الحالة</label><textarea id="reportDescription" rows="4" placeholder="صف الحالة باختصار ووضوح"></textarea></div>
+      <div class="full"><label>الموقع</label><input id="reportLocationText" placeholder="وصف الموقع أو أقرب معلم"><div style="display:flex;gap:8px;margin-top:8px"><button class="btn light" type="button" onclick="useCurrentReportLocation()">تحديد موقعي تلقائيًا</button></div><div id="reportMap" class="report-map"></div><small id="reportCoords">اضغط على الخريطة أو استخدم موقعك الحالي.</small></div>
+      <div class="full"><label>صور أو فيديو (اختياري)</label><input id="reportMedia" type="file" multiple accept="image/*,video/*"><div id="reportMediaPreview" class="file-preview"></div></div>
+    </div>
+    <button class="btn" style="width:100%;margin-top:12px" onclick="submitPublicReport()">إرسال البلاغ</button>
+    <p id="reportMsg" class="form-msg"></p><div id="reportSuccess"></div>
+  </div>
+</div>
+
+<div id="missingInfoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10950;align-items:center;justify-content:center;padding:14px">
+ <div class="auth-card" style="width:min(560px,100%)"><div style="display:flex;justify-content:space-between"><h2>لدي معلومة</h2><button onclick="closeMissingInfo()" style="border:0;background:none;font-size:28px">×</button></div>
+ <input type="hidden" id="missingInfoId"><label>اسمك (اختياري)</label><input id="missingInfoName"><label>رقم الجوال</label><input id="missingInfoPhone"><label>المعلومة</label><textarea id="missingInfoText" rows="5"></textarea><button class="btn" style="width:100%" onclick="submitMissingInfo()">إرسال المعلومة</button><p id="missingInfoMsg" class="form-msg"></p></div>
+</div>
+<button id="pwaInstallBtn" class="pwa-install">تثبيت تطبيق ليث</button>
 <div id="authOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;padding:20px">
   <div class="auth-card">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:16px">
@@ -392,7 +473,7 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
     <div class="admin-actions">
       <button class="btn" type="button" onclick="loadMembers('pending')">طلبات المتطوعين الجديدة</button>
       <button class="btn light" type="button" onclick="loadMembers('approved')">المتطوعون الفعّالون</button>
-      <button class="btn light" type="button" onclick="loadReports()">البلاغات</button>
+      <button class="btn light" type="button" onclick="loadReports()">البلاغات</button><button class="btn light" type="button" onclick="openOperationsMap()">الخريطة المباشرة</button><button class="btn light" type="button" onclick="showAdminAnalytics()">التقارير والإحصائيات</button>
     </div>
     <div id="adminNewReportAlert" class="admin-alert">ورد بلاغ جديد إلى المنصة.</div>
     <div id="membersList"></div>
@@ -536,6 +617,18 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
   </div>
 </div>
 
+
+<div id="operationsMapOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:10045;align-items:center;justify-content:center;padding:14px">
+ <div class="auth-card" style="width:min(1100px,100%);height:min(90vh,820px);display:flex;flex-direction:column">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="margin:0">الخريطة التشغيلية المباشرة</h2><small>البلاغات والمتطوعون وآخر المواقع المسجلة</small></div><button onclick="closeOperationsMap()" style="border:0;background:none;font-size:28px">×</button></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"><select id="opsTypeFilter" onchange="refreshOperationsMap()"><option value="">كل الأنواع</option><option value="rescue">إنقاذ</option><option value="missing">مفقود</option><option value="assistance">مساعدة</option></select><input id="opsRegionFilter" placeholder="فلترة بالمنطقة" oninput="refreshOperationsMap()"></div>
+  <div id="operationsMap" style="flex:1;min-height:400px;border-radius:18px;overflow:hidden"></div>
+ </div>
+</div>
+
+<div id="adminAnalyticsOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:10046;align-items:center;justify-content:center;padding:14px">
+ <div class="auth-card" style="width:min(900px,100%);max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between"><div><h2 style="margin:0">التقارير والإحصائيات</h2><small>ملخص تشغيلي مباشر</small></div><button onclick="closeAdminAnalytics()" style="border:0;background:none;font-size:28px">×</button></div><div id="adminAnalyticsContent" style="margin-top:16px"></div></div>
+</div>
 <div id="trackingOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10050;align-items:center;justify-content:center;padding:20px">
   <div class="auth-card" style="width:min(980px,96vw)">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
@@ -908,14 +1001,14 @@ async function loadReports(){
   const ids=data.map(r=>r.id);
   const {data:assignments,error:aerr}=await getSupabaseClient().from("report_assignments").select("id,report_id,member_id,status,assigned_at,accepted_at,ended_at,volunteer_minutes,members(full_name)").in("report_id",ids);
   if(aerr) console.error(aerr);
-  const workflowName={new:"جديد",dispatched:"تم الترحيل",in_progress:"قيد التنفيذ",completed:"مكتمل",cancelled:"ملغي"};
+  const workflowName={new:"جديد",dispatched:"تم الترحيل",in_progress:"جاري التعامل",arrived:"تم الوصول",completed:"مغلق",cancelled:"ملغي"};
   list.innerHTML=`<h2 style="margin-top:0">البلاغات الواردة</h2>`+data.map(r=>{
     const ra=(assignments||[]).filter(a=>a.report_id===r.id);
     const assignmentHtml=ra.length?`<div class="assignment-list"><b>الأعضاء المرحل إليهم:</b><br>${ra.map(a=>`${esc(a.members?.full_name||"عضو")} — ${assignmentStatusName(a.status)}${a.volunteer_minutes?` — ${formatMinutes(a.volunteer_minutes)}`:""}`).join("<br>")}</div>`:"";
     const wf=r.workflow_status||"new";
-    const actions=wf==="completed"||wf==="cancelled"?"":`<div class="row-actions">${wf==="new"||wf==="dispatched"?`<button class="success" onclick="openDispatch('${r.id}')">ترحيل البلاغ</button>`:""}${wf==="dispatched"||wf==="in_progress"?`<button onclick="openTracking('${r.id}')">التتبع المباشر</button>`:""}<button class="danger" onclick="cancelReport('${r.id}')">إلغاء البلاغ</button>${wf==="dispatched"||wf==="in_progress"?`<button onclick="closeWholeReport('${r.id}')">إيقاف البلاغ كاملًا</button>`:""}</div>`;
+    const actions=`<div class="row-actions">${wf!=="completed"&&wf!=="cancelled"?`${wf==="new"||wf==="dispatched"?`<button class="success" onclick="openDispatch('${r.id}')">توزيع البلاغ</button>`:""}<button onclick="openTracking('${r.id}')">التتبع المباشر</button><button class="danger" onclick="cancelReport('${r.id}')">إلغاء البلاغ</button>`:""}</div><div class="status-actions"><button class="${wf==="new"?"active":""}" onclick="setReportWorkflow('${r.id}','new')">جديد</button><button class="${wf==="in_progress"?"active":""}" onclick="setReportWorkflow('${r.id}','in_progress')">جاري التعامل</button><button class="${wf==="arrived"?"active":""}" onclick="setReportWorkflow('${r.id}','arrived')">تم الوصول</button><button class="${wf==="completed"?"active":""}" onclick="setReportWorkflow('${r.id}','completed')">مغلق</button></div>`;
     return `<div class="report-row">
-      <h3>بلاغ ${esc(r.name||"بدون اسم")} <span class="status-pill">${workflowName[wf]||esc(wf)}</span></h3>
+      <h3>${esc(r.report_number||"بلاغ")} — ${esc(r.name||"بدون اسم")} <span class="status-pill">${workflowName[wf]||esc(wf)}</span></h3>
       <div class="report-meta">
         <div><b>رقم الجوال:</b> ${esc(r.phone||"")}</div><div><b>الموقع:</b> ${esc(r.location||"")}</div>
         <div><b>نوع البلاغ:</b> ${r.report_type==="rescue"?"إنقاذ":esc(r.report_type||"")}</div><div><b>الأولوية:</b> ${esc(r.priority||"normal")}</div>
@@ -1025,7 +1118,7 @@ async function loadMyAssignments(){
   if(error){console.error(error);box.innerHTML="<p>تعذر تحميل المهام.</p>";return;}
   const pending=(data||[]).filter(a=>a.status==="assigned").length;
   const alertHtml=pending?`<div class="task-alert">لديك ${pending} بلاغ جديد بانتظار قبولك.</div>`:"";
-  box.innerHTML=alertHtml+((data||[]).map(a=>{const r=a.reports||{};const live=a.status==="accepted"?`<div style="margin-top:10px">الوقت الحالي: <span class="timer live-timer" data-start="${esc(a.accepted_at)}">00:00:00</span> <span class="tracking-status live"><span class="tracking-dot"></span>التتبع يعمل تلقائيًا</span></div>`:"";const consent=a.status==="assigned"?`<div class="tracking-consent"><b>مشاركة الموقع أثناء المهمة:</b> عند الضغط على «قبول وبدء المهمة» سيطلب الجهاز السماح بالموقع، وبعد الموافقة يتم إرسال موقعك للإدارة طوال بقاء المهمة نشطة. لا يوجد زر داخل المنصة لإيقاف التتبع أثناء المهمة.</div>`:"";const btn=a.status==="assigned"?`<button class="btn success" onclick="acceptAssignment('${a.id}')">قبول وبدء المهمة ومشاركة موقعي</button>`:a.status==="accepted"?`<span class="tracking-status live"><span class="tracking-dot"></span>مشاركة الموقع إلزامية أثناء المهمة</span>`:"";return `<div class="task-card"><h3 style="margin-top:0">بلاغ: ${esc(r.description||"بلاغ إنقاذ")}</h3><div class="member-meta"><div><b>الحالة:</b> ${assignmentStatusName(a.status)}</div><div><b>الموقع:</b> ${esc(r.location||"")}</div><div><b>وقت الإرسال:</b> ${esc(formatDateTime(a.assigned_at))}</div><div><b>وقت القبول:</b> ${a.accepted_at?esc(formatDateTime(a.accepted_at)):"—"}</div><div><b>الساعات المحتسبة:</b> ${formatMinutes(a.volunteer_minutes||0)}</div></div>${live}<div class="report-desc">${esc(r.description||"")}</div>${consent}<div class="row-actions">${btn}</div></div>`;}).join(""))||"<p>لا توجد بلاغات مرسلة لك حاليًا.</p>";refreshLiveTimers();
+  box.innerHTML=alertHtml+((data||[]).map(a=>{const r=a.reports||{};const live=a.status==="accepted"?`<div style="margin-top:10px">الوقت الحالي: <span class="timer live-timer" data-start="${esc(a.accepted_at)}">00:00:00</span> <span class="tracking-status live"><span class="tracking-dot"></span>التتبع يعمل تلقائيًا</span></div>`:"";const consent=a.status==="assigned"?`<div class="tracking-consent"><b>مشاركة الموقع أثناء المهمة:</b> عند الضغط على «قبول وبدء المهمة» سيطلب الجهاز السماح بالموقع، وبعد الموافقة يتم إرسال موقعك للإدارة طوال بقاء المهمة نشطة. لا يوجد زر داخل المنصة لإيقاف التتبع أثناء المهمة.</div>`:"";const btn=a.status==="assigned"?`<button class="btn success" onclick="acceptAssignment('${a.id}')">قبول وبدء المهمة ومشاركة موقعي</button>`:a.status==="accepted"?`<button class="btn success" onclick="markMyArrival(\'${a.id}\')">تسجيل الوصول للموقع</button><span class="tracking-status live"><span class="tracking-dot"></span>مشاركة الموقع إلزامية أثناء المهمة</span>`:"";return `<div class="task-card"><h3 style="margin-top:0">بلاغ: ${esc(r.description||"بلاغ إنقاذ")}</h3><div class="member-meta"><div><b>الحالة:</b> ${assignmentStatusName(a.status)}</div><div><b>الموقع:</b> ${esc(r.location||"")}</div><div><b>وقت الإرسال:</b> ${esc(formatDateTime(a.assigned_at))}</div><div><b>وقت القبول:</b> ${a.accepted_at?esc(formatDateTime(a.accepted_at)):"—"}</div><div><b>الساعات المحتسبة:</b> ${formatMinutes(a.volunteer_minutes||0)}</div></div>${live}<div class="report-desc">${esc(r.description||"")}</div>${consent}<div class="row-actions">${btn}</div></div>`;}).join(""))||"<p>لا توجد بلاغات مرسلة لك حاليًا.</p>";refreshLiveTimers();
   const active=(data||[]).find(a=>a.status==="accepted");
   if(active) ensureLocationTracking(active.id); else stopLocationTracking();
 }
@@ -1089,24 +1182,51 @@ async function refreshTracking(){
 
 async function logoutUser(){stopLocationTracking();await getSupabaseClient().auth.signOut();document.getElementById("adminPanel").style.display="none";location.reload();}
 
-async function openReport(){
-  const name=prompt("اكتب اسمك:"); if(!name)return;
-  const phone=prompt("اكتب رقم الجوال:"); if(!phone)return;
-  const location=prompt("اكتب موقع البلاغ:"); if(!location)return;
-  const description=prompt("اكتب وصف البلاغ:"); if(!description)return;
-  try{
-    const client=getSupabaseClient();
-    const {error}=await Promise.race([
-      client.from("reports").insert([{name,phone,location,description,report_type:"rescue"}]),
-      new Promise((_,reject)=>setTimeout(()=>reject(new Error("TIMEOUT")),15000))
-    ]);
-    if(error){console.error(error);alert("حدث خطأ أثناء إرسال البلاغ: "+(error.message||""));return;}
-    alert("تم إرسال البلاغ بنجاح.");
-  }catch(e){
-    console.error(e);
-    alert(e?.message==="TIMEOUT"?"تعذر الاتصال بالنظام خلال المهلة المحددة.":"تعذر تشغيل الاتصال: "+(e?.message||"خطأ غير معروف"));
-  }
+
+let reportMapInstance=null,reportMapMarker=null,reportLat=null,reportLng=null,operationsMap=null,operationsLayer=null,deferredPwaPrompt=null;
+
+function openEmergency(){document.getElementById("emergencyOverlay").style.display="flex";document.getElementById("emergencyMsg").textContent="";}
+function closeEmergency(){document.getElementById("emergencyOverlay").style.display="none";}
+async function startEmergencyReport(){
+  const msg=document.getElementById("emergencyMsg");msg.textContent="جاري تحديد موقعك...";
+  try{const p=await requestInitialPosition();closeEmergency();openReport("rescue");setReportCoordinates(p.coords.latitude,p.coords.longitude,true);}
+  catch(e){msg.textContent="تعذر تحديد الموقع. اسمح للموقع بالوصول إلى موقعك ثم حاول مرة أخرى.";}
 }
+function openReport(type="rescue"){
+  document.getElementById("reportOverlay").style.display="flex";document.getElementById("reportType").value=type||"rescue";document.getElementById("reportMsg").textContent="";document.getElementById("reportSuccess").innerHTML="";
+  setTimeout(()=>{if(!reportMapInstance){reportMapInstance=L.map("reportMap").setView([24.7136,46.6753],6);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}).addTo(reportMapInstance);reportMapInstance.on("click",e=>setReportCoordinates(e.latlng.lat,e.latlng.lng,true));}reportMapInstance.invalidateSize();},150);
+}
+function closeReport(){document.getElementById("reportOverlay").style.display="none";}
+function setReportCoordinates(lat,lng,center=false){reportLat=Number(lat);reportLng=Number(lng);document.getElementById("reportCoords").textContent=`الإحداثيات: ${reportLat.toFixed(6)}, ${reportLng.toFixed(6)}`;if(reportMapInstance){if(reportMapMarker)reportMapMarker.setLatLng([reportLat,reportLng]);else reportMapMarker=L.marker([reportLat,reportLng]).addTo(reportMapInstance);if(center)reportMapInstance.setView([reportLat,reportLng],16);}}
+async function useCurrentReportLocation(){try{const p=await requestInitialPosition();setReportCoordinates(p.coords.latitude,p.coords.longitude,true);}catch(e){alert("تعذر تحديد موقعك. تحقق من إذن الموقع في المتصفح.");}}
+document.addEventListener("change",e=>{if(e.target?.id==="reportMedia"){const fs=[...e.target.files];document.getElementById("reportMediaPreview").innerHTML=fs.map(f=>`<span>${esc(f.name)} (${Math.ceil(f.size/1024)}KB)</span>`).join("");}});
+async function uploadReportMedia(reportId,files){const client=getSupabaseClient();const urls=[];for(const f of files){if(f.size>20*1024*1024)throw new Error("حجم كل ملف يجب ألا يتجاوز 20MB.");const ext=(f.name.split(".").pop()||"bin").toLowerCase(),path=`${reportId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;const {error}=await client.storage.from("report-media").upload(path,f,{contentType:f.type,upsert:false});if(error)throw error;const {data}=client.storage.from("report-media").getPublicUrl(path);urls.push({url:data.publicUrl,media_type:f.type||null});}if(urls.length){const {error}=await client.from("report_media").insert(urls.map(x=>({report_id:reportId,file_url:x.url,media_type:x.media_type})));if(error)throw error;}}
+async function submitPublicReport(){
+  const name=document.getElementById("reportName").value.trim(),phone=document.getElementById("reportPhone").value.trim(),type=document.getElementById("reportType").value,region=document.getElementById("reportRegion").value.trim(),description=document.getElementById("reportDescription").value.trim(),location=document.getElementById("reportLocationText").value.trim(),msg=document.getElementById("reportMsg"),files=[...document.getElementById("reportMedia").files];
+  if(!phone||!description){msg.textContent="رقم الجوال ووصف الحالة مطلوبان.";return;}if(!/^05\d{8}$/.test(phone)){msg.textContent="رقم الجوال يجب أن يكون بصيغة 05XXXXXXXX.";return;}
+  msg.textContent="جاري إرسال البلاغ...";
+  const {data,error}=await getSupabaseClient().rpc("create_public_report",{p_name:name||"مبلغ",p_phone:phone,p_report_type:type,p_description:description,p_location:location||null,p_region:region||null,p_latitude:reportLat,p_longitude:reportLng});
+  if(error){console.error(error);msg.textContent="تعذر إرسال البلاغ: "+error.message;return;}
+  const row=Array.isArray(data)?data[0]:data;try{if(files.length)await uploadReportMedia(row.report_id,files);}catch(e){console.error(e);msg.textContent="تم إنشاء البلاغ لكن تعذر رفع بعض المرفقات: "+e.message;}
+  document.getElementById("reportSuccess").innerHTML=`<div class="report-number-box">تم إرسال البلاغ بنجاح<br>رقم المتابعة<br><b>${esc(row.report_number)}</b><br><small>احتفظ بهذا الرقم لمتابعة البلاغ.</small></div>`;if(!files.length)msg.textContent="";loadPublicStats();
+}
+async function loadPublicStats(){const {data,error}=await getSupabaseClient().rpc("get_public_stats");if(error){console.warn("stats",error);await loadPublicReportCount();return;}const s=Array.isArray(data)?data[0]:data;if(!s)return;const map={publicReportCount:s.total_reports,statRescues:s.completed_reports,statVolunteers:s.volunteers,statHours:s.volunteer_hours,statRegions:s.regions_served,achRescues:s.completed_reports,achVolunteers:s.volunteers,achHours:s.volunteer_hours,achRegions:s.regions_served};for(const [id,v] of Object.entries(map)){const el=document.getElementById(id);if(el)el.textContent=Number(v||0).toLocaleString("ar-SA");}}
+async function loadPublicMissingPersons(){const box=document.getElementById("publicMissingPersons");if(!box)return;const {data,error}=await getSupabaseClient().rpc("get_public_missing_persons");if(error){box.innerHTML="<p>لا توجد بلاغات مفقودين متاحة حاليًا.</p>";return;}box.innerHTML=(data||[]).map(m=>`<article class="missing-card">${m.photo_url?`<img src="${esc(m.photo_url)}" alt="${esc(m.full_name)}">`:""}<div class="missing-body"><h3>${esc(m.full_name)}</h3><p>${m.age?`العمر: ${esc(m.age)}<br>`:""}آخر مكان شوهد فيه: ${esc(m.last_seen_location||"غير محدد")}</p><small>${esc(m.last_seen_at?formatDateTime(m.last_seen_at):"")}</small><div class="row-actions"><button class="btn light" onclick="openMissingInfo('${m.id}')">لدي معلومة</button><button class="share-btn" onclick="shareMissing('${m.id}','${esc(m.full_name)}')">مشاركة البلاغ</button></div></div></article>`).join("")||"<p>لا توجد بلاغات مفقودين نشطة.</p>";}
+function openMissingInfo(id){document.getElementById("missingInfoId").value=id;document.getElementById("missingInfoOverlay").style.display="flex";document.getElementById("missingInfoMsg").textContent="";}
+function closeMissingInfo(){document.getElementById("missingInfoOverlay").style.display="none";}
+async function submitMissingInfo(){const missing_person_id=document.getElementById("missingInfoId").value,name=document.getElementById("missingInfoName").value.trim(),phone=document.getElementById("missingInfoPhone").value.trim(),information=document.getElementById("missingInfoText").value.trim(),msg=document.getElementById("missingInfoMsg");if(!phone||!information){msg.textContent="رقم الجوال والمعلومة مطلوبان.";return;}const {error}=await getSupabaseClient().rpc("submit_missing_person_tip",{p_missing_person_id:missing_person_id,p_name:name||null,p_phone:phone,p_information:information});msg.textContent=error?"تعذر الإرسال: "+error.message:"تم إرسال المعلومة للإدارة. شكرًا لك.";}
+async function shareMissing(id,name){const url=location.origin+location.pathname+"#missing";const text=`بلاغ مفقود: ${name} - جمعية ليث للإنقاذ`;if(navigator.share)await navigator.share({title:text,text,url});else{await navigator.clipboard.writeText(text+" "+url);alert("تم نسخ رابط البلاغ.");}}
+async function setReportWorkflow(id,status){const {error}=await getSupabaseClient().rpc("set_report_workflow_status",{p_report_id:id,p_status:status});if(error){alert("تعذر تحديث الحالة: "+error.message);return;}await loadReports();}
+async function markMyArrival(id){let pos=null;try{pos=await requestInitialPosition();}catch(e){}const {error}=await getSupabaseClient().rpc("mark_assignment_arrived",{p_assignment_id:id,p_latitude:pos?.coords?.latitude??null,p_longitude:pos?.coords?.longitude??null});if(error){alert("تعذر تسجيل الوصول: "+error.message);return;}await loadMyAssignments();}
+async function openOperationsMap(){document.getElementById("operationsMapOverlay").style.display="flex";if(!operationsMap){operationsMap=L.map("operationsMap").setView([24.7136,46.6753],6);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}).addTo(operationsMap);operationsLayer=L.layerGroup().addTo(operationsMap);}setTimeout(()=>operationsMap.invalidateSize(),100);await refreshOperationsMap();}
+function closeOperationsMap(){document.getElementById("operationsMapOverlay").style.display="none";}
+async function refreshOperationsMap(){if(!operationsLayer)return;const type=document.getElementById("opsTypeFilter")?.value||"",region=document.getElementById("opsRegionFilter")?.value.trim()||"";const {data,error}=await getSupabaseClient().rpc("get_admin_operations_map");if(error){console.error(error);return;}operationsLayer.clearLayers();const b=[];for(const x of (data||[])){if(type&&x.report_type!==type)continue;if(region&&!String(x.region||"").includes(region))continue;if(x.latitude==null||x.longitude==null)continue;const ll=[Number(x.latitude),Number(x.longitude)];b.push(ll);L.marker(ll).bindPopup(`<b>${esc(x.report_number||"بلاغ")}</b><br>${esc(x.description||"")}<br>${esc(x.region||"")}`).addTo(operationsLayer);}if(b.length)operationsMap.fitBounds(b,{padding:[30,30],maxZoom:13});}
+async function showAdminAnalytics(){document.getElementById("adminAnalyticsOverlay").style.display="flex";const box=document.getElementById("adminAnalyticsContent");box.innerHTML="<p>جاري تحميل الإحصائيات...</p>";const {data,error}=await getSupabaseClient().rpc("get_admin_analytics");if(error){box.innerHTML="<p>تعذر تحميل الإحصائيات: "+esc(error.message)+"</p>";return;}const a=Array.isArray(data)?data[0]:data;box.innerHTML=`<div class="live-stats"><div class="live-stat"><b>${Number(a?.total_reports||0).toLocaleString("ar-SA")}</b><span>إجمالي البلاغات</span></div><div class="live-stat"><b>${Number(a?.completed_reports||0).toLocaleString("ar-SA")}</b><span>مغلقة</span></div><div class="live-stat"><b>${Number(a?.avg_response_minutes||0).toLocaleString("ar-SA")}</b><span>متوسط الاستجابة/دقيقة</span></div><div class="live-stat"><b>${Number(a?.volunteers||0).toLocaleString("ar-SA")}</b><span>متطوعون</span></div></div><h3>أكثر المناطق بلاغًا</h3><pre style="white-space:pre-wrap;font-family:inherit">${esc(JSON.stringify(a?.top_regions||{},null,2))}</pre><h3>أنواع البلاغات</h3><pre style="white-space:pre-wrap;font-family:inherit">${esc(JSON.stringify(a?.report_types||{},null,2))}</pre>`;}
+function closeAdminAnalytics(){document.getElementById("adminAnalyticsOverlay").style.display="none";}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPwaPrompt=e;const b=document.getElementById("pwaInstallBtn");if(b)b.style.display="block";});
+document.addEventListener("click",async e=>{if(e.target?.id==="pwaInstallBtn"&&deferredPwaPrompt){deferredPwaPrompt.prompt();await deferredPwaPrompt.userChoice;deferredPwaPrompt=null;e.target.style.display="none";}});
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));}
+
 
 
 let adminReportPollHandle=null, lastAdminReportCount=null, heroSlideTimer=null, leaderboardPollHandle=null;
@@ -1141,7 +1261,7 @@ window.addEventListener("DOMContentLoaded",async()=>{
   try{
     const client=getSupabaseClient();
     await loadSiteSettings();
-    await Promise.all([loadPublicPosts(),loadPublicReportCount(),loadHeroSlides(),loadPublicLeaderboard()]);
+    await Promise.all([loadPublicPosts(),loadPublicStats(),loadHeroSlides(),loadPublicLeaderboard(),loadPublicMissingPersons()]);
     startPublicLeaderboardUpdates();
     const {data:{session}}=await Promise.race([
       client.auth.getSession(),

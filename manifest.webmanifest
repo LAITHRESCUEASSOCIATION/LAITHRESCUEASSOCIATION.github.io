@@ -1,0 +1,11 @@
+{
+  "name":"جمعية ليث للإنقاذ",
+  "short_name":"ليث",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#ffffff",
+  "theme_color":"#17232d",
+  "lang":"ar",
+  "dir":"rtl",
+  "description":"منصة جمعية ليث للإنقاذ للبلاغات والمتطوعين والمهام."
+}
