@@ -677,6 +677,9 @@ let trackingMap=null;
 let trackingLayer=null;
 let trackingPollHandle=null;
 let trackingReportId=null;
+let realtimeChannel=null;
+let realtimeRefreshTimer=null;
+let realtimeConnected=false;
 async function uploadSiteImage(file,prefix){
   if(!file) return null;
   const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
@@ -926,6 +929,7 @@ async function loginVolunteer(){
       await loadSiteSettings();
       await loadAdminPosts();
       await loadAdminSlides();
+      await startRealtimeUpdates();
       startAdminReportAlerts();
       return;
     }
@@ -940,6 +944,7 @@ async function loginVolunteer(){
     closeAuth();
     currentIsAdmin=false;
     updateSessionNav(true);
+    await startRealtimeUpdates();
     await resumeActiveVolunteerTracking();
     window.scrollTo({top:0,behavior:"smooth"});
   }catch(err){
@@ -1119,7 +1124,7 @@ async function openMemberDashboard(){
   document.getElementById("backToAdminBtn").style.display=currentIsAdmin?"inline-flex":"none";
   document.getElementById("backToHomeBtn").style.display=currentIsAdmin?"none":"inline-flex";
   await Promise.all([loadMyProfile(),loadMyAssignments(),loadMemberDirectory(),loadMyAchievements()]);
-  if(taskTimerHandle)clearInterval(taskTimerHandle);taskTimerHandle=setInterval(refreshLiveTimers,1000);if(taskPollHandle)clearInterval(taskPollHandle);taskPollHandle=setInterval(loadMyAssignments,20000);refreshLiveTimers();
+  if(taskTimerHandle)clearInterval(taskTimerHandle);taskTimerHandle=setInterval(refreshLiveTimers,1000);if(taskPollHandle)clearInterval(taskPollHandle);taskPollHandle=setInterval(loadMyAssignments,60000);refreshLiveTimers();
 }
 async function loadMyProfile(){
   const box=document.getElementById("myProfileBox");box.innerHTML="<p>جاري تحميل الملف الشخصي...</p>";
@@ -1236,7 +1241,7 @@ async function refreshTracking(){
   if(bounds.length)trackingMap.fitBounds(bounds,{padding:[35,35],maxZoom:16});
 }
 
-async function logoutUser(){stopLocationTracking();await getSupabaseClient().auth.signOut();document.getElementById("adminPanel").style.display="none";location.reload();}
+async function logoutUser(){await stopRealtimeUpdates();stopLocationTracking();await getSupabaseClient().auth.signOut();document.getElementById("adminPanel").style.display="none";location.reload();}
 
 
 let reportMapInstance=null,reportMapMarker=null,reportLat=null,reportLng=null,operationsMap=null,operationsLayer=null,deferredPwaPrompt=null;
@@ -1342,6 +1347,56 @@ async function addHeroSlide(){const f=document.getElementById("heroSlideFile")?.
 async function toggleHeroSlide(id,v){const {error}=await getSupabaseClient().from("hero_slides").update({is_active:v}).eq("id",id);if(error){alert(error.message);return;}await Promise.all([loadAdminSlides(),loadHeroSlides()]);}
 async function deleteHeroSlide(id){if(!confirm("حذف الصورة من العرض؟"))return;const {error}=await getSupabaseClient().from("hero_slides").delete().eq("id",id);if(error){alert(error.message);return;}await Promise.all([loadAdminSlides(),loadHeroSlides()]);}
 function playNewReportSound(){try{const C=window.AudioContext||window.webkitAudioContext;const ctx=new C();const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.7);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.7);}catch(e){console.warn(e);}}
+function scheduleRealtimeOperationalRefresh(){
+  if(realtimeRefreshTimer)clearTimeout(realtimeRefreshTimer);
+  realtimeRefreshTimer=setTimeout(async()=>{
+    realtimeRefreshTimer=null;
+    const memberPanel=document.getElementById("memberPanel");
+    const reportsList=document.getElementById("reportsList");
+    const jobs=[];
+    if(memberPanel&&memberPanel.style.display==="block")jobs.push(loadMyAssignments());
+    if(currentIsAdmin&&reportsList&&reportsList.style.display!=="none")jobs.push(loadReports());
+    if(jobs.length)await Promise.allSettled(jobs);
+  },180);
+}
+function refreshRealtimeMessageThread(assignmentId){
+  if(!assignmentId)return;
+  const member=document.getElementById(`memberChatThread-${assignmentId}`);
+  const admin=document.getElementById(`adminChatThread-${assignmentId}`);
+  if(member)loadTaskMessages(assignmentId,"member");
+  if(admin)loadTaskMessages(assignmentId,"admin");
+}
+async function stopRealtimeUpdates(){
+  const c=getSupabaseClient();
+  if(realtimeChannel){try{await c.removeChannel(realtimeChannel);}catch(e){console.warn("تعذر إيقاف Realtime",e);}realtimeChannel=null;}
+  realtimeConnected=false;
+}
+async function startRealtimeUpdates(){
+  const c=getSupabaseClient();
+  const {data:{session}}=await c.auth.getSession();
+  if(!session)return;
+  if(realtimeChannel)await stopRealtimeUpdates();
+  realtimeChannel=c.channel(`laith-live-${session.user.id}-${Date.now()}`)
+    .on("postgres_changes",{event:"*",schema:"public",table:"assignment_messages"},payload=>{
+      const assignmentId=payload?.new?.assignment_id||payload?.old?.assignment_id;
+      refreshRealtimeMessageThread(assignmentId);
+    })
+    .on("postgres_changes",{event:"*",schema:"public",table:"report_assignments"},()=>{
+      scheduleRealtimeOperationalRefresh();
+    })
+    .on("postgres_changes",{event:"*",schema:"public",table:"reports"},()=>{
+      scheduleRealtimeOperationalRefresh();
+      if(currentIsAdmin){loadPublicStats();loadPublicReportCount();}
+    })
+    .on("postgres_changes",{event:"*",schema:"public",table:"report_media"},()=>{
+      scheduleRealtimeOperationalRefresh();
+    })
+    .subscribe(status=>{
+      realtimeConnected=status==="SUBSCRIBED";
+      if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")console.warn("اتصال التحديث اللحظي غير متاح مؤقتًا:",status);
+    });
+}
+
 async function pollAdminNewReports(){if(!currentIsAdmin)return;const {data,error}=await getSupabaseClient().rpc("get_public_report_count");if(error)return;const n=Number(data||0);if(lastAdminReportCount!==null&&n>lastAdminReportCount){const a=document.getElementById("adminNewReportAlert");if(a){a.style.display="block";a.textContent=`ورد ${n-lastAdminReportCount} بلاغ جديد إلى المنصة.`;}playNewReportSound();if(document.getElementById("reportsList")?.style.display!=="none")loadReports();}lastAdminReportCount=n;}
 function startAdminReportAlerts(){if(adminReportPollHandle)clearInterval(adminReportPollHandle);pollAdminNewReports();adminReportPollHandle=setInterval(pollAdminNewReports,10000);}
 function openAchievementAdmin(memberId){document.getElementById("achievementMemberId").value=memberId;document.getElementById("achievementTitle").value="";document.getElementById("achievementDescription").value="";document.getElementById("achievementFile").value="";document.getElementById("achievementMsg").textContent="";document.getElementById("achievementOverlay").style.display="flex";}
@@ -1371,10 +1426,11 @@ window.addEventListener("DOMContentLoaded",async()=>{
       await loadSiteSettings();
       await loadAdminPosts();
       await loadAdminSlides();
+      await startRealtimeUpdates();
       startAdminReportAlerts();
     }else{
       const {data:m}=await client.from("members").select("account_status").eq("id",session.user.id).maybeSingle();
-      if(m?.account_status==="approved"){currentIsAdmin=false;updateSessionNav(true);await resumeActiveVolunteerTracking();}
+      if(m?.account_status==="approved"){currentIsAdmin=false;updateSessionNav(true);await startRealtimeUpdates();await resumeActiveVolunteerTracking();}
     }
   }catch(e){
     console.error("Supabase startup error:",e);
