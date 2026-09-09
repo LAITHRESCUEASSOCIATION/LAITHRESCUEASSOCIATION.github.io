@@ -1713,11 +1713,11 @@ function renderOpsCenter(d){
   document.getElementById("opsCallsList").innerHTML=calls.map(c=>{const p=priorityMeta(c.priority_level);return `<div class="call-card ${c.priority_level==="critical"?"urgent":""}"><div><b>نداء البلاغ #${esc(c.report_number)}</b> <span class="priority-pill ${p[1]}">${p[2]} ${p[0]}</span></div><small>${esc(c.report_type||"")} · ${esc(c.region||"—")} · ${esc(formatDateTime(c.created_at))}</small><div style="margin-top:8px"><span class="response-chip">✅ يستطيع: ${esc(c.can_count||0)}</span><span class="response-chip">❌ لا يستطيع: ${esc(c.cannot_count||0)}</span><span class="response-chip">⏱️ متأخر: ${esc(c.delayed_count||0)}</span><span class="response-chip">… بانتظار: ${esc(c.pending_count||0)}</span></div><div style="margin-top:9px">${(c.responses||[]).map(x=>`<div class="resource-card"><b>${esc(x.member_name||"متطوع")}</b> — ${esc(responseArabic(x.response_status,x.delay_minutes))}${x.responded_at?`<br><small>${esc(formatDateTime(x.responded_at))}</small>`:""}</div>`).join("")||"<small>لا توجد ردود حتى الآن.</small>"}</div></div>`}).join("")||"<small>لا توجد نداءات استجابة مفتوحة.</small>";
 
   const teams=d.teams||[];
+  const volunteers=d.volunteers||[];
   window.__opsTeams=teams;
   window.__opsVolunteers=volunteers;
   document.getElementById("opsTeamsList").innerHTML=teams.map(t=>`<div class="team-card"><b>🔵 ${esc(t.name)}</b><br><small>${esc(t.team_type||"")} · ${esc(t.region||"كل المناطق")} · ${Number(t.member_count||0)} أعضاء${t.leader_name?` · القائد: ${esc(t.leader_name)}`:""}</small><div class="row-actions" style="margin-top:9px"><button class="btn light" onclick="openTeamManager('${t.id}')">إدارة الأعضاء</button><button class="btn danger" onclick="deleteTeamDirect('${t.id}','${escJs(t.name)}')">حذف الفريق</button></div></div>`).join("")||"<small>لا توجد فرق مسجلة.</small>";
 
-  const volunteers=d.volunteers||[];
   document.getElementById("opsVolunteersList").innerHTML=volunteers.map(v=>`<div class="resource-card"><b>${esc(v.full_name)}</b> · ${esc(readinessArabic(v.availability_status))}<br><small>${esc(v.specialty||"متطوع")} · ${esc(v.team_name||"بدون فريق")}${v.location_at?` · آخر موقع ${esc(formatDateTime(v.location_at))}`:""}</small></div>`).join("")||"<small>لا توجد بيانات متطوعين.</small>";
 
   const vehicles=d.vehicles||[];
