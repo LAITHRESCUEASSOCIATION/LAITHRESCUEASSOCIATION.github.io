@@ -320,6 +320,19 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 }
 </style>
 
+
+<style id="laith-asset-management-styles">
+.asset-photo{width:100%;height:180px;object-fit:cover;border-radius:14px;margin-bottom:10px;background:#eef2f3}
+.asset-grid-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.asset-card .asset-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.asset-card select{min-width:150px}
+.saudi-plate{
+  display:inline-flex;align-items:center;gap:7px;background:#fff;border:2px solid #252b2e;
+  border-radius:7px;padding:4px 9px;font-weight:800;direction:rtl;margin-top:6px
+}
+.asset-required-note{font-size:12px;color:#6a767c}
+</style>
+
 </head>
 <body>
 <header><div class="wrap nav">
@@ -1646,7 +1659,82 @@ window.addEventListener("DOMContentLoaded",async()=>{
       </section>
       <section id="ops-teams" class="ops-panel"><div class="ops-two"><div class="ops-box"><h3>الفرق المتحركة</h3><div id="opsTeamsList"></div></div><div class="ops-box"><h3>إنشاء فريق</h3><div class="form-grid-ops"><input id="teamName" placeholder="اسم الفريق"><select id="teamType"><option value="rescue">إنقاذ</option><option value="search">بحث</option><option value="medical">إسعاف</option><option value="logistics">دعم لوجستي</option><option value="general">عام</option></select><input id="teamRegion" placeholder="منطقة التغطية"><button class="btn full" onclick="createOpsTeam()">إنشاء الفريق</button></div></div></div></section>
       <section id="ops-volunteers" class="ops-panel"><div class="ops-box"><h3>جاهزية المتطوعين</h3><div id="opsVolunteersList"></div></div></section>
-      <section id="ops-assets" class="ops-panel"><div class="ops-two"><div class="ops-box"><h3>المركبات</h3><div id="opsVehicles"></div></div><div class="ops-box"><h3>المعدات</h3><div id="opsEquipment"></div></div></section>
+      
+<section id="ops-assets" class="ops-panel">
+  <div class="ops-two">
+    <div class="ops-box">
+      <h3>المركبات</h3>
+      <div class="cms-box" style="margin-bottom:14px">
+        <h4>تسجيل مركبة جديدة</h4>
+        <div class="form-grid-ops">
+          <div>
+            <label>شركة المركبة *</label>
+            <input id="vehicleBrand" list="vehicleBrandsList" autocomplete="off" placeholder="اكتب للبحث، مثال: تويوتا" oninput="updateVehicleModels()" required>
+            <datalist id="vehicleBrandsList"></datalist>
+          </div>
+          <div>
+            <label>نوع / طراز السيارة *</label>
+            <input id="vehicleModel" list="vehicleModelsList" autocomplete="off" placeholder="اكتب للبحث، مثال: لاندكروزر" required>
+            <datalist id="vehicleModelsList"></datalist>
+          </div>
+          <div>
+            <label>موديل السنة *</label>
+            <input id="vehicleYear" list="vehicleYearsList" inputmode="numeric" autocomplete="off" placeholder="مثال: 2026" required>
+            <datalist id="vehicleYearsList"></datalist>
+          </div>
+          <div>
+            <label>صورة المركبة *</label>
+            <input id="vehicleImage" type="file" accept="image/*" onchange="previewVehicleImage()" required>
+          </div>
+          <div class="full" id="vehicleImagePreviewWrap" style="display:none">
+            <img id="vehicleImagePreview" alt="معاينة المركبة" style="width:100%;max-height:260px;object-fit:cover;border-radius:14px">
+          </div>
+          <div>
+            <label>حروف اللوحة السعودية — 3 حروف *</label>
+            <input id="vehiclePlateLetters" maxlength="5" autocomplete="off" placeholder="مثال: أ ب ج" oninput="formatSaudiPlateLetters(this)" required>
+          </div>
+          <div>
+            <label>أرقام اللوحة — 4 أرقام *</label>
+            <input id="vehiclePlateNumbers" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="مثال: 1234" oninput="formatSaudiPlateNumbers(this)" required>
+          </div>
+          <button type="button" id="addVehicleBtn" class="btn full" onclick="addVehicleAsset()">إضافة المركبة</button>
+        </div>
+        <small style="display:block;margin-top:8px">جميع البيانات أعلاه إلزامية. ويمكنك الكتابة داخل القوائم للبحث بسرعة.</small>
+      </div>
+      <div id="opsVehicles"><small>جاري تحميل المركبات...</small></div>
+    </div>
+
+    <div class="ops-box">
+      <h3>المعدات</h3>
+      <div class="cms-box" style="margin-bottom:14px">
+        <h4>إضافة معدة جديدة</h4>
+        <div class="form-grid-ops">
+          <div>
+            <label>اسم المعدة *</label>
+            <input id="equipmentName" autocomplete="off" placeholder="مثال: جهاز إنعاش" required>
+          </div>
+          <div>
+            <label>مكان وجود المعدة *</label>
+            <input id="equipmentLocation" autocomplete="off" placeholder="مثال: مستودع الجمعية / مركبة 1" required>
+          </div>
+          <div>
+            <label>حالة المعدة *</label>
+            <select id="equipmentStatus" required>
+              <option value="available">جاهزة</option>
+              <option value="in_use">قيد الاستخدام</option>
+              <option value="maintenance">تحت الصيانة</option>
+              <option value="damaged">تالفة</option>
+              <option value="missing">مفقودة</option>
+              <option value="retired">مستبعدة من الخدمة</option>
+            </select>
+          </div>
+          <button type="button" id="addEquipmentBtn" class="btn full" onclick="addEquipmentAsset()">إضافة المعدة</button>
+        </div>
+      </div>
+      <div id="opsEquipment"><small>جاري تحميل المعدات...</small></div>
+    </div>
+  </div>
+</section>
       <section id="ops-timeline" class="ops-panel"><div class="ops-two"><div class="ops-box"><h3>اختر بلاغًا</h3><div id="opsTimelineReports"></div></div><div class="ops-box"><h3>السجل الزمني</h3><div id="opsTimeline" class="timeline"><small>اختر بلاغًا لعرض السجل.</small></div></div></section>
       <section id="ops-events" class="ops-panel"><div class="ops-box"><h3>آخر الأحداث</h3><div id="opsEvents"></div></div></section>
     </div>
@@ -1706,7 +1794,7 @@ async function openOpsCenter(){
   opsRefreshHandle=setInterval(()=>{if(opsCenterOpen)refreshOpsCenter(false)},10000);
 }
 function closeOpsCenter(){opsCenterOpen=false;document.getElementById("opsCenterOverlay").style.display="none";if(opsRefreshHandle)clearInterval(opsRefreshHandle);}
-function showOpsTab(name,btn){document.querySelectorAll(".ops-panel").forEach(x=>x.classList.remove("active"));document.querySelectorAll("[data-opstab]").forEach(x=>x.classList.remove("active"));document.getElementById("ops-"+name)?.classList.add("active");btn?.classList.add("active");if(name==="overview")setTimeout(()=>opsCenterMap?.invalidateSize(),50);}
+function showOpsTab(name,btn){document.querySelectorAll(".ops-panel").forEach(x=>x.classList.remove("active"));document.querySelectorAll("[data-opstab]").forEach(x=>x.classList.remove("active"));document.getElementById("ops-"+name)?.classList.add("active");btn?.classList.add("active");if(name==="overview")setTimeout(()=>opsCenterMap?.invalidateSize(),50);if(name==="assets")loadAssetsManagement().catch(e=>console.error(e));}
 
 async function refreshOpsCenter(showError=true){
   let data=null;
@@ -1737,8 +1825,7 @@ function renderOpsCenter(d){
   document.getElementById("opsVolunteersList").innerHTML=volunteers.map(v=>`<div class="resource-card"><b>${esc(v.full_name)}</b> · ${esc(readinessArabic(v.availability_status))}<br><small>${esc(v.specialty||"متطوع")} · ${esc(v.team_name||"بدون فريق")}${v.location_at?` · آخر موقع ${esc(formatDateTime(v.location_at))}`:""}</small></div>`).join("")||"<small>لا توجد بيانات متطوعين.</small>";
 
   const vehicles=d.vehicles||[];
-  document.getElementById("opsVehicles").innerHTML=vehicles.map(v=>`<div class="asset-card"><b>🚙 ${esc(v.name)}</b><br><small>${esc(v.plate_number||"بدون لوحة")} · ${esc(v.status||"غير محدد")}</small></div>`).join("")||"<small>لا توجد مركبات مسجلة.</small>";
-  const equipment=document.getElementById("opsEquipment"); if(equipment) equipment.innerHTML="<small>إدارة المعدات الذكية وQR ستكون في المرحلة التالية.</small>";
+  loadAssetsManagement().catch(e=>console.error("loadAssetsManagement",e));
 
   const shifts=d.shifts||[];
   document.getElementById("opsShiftsList").innerHTML=shifts.map(s=>`<div class="shift-card ${s.status==="active"?"active":""}"><b>${s.status==="active"?"🟢 المناوب الآن":"📅"} ${esc(s.title)}</b><br><small>${esc(s.team_name||"بدون فريق")} · القائد: ${esc(s.leader_name||"غير محدد")} · ${Number(s.member_count||0)} متطوع · المركبة: ${esc(s.vehicle_name||"غير محددة")} ${s.vehicle_plate?`(${esc(s.vehicle_plate)})`:""}</small><br><small>${esc(formatDateTime(s.starts_at))} — ${esc(formatDateTime(s.ends_at))}</small></div>`).join("")||"<small>لا توجد مناوبات حالية أو قادمة.</small>";
@@ -1917,6 +2004,234 @@ async function deleteTeamDirect(teamId,name){
   if(error){alert("تعذر حذف الفريق: "+error.message);return;}
   await refreshOpsCenter(false);
 }
+
+
+const VEHICLE_BRANDS_AR = [
+"تويوتا","لكزس","نيسان","إنفينيتي","هوندا","أكورا","مازدا","ميتسوبيشي","سوبارو","سوزوكي","إيسوزو",
+"هيونداي","كيا","جينيسيس","سانج يونج","مرسيدس بنز","بي إم دبليو","أودي","فولكس واجن","بورشه","أوبل",
+"فورد","لينكون","شيفروليه","جي إم سي","كاديلاك","دودج","جيب","كرايسلر","رام","تسلا",
+"لاند روفر","رينج روفر","جاكوار","بنتلي","رولز رويس","أستون مارتن","مكلارين","لوتس",
+"فولفو","بولستار","سكودا","سيات","كوبرا","بيجو","سيتروين","رينو","داسيا",
+"فيات","ألفا روميو","مازيراتي","فيراري","لامبورغيني",
+"شانجان","جيلي","هافال","جريت وول","تانك","إم جي","شيري","جيتور","إكسيد","بي واي دي","هونشي",
+"جي أيه سي","بايك","جاك","دونغ فينغ","ماكسيوس","فاو","لينك آند كو","زيكر","أومودا","جايكو",
+"إيفيكو","فوتون","مان","سكانيا","فولفو للشاحنات","مرسيدس للشاحنات"
+];
+
+const VEHICLE_MODELS_AR = {
+"تويوتا":["لاندكروزر","برادو","فورتشنر","هايلكس","شاص","راف فور","كورولا","كامري","يارس","هايلاندر","جرانفيا","إنوفا","رايز","كراون"],
+"لكزس":["LX","GX","RX","NX","UX","ES","LS","IS"],
+"نيسان":["باترول","باترول سفاري","إكس تريل","باثفايندر","إكستيرا","نافارا","صني","التيما","ماكسيما","كيكس"],
+"هيونداي":["توسان","سانتافي","باليسيد","كريتا","أكسنت","إلنترا","سوناتا","أزيرا","ستاريا"],
+"كيا":["سبورتاج","سورينتو","سيلتوس","تيلورايد","بيجاس","سيراتو","K5","K8","كارنفال"],
+"فورد":["إكسبيديشن","إكسبلورر","إيفرست","برونكو","إف-150","رينجر","تيريتوري","توروس"],
+"شيفروليه":["تاهو","سوبربان","ترافيرس","كابتيفا","سيلفرادو","جروف","ماليبو"],
+"جي إم سي":["يوكن","سييرا","أكاديا","تيرين"],
+"جيب":["رانجلر","جراند شيروكي","كومباس","جلاديتور"],
+"مرسيدس بنز":["G-Class","GLS","GLE","GLC","E-Class","C-Class","S-Class","V-Class","Sprinter"],
+"بي إم دبليو":["X7","X6","X5","X4","X3","X1","الفئة 7","الفئة 5","الفئة 3"],
+"أودي":["Q8","Q7","Q5","Q3","A8","A6","A4"],
+"فولكس واجن":["تيرامونت","طوارق","تيجوان","جولف","باسات"],
+"لاند روفر":["ديفندر","ديسكفري","ديسكفري سبورت"],
+"رينج روفر":["رينج روفر","رينج روفر سبورت","فيلار","إيفوك"],
+"مازدا":["CX-90","CX-60","CX-5","CX-30","مازدا 6","مازدا 3"],
+"ميتسوبيشي":["باجيرو","مونتيرو سبورت","أوتلاندر","إكليبس كروس","L200"],
+"إيسوزو":["D-Max","MU-X"],
+"سوزوكي":["جيمني","جراند فيتارا","فرونكس","سويفت","ديزاير"],
+"سوبارو":["فورستر","أوتباك","كروستريك","WRX"],
+"هافال":["H9","H6","H6 GT","جوليان"],
+"تانك":["300","500","700"],
+"شانجان":["CS95","CS85","CS75 Plus","CS55 Plus","UNI-K","UNI-T","UNI-V","السفن"],
+"جيلي":["مونجارو","أوكافانجو","كولراي","إمجراند","ستار راي"],
+"إم جي":["RX8","RX5","HS","ZS","GT","MG 5"],
+"جيتور":["T2","X90 Plus","X70 Plus","X70"],
+"شيري":["تيجو 9","تيجو 8","تيجو 7","تيجو 4","أريزو 8","أريزو 6"],
+"بي واي دي":["تانغ","سونغ بلس","هان","سيل","أتو 3"],
+"جي أيه سي":["GS8","GS4","إمكو","إمباو"],
+"تسلا":["Model X","Model Y","Model S","Model 3","Cybertruck"],
+"رام":["1500","2500","3500"]
+};
+
+function initVehicleLists(){
+  const brands=document.getElementById("vehicleBrandsList");
+  if(brands)brands.innerHTML=VEHICLE_BRANDS_AR.map(x=>`<option value="${esc(x)}"></option>`).join("");
+  const years=document.getElementById("vehicleYearsList");
+  if(years){
+    const now=new Date().getFullYear();
+    years.innerHTML=Array.from({length:70},(_,i)=>now+1-i).map(y=>`<option value="${y}"></option>`).join("");
+  }
+  updateVehicleModels();
+}
+function updateVehicleModels(){
+  const brand=(document.getElementById("vehicleBrand")?.value||"").trim();
+  const dl=document.getElementById("vehicleModelsList");
+  if(!dl)return;
+  const models=VEHICLE_MODELS_AR[brand]||[];
+  dl.innerHTML=models.map(x=>`<option value="${esc(x)}"></option>`).join("");
+}
+function normalizeArabicDigits(s){
+  const map={"٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9","۰":"0","۱":"1","۲":"2","۳":"3","۴":"4","۵":"5","۶":"6","۷":"7","۸":"8","۹":"9"};
+  return String(s||"").replace(/[٠-٩۰-۹]/g,d=>map[d]||d);
+}
+function formatSaudiPlateNumbers(el){
+  el.value=normalizeArabicDigits(el.value).replace(/\D/g,"").slice(0,4);
+}
+function formatSaudiPlateLetters(el){
+  el.value=String(el.value||"").replace(/[^\u0621-\u064A]/g,"").slice(0,3).split("").join(" ");
+}
+function normalizedPlateLetters(){
+  return String(document.getElementById("vehiclePlateLetters")?.value||"").replace(/\s+/g,"");
+}
+function previewVehicleImage(){
+  const input=document.getElementById("vehicleImage"),wrap=document.getElementById("vehicleImagePreviewWrap"),img=document.getElementById("vehicleImagePreview");
+  const file=input?.files?.[0];
+  if(!file){if(wrap)wrap.style.display="none";return;}
+  if(!file.type.startsWith("image/")){alert("اختر صورة للمركبة فقط.");input.value="";wrap.style.display="none";return;}
+  img.src=URL.createObjectURL(file);wrap.style.display="block";
+}
+function vehicleStatusArabic(v){
+  return ({available:"جاهزة",ready:"جاهزة",in_use:"قيد الاستخدام",maintenance:"تحت الصيانة",damaged:"متضررة",out_of_service:"خارج الخدمة"})[v]||v||"غير محدد";
+}
+function equipmentStatusArabic(v){
+  return ({available:"جاهزة",in_use:"قيد الاستخدام",maintenance:"تحت الصيانة",damaged:"تالفة",missing:"مفقودة",retired:"مستبعدة من الخدمة"})[v]||v||"غير محدد";
+}
+
+async function addVehicleAsset(){
+  const brand=(document.getElementById("vehicleBrand")?.value||"").trim();
+  const model=(document.getElementById("vehicleModel")?.value||"").trim();
+  const yearRaw=normalizeArabicDigits(document.getElementById("vehicleYear")?.value||"").trim();
+  const year=Number(yearRaw);
+  const letters=normalizedPlateLetters();
+  const numbers=normalizeArabicDigits(document.getElementById("vehiclePlateNumbers")?.value||"").trim();
+  const file=document.getElementById("vehicleImage")?.files?.[0];
+
+  if(!brand||!model||!yearRaw||!letters||!numbers||!file){alert("جميع بيانات المركبة إلزامية، بما فيها الصورة واللوحة.");return;}
+  if(!/^[\u0621-\u064A]{3}$/.test(letters)){alert("حروف اللوحة يجب أن تكون 3 حروف عربية بالضبط.");return;}
+  if(!/^\d{4}$/.test(numbers)){alert("أرقام اللوحة يجب أن تكون 4 أرقام بالضبط.");return;}
+  const maxYear=new Date().getFullYear()+1;
+  if(!Number.isInteger(year)||year<1950||year>maxYear){alert("اختر موديل سنة صحيح.");return;}
+  if(!file.type.startsWith("image/")){alert("ملف صورة المركبة غير صالح.");return;}
+
+  const btn=document.getElementById("addVehicleBtn");
+  btn.disabled=true;btn.textContent="جاري رفع الصورة وتسجيل المركبة...";
+  let uploadedPath=null;
+  try{
+    const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+    const uid=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+"-"+Math.random().toString(16).slice(2));
+    uploadedPath=`vehicles/${uid}.${ext}`;
+    const sb=getSupabaseClient();
+    const {error:upErr}=await sb.storage.from("asset-media").upload(uploadedPath,file,{cacheControl:"3600",upsert:false,contentType:file.type});
+    if(upErr)throw new Error("تعذر رفع صورة المركبة: "+upErr.message);
+    const {data:pub}=sb.storage.from("asset-media").getPublicUrl(uploadedPath);
+    const imageUrl=pub?.publicUrl;
+    if(!imageUrl)throw new Error("تعذر إنشاء رابط صورة المركبة.");
+
+    const {error}=await sb.rpc("create_vehicle_asset",{
+      p_manufacturer:brand,p_vehicle_model:model,p_model_year:year,
+      p_plate_letters:letters,p_plate_numbers:numbers,p_image_url:imageUrl
+    });
+    if(error)throw error;
+
+    document.getElementById("vehicleBrand").value="";
+    document.getElementById("vehicleModel").value="";
+    document.getElementById("vehicleYear").value="";
+    document.getElementById("vehiclePlateLetters").value="";
+    document.getElementById("vehiclePlateNumbers").value="";
+    document.getElementById("vehicleImage").value="";
+    document.getElementById("vehicleImagePreviewWrap").style.display="none";
+    updateVehicleModels();
+    alert("تمت إضافة المركبة بنجاح.");
+    await refreshOpsCenter(false);
+    await loadAssetsManagement();
+  }catch(e){
+    console.error(e);
+    alert(e?.message||String(e));
+    if(uploadedPath){
+      try{await getSupabaseClient().storage.from("asset-media").remove([uploadedPath]);}catch(_){}
+    }
+  }finally{
+    btn.disabled=false;btn.textContent="إضافة المركبة";
+  }
+}
+
+async function addEquipmentAsset(){
+  const name=(document.getElementById("equipmentName")?.value||"").trim();
+  const location=(document.getElementById("equipmentLocation")?.value||"").trim();
+  const status=document.getElementById("equipmentStatus")?.value||"available";
+  if(!name||!location||!status){alert("اسم المعدة وموقعها وحالتها بيانات إلزامية.");return;}
+  const btn=document.getElementById("addEquipmentBtn");
+  btn.disabled=true;btn.textContent="جاري إضافة المعدة...";
+  try{
+    const {error}=await getSupabaseClient().rpc("create_equipment_asset",{p_name:name,p_location:location,p_status:status});
+    if(error)throw error;
+    document.getElementById("equipmentName").value="";
+    document.getElementById("equipmentLocation").value="";
+    document.getElementById("equipmentStatus").value="available";
+    alert("تمت إضافة المعدة بنجاح.");
+    await loadAssetsManagement();
+  }catch(e){
+    console.error(e);alert("تعذر إضافة المعدة: "+(e?.message||e));
+  }finally{
+    btn.disabled=false;btn.textContent="إضافة المعدة";
+  }
+}
+async function updateEquipmentStatus(id,selectEl){
+  const old=selectEl.dataset.old||"";
+  const value=selectEl.value;
+  selectEl.disabled=true;
+  const {error}=await getSupabaseClient().rpc("update_equipment_status",{p_equipment_id:id,p_status:value});
+  selectEl.disabled=false;
+  if(error){selectEl.value=old;alert("تعذر تعديل حالة المعدة: "+error.message);return;}
+  selectEl.dataset.old=value;
+}
+async function updateVehicleStatus(id,selectEl){
+  const old=selectEl.dataset.old||"";
+  const value=selectEl.value;
+  selectEl.disabled=true;
+  const {error}=await getSupabaseClient().rpc("update_vehicle_status",{p_vehicle_id:id,p_status:value});
+  selectEl.disabled=false;
+  if(error){selectEl.value=old;alert("تعذر تعديل حالة المركبة: "+error.message);return;}
+  selectEl.dataset.old=value;
+  await refreshOpsCenter(false);
+}
+
+async function loadAssetsManagement(){
+  const vbox=document.getElementById("opsVehicles"),ebox=document.getElementById("opsEquipment");
+  if(!vbox||!ebox)return;
+  initVehicleLists();
+  const sb=getSupabaseClient();
+  const [{data:vehicles,error:vErr},{data:equipment,error:eErr}]=await Promise.all([
+    sb.from("vehicles").select("id,name,manufacturer,vehicle_model,model_year,plate_number,plate_letters,plate_numbers,image_url,status,created_at").order("created_at",{ascending:false}),
+    sb.from("equipment").select("id,name,location,status,created_at").order("created_at",{ascending:false})
+  ]);
+  if(vErr)vbox.innerHTML=`<small>تعذر تحميل المركبات: ${esc(vErr.message)}</small>`;
+  else vbox.innerHTML=(vehicles||[]).length?`<div class="asset-grid-list">${vehicles.map(v=>`
+    <div class="asset-card">
+      ${v.image_url?`<img class="asset-photo" src="${esc(v.image_url)}" alt="صورة ${esc(v.name||"المركبة")}" loading="lazy">`:""}
+      <b>🚙 ${esc(v.manufacturer||"")} ${esc(v.vehicle_model||v.name||"")}</b><br>
+      <small>موديل ${esc(v.model_year||"—")}</small><br>
+      <span class="saudi-plate">${esc(v.plate_letters||"")} &nbsp; ${esc(v.plate_numbers||v.plate_number||"")}</span>
+      <div class="asset-actions">
+        <select data-old="${esc(v.status||"available")}" onchange="updateVehicleStatus('${v.id}',this)">
+          ${[["available","جاهزة"],["in_use","قيد الاستخدام"],["maintenance","تحت الصيانة"],["damaged","متضررة"],["out_of_service","خارج الخدمة"]].map(([x,l])=>`<option value="${x}" ${x===(v.status||"available")?"selected":""}>${l}</option>`).join("")}
+        </select>
+      </div>
+    </div>`).join("")}</div>`:"<small>لا توجد مركبات مسجلة حتى الآن.</small>";
+
+  if(eErr)ebox.innerHTML=`<small>تعذر تحميل المعدات: ${esc(eErr.message)}</small>`;
+  else ebox.innerHTML=(equipment||[]).length?`<div class="asset-grid-list">${equipment.map(e=>`
+    <div class="asset-card">
+      <b>🧰 ${esc(e.name)}</b><br>
+      <small>الموقع: ${esc(e.location||"غير محدد")}</small>
+      <div class="asset-actions">
+        <select data-old="${esc(e.status||"available")}" onchange="updateEquipmentStatus('${e.id}',this)">
+          ${[["available","جاهزة"],["in_use","قيد الاستخدام"],["maintenance","تحت الصيانة"],["damaged","تالفة"],["missing","مفقودة"],["retired","مستبعدة من الخدمة"]].map(([x,l])=>`<option value="${x}" ${x===(e.status||"available")?"selected":""}>${l}</option>`).join("")}
+        </select>
+      </div>
+    </div>`).join("")}</div>`:"<small>لا توجد معدات مسجلة حتى الآن.</small>";
+}
+document.addEventListener("DOMContentLoaded",initVehicleLists);
+
 
 async function trackCitizenReport(){
   const n=document.getElementById("citizenTrackNumber").value.trim(),box=document.getElementById("citizenTrackResult");if(!n){box.innerHTML="<small>اكتب رقم البلاغ.</small>";return;}box.innerHTML="<small>جاري التحقق...</small>";
