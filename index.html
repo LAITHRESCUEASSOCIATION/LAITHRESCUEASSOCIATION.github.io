@@ -3094,103 +3094,149 @@ async function openRescuerRatingAdmin(id,name){document.getElementById('rescuerR
 </script>
 
 
-<style id="laith-v12-mobile-fixed-tools">
-/* V12 — force assistance tools to remain visible and usable on phones */
-.laith-float-stack{
-  position:fixed!important;
-  left:max(8px,env(safe-area-inset-left))!important;
-  right:auto!important;
-  top:50%!important;
-  bottom:auto!important;
-  transform:translateY(-50%)!important;
-  z-index:2147483000!important;
-  display:flex!important;
-  visibility:visible!important;
-  opacity:1!important;
-  flex-direction:column!important;
-  gap:8px!important;
-  pointer-events:auto!important;
-}
-.laith-float-btn{
-  display:grid!important;
-  visibility:visible!important;
-  opacity:1!important;
-  place-items:center!important;
-  width:48px!important;
-  height:48px!important;
-  min-width:48px!important;
-  min-height:48px!important;
-  padding:0!important;
-  border-radius:50%!important;
-  touch-action:manipulation!important;
-  -webkit-tap-highlight-color:transparent;
-}
-@media(max-width:700px){
-  .laith-float-stack{
-    left:max(6px,env(safe-area-inset-left))!important;
-    top:52%!important;
-    gap:6px!important;
+<style id="laith-v13-mobile-tools-hard-fix">
+/* حل نهائي للجوال: شريط أدوات مستقل فوق جميع عناصر الصفحة */
+html,body{overflow-x:hidden!important}
+@media (max-width: 768px){
+  body > .laith-float-stack{
+    position:fixed!important;
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    left:6px!important;
+    right:auto!important;
+    top:auto!important;
+    bottom:calc(18px + env(safe-area-inset-bottom))!important;
+    transform:none!important;
+    width:48px!important;
+    height:auto!important;
+    max-width:48px!important;
+    margin:0!important;
+    padding:5px!important;
+    gap:5px!important;
+    background:rgba(255,255,255,.96)!important;
+    border:1px solid #d9e4e9!important;
+    border-radius:18px!important;
+    box-shadow:0 12px 35px rgba(0,0,0,.28)!important;
+    z-index:2147483640!important;
+    isolation:isolate!important;
   }
-  .laith-float-btn{
-    width:43px!important;
-    height:43px!important;
-    min-width:43px!important;
-    min-height:43px!important;
-    font-size:16px!important;
+  body > .laith-float-stack > .laith-float-btn{
+    position:relative!important;
+    display:grid!important;
+    visibility:visible!important;
+    opacity:1!important;
+    place-items:center!important;
+    flex:none!important;
+    width:38px!important;
+    height:38px!important;
+    min-width:38px!important;
+    min-height:38px!important;
+    max-width:38px!important;
+    max-height:38px!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:12px!important;
+    background:#063b55!important;
+    color:#fff!important;
+    font-size:15px!important;
+    line-height:1!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+    touch-action:manipulation!important;
+    -webkit-appearance:none!important;
+    appearance:none!important;
   }
+  body > .laith-float-stack > .laith-float-btn.gold{
+    background:#d7aa50!important;
+    color:#063b55!important;
+  }
+
   #assistantOverlay,#commandOverlay,#accessibilityOverlay,#roleExperienceOverlay{
     position:fixed!important;
-    left:56px!important;
+    display:none;
+    left:60px!important;
     right:8px!important;
-    bottom:max(8px,env(safe-area-inset-bottom))!important;
     top:auto!important;
+    bottom:calc(8px + env(safe-area-inset-bottom))!important;
+    inset-block-start:auto!important;
     width:auto!important;
-    max-width:none!important;
     height:auto!important;
+    max-width:none!important;
     max-height:calc(100dvh - 16px)!important;
-    padding:0!important;
     margin:0!important;
-    z-index:2147482990!important;
-    pointer-events:none!important;
+    padding:0!important;
     background:transparent!important;
+    z-index:2147483630!important;
+    pointer-events:none!important;
+  }
+  #assistantOverlay[style*="display: flex"],#commandOverlay[style*="display: flex"],
+  #accessibilityOverlay[style*="display: flex"],#roleExperienceOverlay[style*="display: flex"]{
+    display:flex!important;
   }
   #assistantOverlay .v6-modal,#commandOverlay .v6-modal,
   #accessibilityOverlay .v6-modal,#roleExperienceOverlay .v6-modal{
+    pointer-events:auto!important;
     width:100%!important;
     max-width:none!important;
     max-height:calc(100dvh - 16px)!important;
     overflow:auto!important;
-    -webkit-overflow-scrolling:touch;
-    pointer-events:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    padding:15px!important;
     border-radius:18px!important;
-  }
-}
-@media(max-width:390px){
-  .laith-float-stack{left:max(4px,env(safe-area-inset-left))!important}
-  .laith-float-btn{
-    width:40px!important;height:40px!important;
-    min-width:40px!important;min-height:40px!important;
-  }
-  #assistantOverlay,#commandOverlay,#accessibilityOverlay,#roleExperienceOverlay{
-    left:50px!important;right:5px!important;
+    background:#fff!important;
+    box-shadow:0 18px 50px rgba(0,0,0,.3)!important;
   }
 }
 </style>
-<script id="laith-v12-mobile-tools-js">
-document.addEventListener("DOMContentLoaded", function(){
-  const stack=document.querySelector(".laith-float-stack");
-  if(stack){
-    stack.style.setProperty("display","flex","important");
-    stack.style.setProperty("visibility","visible","important");
-    stack.style.setProperty("opacity","1","important");
-    stack.style.setProperty("pointer-events","auto","important");
-    document.body.appendChild(stack);
+<script id="laith-v13-mobile-tools-hard-fix-js">
+(function(){
+  function forceMobileTools(){
+    var stack=document.querySelector('.laith-float-stack');
+    if(!stack) return;
+    // Move outside any ancestor that may clip/hide fixed children.
+    if(stack.parentElement!==document.body) document.body.appendChild(stack);
+    stack.removeAttribute('hidden');
+    stack.setAttribute('aria-hidden','false');
+
+    if(window.matchMedia('(max-width: 768px)').matches){
+      var s=stack.style;
+      s.setProperty('position','fixed','important');
+      s.setProperty('display','flex','important');
+      s.setProperty('visibility','visible','important');
+      s.setProperty('opacity','1','important');
+      s.setProperty('left','6px','important');
+      s.setProperty('right','auto','important');
+      s.setProperty('top','auto','important');
+      s.setProperty('bottom','18px','important');
+      s.setProperty('transform','none','important');
+      s.setProperty('width','48px','important');
+      s.setProperty('z-index','2147483640','important');
+
+      stack.querySelectorAll('.laith-float-btn').forEach(function(btn){
+        btn.style.setProperty('display','grid','important');
+        btn.style.setProperty('visibility','visible','important');
+        btn.style.setProperty('opacity','1','important');
+        btn.style.setProperty('width','38px','important');
+        btn.style.setProperty('height','38px','important');
+        btn.style.setProperty('min-width','38px','important');
+        btn.style.setProperty('min-height','38px','important');
+        btn.style.setProperty('padding','0','important');
+      });
+    }
   }
-  ["assistantOverlay","commandOverlay","accessibilityOverlay","roleExperienceOverlay"].forEach(function(id){
-    const el=document.getElementById(id);
-    if(el) document.body.appendChild(el);
-  });
-});
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',forceMobileTools,{once:true});
+  }else{
+    forceMobileTools();
+  }
+  window.addEventListener('pageshow',forceMobileTools);
+  window.addEventListener('resize',forceMobileTools);
+})();
 </script>
 
 </body>
