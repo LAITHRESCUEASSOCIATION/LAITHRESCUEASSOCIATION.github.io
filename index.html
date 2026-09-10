@@ -676,6 +676,85 @@ main small, main .muted, main [class*="meta"]{opacity:1}
 
 <div class="activity-strip" id="activityStrip"><div class="wrap"><div id="activityTrack" class="activity-track"><span><b>●</b> نظام ليث متصل</span><span><b>●</b> يتم تحديث النشاط المباشر تلقائيًا</span></div></div></div>
 
+
+<div id="laithV14App" class="v14-app">
+  <section id="v14HomePage" class="v14-page active">
+    <div class="v14-mobile-head">
+      <button class="v14-head-icon" type="button" onclick="openV14Notifications()" aria-label="التنبيهات">♢<span class="v14-notify-dot">2</span></button>
+      <div class="v14-brand"><div id="v14BrandLogo" class="v14-brand-logo">ليث</div><small>جمعية ليث للإنقاذ</small></div>
+      <button class="v14-head-icon" type="button" onclick="openCommandSearch()" aria-label="البحث">⌕</button>
+    </div>
+    <div class="v14-search-wrap">
+      <button type="button" class="v14-qr" onclick="openCommandSearch()">⌗</button>
+      <button type="button" class="v14-search-button" onclick="openCommandSearch()">ما تبحث عنه؟ <span>⌕</span></button>
+    </div>
+
+    <div id="v14HeroMount" class="v14-home-block"></div>
+
+    <div class="v14-home-services">
+      <button onclick="openEmergency()"><i>🚨</i><span>الإنقاذ والإغاثة</span></button>
+      <button onclick="openReport('assistance')"><i>⛰</i><span>الخدمات الميدانية</span></button>
+      <button onclick="openSignup()"><i>♟</i><span>التطوع</span></button>
+      <button onclick="showV14Page('more')"><i>🤝</i><span>عن الجمعية</span></button>
+    </div>
+
+    <section class="v14-content-section">
+      <div class="v14-section-title"><h2>أبرز الجهات الداعمة</h2><span></span></div>
+      <div id="v14Partners" class="v14-partners"><small>جاري تحميل الجهات الداعمة...</small></div>
+    </section>
+
+    <div id="v14FeaturedMount"></div>
+
+    <section class="v14-content-section">
+      <div class="v14-section-title"><h2>أحدث الأخبار والمبادرات</h2><button type="button" onclick="showV14Page('more')">عرض الكل ←</button></div>
+      <div id="v14NewsMount"></div>
+    </section>
+  </section>
+
+  <section id="v14ReportsPage" class="v14-page">
+    <div class="v14-page-head"><h1>البلاغات</h1><p>تقديم البلاغ ومتابعته من مكان واحد.</p></div>
+    <div class="v14-report-count"><small>البلاغات التي تم التعامل معها</small><b id="v14CompletedReports">—</b><span>بلاغ مكتمل</span></div>
+    <div class="v14-two-actions">
+      <button class="v14-action-card danger" onclick="openEmergency()"><i>＋</i><b>بلاغ جديد</b><small>تسجيل طلب إنقاذ أو مساعدة</small></button>
+      <button class="v14-action-card" onclick="document.getElementById('v14TrackBox').scrollIntoView({behavior:'smooth'})"><i>⌕</i><b>متابعة بلاغي</b><small>استعلم برقم البلاغ</small></button>
+    </div>
+    <div id="v14TrackBox" class="v14-panel">
+      <h2>متابعة بلاغي</h2>
+      <p>أدخل رقم البلاغ الذي استلمته عند التسجيل.</p>
+      <div class="v14-track-form"><input id="v14TrackNumber" inputmode="numeric" placeholder="رقم البلاغ"><button class="btn" onclick="trackV14Report()">استعلام</button></div>
+      <div id="v14TrackResult" class="v14-track-result"></div>
+    </div>
+  </section>
+
+  <section id="v14StatsPage" class="v14-page">
+    <div class="v14-page-head"><h1>الإحصائيات</h1><p>أرقام جمعية ليث، المراكز الأولى، الجاهزية والأثر.</p></div>
+    <div id="v14StatsMount"></div>
+  </section>
+
+  <section id="v14MorePage" class="v14-page">
+    <div class="v14-page-head"><h1>المزيد</h1><p>حسابك وخدمات الجمعية والمعلومات العامة.</p></div>
+    <div id="v14UserCard" class="v14-user-card"></div>
+    <div class="v14-more-list">
+      <button onclick="openSignup()"><i>♟</i><span><b>تطوع معنا</b><small>انضم إلى متطوعي جمعية ليث</small></span><em>‹</em></button>
+      <button onclick="openAuth()"><i>⌾</i><span><b>تسجيل الدخول</b><small>الدخول إلى حساب العضو</small></span><em>‹</em></button>
+      <button onclick="openAccessibilityPanel()"><i>Aa</i><span><b>إمكانية الوصول</b><small>وضع كبار السن والتباين والخط</small></span><em>‹</em></button>
+      <button onclick="openLaithAssistant()"><i>✦</i><span><b>مساعد ليث</b><small>البحث والمساعدة الذكية</small></span><em>‹</em></button>
+      <button onclick="openV14About()"><i>ⓘ</i><span><b>عن الجمعية</b><small>تعرف على جمعية ليث للإنقاذ</small></span><em>‹</em></button>
+    </div>
+    <div id="v14AboutBox" class="v14-about-box">
+      <h2>جمعية ليث للإنقاذ</h2>
+      <p>جمعية متخصصة في خدمات الإنقاذ والإغاثة والإسعافات الأولية والاستجابة الميدانية، وتسعى إلى خدمة المجتمع بكفاءة واحترافية من خلال فرقها ومتطوعيها.</p>
+    </div>
+  </section>
+</div>
+
+<nav id="v14BottomNav" class="v14-bottom-nav" aria-label="التنقل الرئيسي">
+  <button data-v14-page="home" class="active" onclick="showV14Page('home')"><i>⌂</i><span>الرئيسية</span></button>
+  <button data-v14-page="reports" onclick="showV14Page('reports')"><i>▦</i><span>البلاغات</span></button>
+  <button data-v14-page="stats" onclick="showV14Page('stats')"><i>⌁</i><span>الإحصائيات</span></button>
+  <button data-v14-page="more" onclick="showV14Page('more')"><i>▦</i><span>المزيد</span></button>
+</nav>
+
 <footer><div class="wrap">
   <div>جمعية ليث للإنقاذ — منصة رقمية متخصصة في إدارة البلاغات والإنقاذ والتطوع.</div>
   <div class="laith-footer-contact" id="laithFooterContact">
@@ -961,6 +1040,21 @@ main small, main .muted, main [class*="meta"]{opacity:1}
         </div>
       </div>
 
+      
+<div class="cms-box v14-admin-content-box" id="v14PartnersAdminBox">
+  <h3>الجهات الداعمة</h3>
+  <p style="color:#687680">أضف شعار الجهة ورابط موقعها. يمكنك إضافة أي عدد من الجهات، ويصبح الشعار قابلًا للضغط في الصفحة الرئيسية.</p>
+  <div class="cms-grid">
+    <div><label>اسم الجهة</label><input id="v14PartnerName" placeholder="اسم الجهة الداعمة"></div>
+    <div><label>رابط الجهة</label><input id="v14PartnerUrl" type="url" placeholder="https://..."></div>
+    <div style="grid-column:1/-1"><label>شعار الجهة</label><input id="v14PartnerLogo" type="file" accept="image/png,image/jpeg,image/webp"></div>
+  </div>
+  <button class="btn" type="button" onclick="addV14Partner()">إضافة الجهة</button>
+  <span id="v14PartnerMsg" class="form-msg"></span>
+  <div id="v14PartnersAdminList" style="margin-top:14px"></div>
+</div>
+
+
       <div class="cms-box">
         <h3>الصور المتحركة في الواجهة الرئيسية</h3>
         <p style="color:#687680">أضف أي عدد من الصور، ويمكنك إظهارها أو إخفاؤها أو حذفها من هنا.</p>
@@ -1008,8 +1102,21 @@ main small, main .muted, main [class*="meta"]{opacity:1}
       <div class="cms-box">
         <h3>إدارة تجربة ليث المتقدمة</h3>
         <div class="cms-grid">
-          <div><label>هوية الموسم</label><select id="seasonMode"><option value="normal">عادية</option><option value="hajj">الحج</option><option value="national">اليوم الوطني</option><option value="winter">الشتاء</option><option value="awareness">حملة توعية</option></select></div>
+          <div><label>هوية الموسم</label><select id="seasonMode" onchange="v14SeasonFormChanged()">
+<option value="normal">افتراضي — هوية ليث الأصلية</option>
+<option value="national">اليوم الوطني السعودي</option>
+<option value="flag_day">يوم العلم السعودي</option>
+<option value="hajj">الحج</option>
+<option value="ramadan">رمضان</option>
+<option value="eid_fitr">عيد الفطر</option>
+<option value="eid_adha">عيد الأضحى</option>
+<option value="winter">الشتاء</option>
+<option value="awareness">حملة توعية</option>
+<option value="custom">مناسبة مخصصة</option>
+</select></div>
           <div><label>اسم الموسم / الرسالة</label><input id="seasonLabel" placeholder="مثال: ليث في موسم الحج"></div>
+<div><label>لون التبويبات والأيقونات</label><input id="seasonCustomColor" type="color" value="#0b8f62"></div>
+<div><label>رمز المناسبة البسيط</label><input id="seasonSymbol" placeholder="مثال: 🇸🇦 أو ☾"></div>
           <div style="grid-column:1/-1"><button class="btn" onclick="saveExperienceSettings()">حفظ إعدادات التجربة</button> <span id="experienceMsg" class="form-msg"></span></div>
         </div>
       </div>
@@ -3237,6 +3344,204 @@ html,body{overflow-x:hidden!important}
   window.addEventListener('pageshow',forceMobileTools);
   window.addEventListener('resize',forceMobileTools);
 })();
+</script>
+
+
+<nav id="v14AdminBottomNav" class="v14-admin-bottom-nav" style="display:none">
+  <button class="active" data-admin-tab="volunteers" onclick="showV14AdminTab('volunteers')"><i>♟</i><span>المتطوعون</span></button>
+  <button data-admin-tab="reports" onclick="showV14AdminTab('reports')"><i>▦</i><span>البلاغات</span></button>
+  <button data-admin-tab="ops" onclick="showV14AdminTab('ops')"><i>⌖</i><span>العمليات</span></button>
+  <button data-admin-tab="content" onclick="showV14AdminTab('content')"><i>▤</i><span>المحتوى</span></button>
+  <button data-admin-tab="more" onclick="showV14AdminTab('more')"><i>•••</i><span>المزيد</span></button>
+</nav>
+
+
+<style id="laith-v14-app-style">
+:root{--v14:#0a4a64;--v14-accent:#d6ad59;--v14-bg:#f7f8f8;--v14-card:#fff;--v14-text:#123e52}
+body{background:var(--v14-bg)!important;padding-bottom:82px}
+body>header{display:none!important}
+main>section,main>.laith-v6,main>.activity-strip,main>.citizen-track{display:none!important}
+.v14-app{display:block;direction:rtl;color:var(--v14-text);max-width:1180px;margin:auto;background:var(--v14-bg);min-height:100vh}
+.v14-page{display:none;padding:0 18px 100px}.v14-page.active{display:block}
+.v14-mobile-head{background:linear-gradient(145deg,#083f58,#0a526d);margin:0 -18px;padding:22px 22px 14px;display:grid;grid-template-columns:48px 1fr 48px;align-items:center;color:#fff}
+.v14-brand{text-align:center}.v14-brand-logo{font-size:36px;font-weight:950;line-height:1}.v14-brand small{color:#e7d09b;font-size:11px}
+.v14-head-icon{position:relative;border:0;background:transparent;color:#fff;font-size:27px;width:48px;height:48px;cursor:pointer}.v14-notify-dot{position:absolute;top:3px;right:3px;background:#e23b3b;color:#fff;font-size:10px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center}
+.v14-search-wrap{background:linear-gradient(145deg,#083f58,#0a526d);margin:0 -18px;padding:10px 22px 24px;display:flex;gap:10px}.v14-search-button{flex:1;height:58px;border:0;border-radius:18px;background:#fff;color:#a2a5a8;text-align:right;padding:0 20px;font-size:16px;display:flex;align-items:center;justify-content:space-between}.v14-qr{width:58px;border:0;border-radius:18px;background:#fff;color:var(--v14);font-size:24px}
+.v14-home-block{margin-top:20px}.v14-home-block .hero{display:block!important;padding:0!important;background:transparent!important;min-height:0!important}.v14-home-block .hero .wrap{padding:0!important}.v14-home-block .hero-grid{min-height:0!important}.v14-home-block .hero-grid>div:first-child{display:none!important}.v14-home-block .visual{position:relative!important;inset:auto!important;display:block!important;min-height:390px!important;border-radius:24px!important;overflow:hidden!important}.v14-home-block .hero .visual:after{background:linear-gradient(90deg,rgba(3,31,47,.1),rgba(3,31,47,.35))!important}.v14-home-block .hero-slide{transition:transform .55s ease,opacity .55s ease;transform:translateX(-20px)}.v14-home-block .hero-slide.active{opacity:1!important;transform:translateX(0)}
+.v14-home-services{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:22px 0}.v14-home-services button{border:1px solid #e4e9eb;background:#fff;border-radius:16px;min-height:125px;padding:14px 8px;color:var(--v14-text);font-family:inherit;font-weight:800;cursor:pointer}.v14-home-services i{display:grid;place-items:center;margin:auto auto 10px;width:54px;height:54px;border-radius:50%;background:#eaf3f5;color:var(--v14);font-style:normal;font-size:25px}
+.v14-content-section{padding:18px 0 28px}.v14-section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.v14-section-title h2{margin:0;font-size:25px}.v14-section-title h2:before{content:"";display:inline-block;width:22px;height:3px;background:var(--v14-accent);margin-left:9px;vertical-align:middle}.v14-section-title button{border:0;background:none;color:#168e88;font-family:inherit;font-weight:800}
+.v14-partners{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory}.v14-partner{flex:0 0 145px;height:110px;background:#fff;border:1px solid #e2e7e9;border-radius:50%;display:grid;place-items:center;padding:20px;scroll-snap-align:start}.v14-partner img{max-width:100%;max-height:65px;object-fit:contain}
+#v14FeaturedMount .featured-volunteer-section{display:block!important;background:transparent!important;padding:18px 0!important}#v14FeaturedMount .wrap{padding:0!important}#v14FeaturedMount .featured-volunteer-card{border-radius:22px}
+#v14NewsMount #news{display:block!important;background:transparent!important;padding:0!important}#v14NewsMount #news>.wrap{padding:0!important}#v14NewsMount #news .section-head{display:none!important}#v14NewsMount .posts-grid{grid-template-columns:repeat(2,1fr)!important;gap:12px!important}#v14NewsMount .post-card{border-radius:18px!important;position:relative}#v14NewsMount .post-card img{height:210px}
+.v14-page-head{padding:34px 0 18px}.v14-page-head h1{margin:0;color:var(--v14-text);font-size:34px}.v14-page-head p{color:#72828a;margin:5px 0}
+.v14-report-count{background:linear-gradient(145deg,#083f58,#0a526d);color:#fff;border-radius:24px;padding:25px;text-align:center;margin-bottom:18px}.v14-report-count small,.v14-report-count span{display:block;color:#d8e7ec}.v14-report-count b{display:block;font-size:52px;color:#fff;margin:5px}
+.v14-two-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}.v14-action-card{border:1px solid #dfe7ea;background:#fff;border-radius:20px;padding:20px;text-align:right;display:grid;gap:5px;color:var(--v14-text);font-family:inherit;cursor:pointer}.v14-action-card i{width:45px;height:45px;border-radius:14px;background:#e8f1f4;display:grid;place-items:center;font-style:normal;font-size:23px}.v14-action-card b{font-size:19px}.v14-action-card small{color:#718089}.v14-action-card.danger i{background:#fbe9eb;color:#a82032}
+.v14-panel{background:#fff;border:1px solid #e0e7e9;border-radius:22px;padding:22px;margin-top:18px}.v14-panel h2{margin-top:0}.v14-track-form{display:flex;gap:8px}.v14-track-form input{flex:1;padding:13px;border:1px solid #d8e1e5;border-radius:13px}.v14-track-result{margin-top:16px}.v14-rescuers{background:#f3f7f8;border-radius:15px;padding:13px;margin-top:12px}.v14-rescuers b{display:block;margin-bottom:5px}.v14-rating-done{padding:12px;border-radius:12px;background:#e9f7ef;color:#17633b;font-weight:800;margin-top:12px}
+#v14StatsMount>section,#v14StatsMount>.laith-v6,#v14StatsMount>div{display:block!important}#v14StatsMount .leaderboard-section,#v14StatsMount .v6-section{padding:24px 0!important;background:transparent!important}#v14StatsMount .wrap{padding:0!important}.v14-stats-live{margin-bottom:15px}
+.v14-more-list{display:grid;gap:10px}.v14-more-list>button{display:grid;grid-template-columns:50px 1fr 24px;align-items:center;gap:12px;background:#fff;border:1px solid #e0e7e9;border-radius:17px;padding:14px;text-align:right;font-family:inherit;color:var(--v14-text)}.v14-more-list i{width:45px;height:45px;border-radius:14px;background:#eaf3f5;display:grid;place-items:center;font-style:normal;font-weight:900}.v14-more-list span b,.v14-more-list span small{display:block}.v14-more-list span small{color:#74838b;margin-top:3px}.v14-more-list em{font-size:25px;font-style:normal}
+.v14-user-card{display:none;background:linear-gradient(145deg,#083f58,#0a526d);color:#fff;border-radius:24px;padding:20px;margin-bottom:16px}.v14-user-card.show{display:grid;grid-template-columns:82px 1fr 42px;gap:14px;align-items:center}.v14-user-card img{width:82px;height:82px;border-radius:50%;object-fit:cover;border:3px solid #d6ad59}.v14-user-card h2{margin:0;color:#fff}.v14-user-card p{margin:3px 0;color:#d9e7ec}.v14-edit-profile{border:0;background:#fff;color:var(--v14);width:42px;height:42px;border-radius:50%;font-size:20px}
+.v14-about-box{background:#fff;border:1px solid #e0e7e9;border-radius:20px;padding:20px;margin-top:16px}.v14-about-box p{line-height:2;color:#526873}
+.v14-bottom-nav{position:fixed;left:0;right:0;bottom:0;height:76px;background:rgba(255,255,255,.97);border-top:1px solid #dce5e8;display:grid;grid-template-columns:repeat(4,1fr);z-index:120000;box-shadow:0 -8px 30px rgba(0,0,0,.07);padding-bottom:env(safe-area-inset-bottom)}.v14-bottom-nav button{border:0;background:none;color:#153e51;display:grid;place-items:center;align-content:center;gap:2px;font-family:inherit;font-weight:800}.v14-bottom-nav i{font-style:normal;font-size:25px;line-height:1}.v14-bottom-nav span{font-size:12px}.v14-bottom-nav button.active{color:#169c94}.v14-bottom-nav button.active:after{content:"";width:28px;height:3px;background:#169c94;border-radius:9px}
+.laith-float-stack{left:8px!important;bottom:90px!important;top:auto!important;transform:none!important}
+footer{display:none!important}
+.v14-admin-bottom-nav{position:fixed;bottom:0;left:0;right:0;height:72px;background:#fff;border-top:1px solid #dce4e8;z-index:2147483000;grid-template-columns:repeat(5,1fr);box-shadow:0 -8px 28px #0001}.v14-admin-bottom-nav button{border:0;background:#fff;display:grid;place-items:center;align-content:center;gap:2px;font-family:inherit;color:#536b77}.v14-admin-bottom-nav button.active{color:#0a8f88}.v14-admin-bottom-nav i{font-style:normal;font-size:20px}.v14-admin-bottom-nav span{font-size:11px;font-weight:800}.admin-shell{padding-bottom:90px!important}.admin-actions{display:none!important}
+.v14-season-mark{position:fixed;top:12px;left:12px;z-index:119000;background:rgba(255,255,255,.94);border-radius:999px;padding:7px 11px;box-shadow:0 5px 18px #0002;font-size:20px}
+body.season-national .v14-bottom-nav button.active,body.season-national .v14-home-services i{color:#0b8f62}body.season-national .v14-bottom-nav button.active:after{background:#0b8f62}
+body.season-flag_day .v14-bottom-nav button.active,body.season-flag_day .v14-home-services i{color:#087d4c}body.season-flag_day .v14-bottom-nav button.active:after{background:#087d4c}
+body.season-hajj .v14-bottom-nav button.active,body.season-hajj .v14-home-services i,body.season-ramadan .v14-bottom-nav button.active,body.season-ramadan .v14-home-services i{color:#b28a3e}
+body.season-custom .v14-bottom-nav button.active,body.season-custom .v14-home-services i{color:var(--season-custom,#0a8f88)}body.season-custom .v14-bottom-nav button.active:after{background:var(--season-custom,#0a8f88)}
+@media(max-width:700px){
+ .v14-app{width:100%;overflow:hidden}.v14-page{padding-left:14px;padding-right:14px}.v14-mobile-head,.v14-search-wrap{margin-left:-14px;margin-right:-14px}
+ .v14-home-block .visual{min-height:300px!important;border-radius:18px!important}.v14-home-services{gap:7px}.v14-home-services button{min-height:105px;padding:10px 3px;font-size:11px}.v14-home-services i{width:45px;height:45px;font-size:20px}
+ .v14-partner{flex-basis:105px;height:90px;padding:14px}.v14-partner img{max-height:52px}
+ #v14NewsMount .posts-grid{grid-template-columns:1fr 1fr!important}#v14NewsMount .post-card img{height:145px}#v14NewsMount .post-card .body{padding:12px}#v14NewsMount .post-card h3{font-size:14px!important}
+ .v14-two-actions{grid-template-columns:1fr 1fr}.v14-track-form{flex-direction:column}.v14-track-form .btn{width:100%}
+ .v14-user-card.show{grid-template-columns:65px 1fr 38px}.v14-user-card img{width:65px;height:65px}.v14-user-card h2{font-size:18px!important}
+ .v14-section-title h2{font-size:21px!important}.v14-page-head h1{font-size:30px!important}
+ .v14-bottom-nav{height:72px}.laith-float-stack{bottom:82px!important}
+}
+</style>
+
+<div id="v14ProfileEditOverlay" class="v6-overlay"><div class="v6-modal" style="width:min(560px,100%)">
+ <div class="v6-modal-head"><h2 style="margin:0">تعديل الملف الشخصي</h2><button class="v6-close" onclick="closeV6Overlay('v14ProfileEditOverlay')">×</button></div>
+ <div class="cms-grid" style="margin-top:15px">
+  <div><label>الاسم</label><input id="v14ProfileName" disabled></div>
+  <div><label>السجل المدني</label><input id="v14ProfileNational" disabled></div>
+  <div><label>رقم الجوال</label><input id="v14ProfilePhone" inputmode="tel"></div>
+  <div><label>البريد الإلكتروني</label><input id="v14ProfileEmail" type="email"></div>
+ </div>
+ <button class="btn" onclick="saveV14MyContact()">حفظ التعديلات</button><span id="v14ProfileMsg" class="form-msg"></span>
+</div></div>
+
+<script id="laith-v14-app-script">
+let v14UserCache=null;
+function showV14Page(page){
+ const map={home:'v14HomePage',reports:'v14ReportsPage',stats:'v14StatsPage',more:'v14MorePage'};
+ Object.values(map).forEach(id=>document.getElementById(id)?.classList.remove('active'));
+ document.getElementById(map[page]||map.home)?.classList.add('active');
+ document.querySelectorAll('#v14BottomNav button').forEach(b=>b.classList.toggle('active',b.dataset.v14Page===page));
+ window.scrollTo({top:0,behavior:'smooth'});
+ if(page==='reports')loadV14CompletedCount();
+ if(page==='more')loadV14UserCard();
+}
+function openV14About(){document.getElementById('v14AboutBox')?.scrollIntoView({behavior:'smooth'})}
+function openV14Notifications(){alert('سيتم عرض تنبيهات الحساب والبلاغات هنا عند توفرها.')}
+function v14Age(d){if(!d)return '—';const b=new Date(d),n=new Date();let a=n.getFullYear()-b.getFullYear();if(n<new Date(n.getFullYear(),b.getMonth(),b.getDate()))a--;return Math.max(0,a)}
+function maskNational(v){v=String(v||'');return v.length>4?'******'+v.slice(-4):v}
+async function loadV14UserCard(){
+ const box=document.getElementById('v14UserCard');if(!box)return;
+ try{
+  const {data:{user}}=await getSupabaseClient().auth.getUser();
+  if(!user){box.className='v14-user-card';box.innerHTML='';return}
+  const {data:m}=await getSupabaseClient().from('members').select('id,full_name,avatar_url,birth_date,national_id,phone').eq('id',user.id).maybeSingle();
+  v14UserCache={user,m};
+  const name=m?.full_name||user.user_metadata?.full_name||user.email||'عضو ليث';
+  box.className='v14-user-card show';
+  box.innerHTML=`<img src="${esc(m?.avatar_url||avatarPlaceholder(name))}" alt=""><div><h2>${esc(name)}</h2><p>العمر: ${v14Age(m?.birth_date)} سنة</p><p>${esc(m?.phone||'')}</p></div><button class="v14-edit-profile" onclick="openV14ProfileEdit()" title="تعديل الملف">✎</button>`;
+ }catch(e){console.warn(e)}
+}
+function openV14ProfileEdit(){
+ if(!v14UserCache)return;
+ const {user,m}=v14UserCache;
+ document.getElementById('v14ProfileName').value=m?.full_name||user.user_metadata?.full_name||'';
+ document.getElementById('v14ProfileNational').value=maskNational(m?.national_id);
+ document.getElementById('v14ProfilePhone').value=m?.phone||'';
+ document.getElementById('v14ProfileEmail').value=user.email||'';
+ document.getElementById('v14ProfileMsg').textContent='';
+ openV6Overlay('v14ProfileEditOverlay');
+}
+async function saveV14MyContact(){
+ const msg=document.getElementById('v14ProfileMsg'),phone=document.getElementById('v14ProfilePhone').value.trim(),email=document.getElementById('v14ProfileEmail').value.trim();
+ if(!/^05\\d{8}$/.test(phone)){msg.textContent='رقم الجوال يجب أن يبدأ بـ 05 ويتكون من 10 أرقام.';return}
+ if(!email||!email.includes('@')){msg.textContent='اكتب بريدًا إلكترونيًا صحيحًا.';return}
+ msg.textContent='جاري الحفظ...';
+ try{
+  const {error}=await getSupabaseClient().rpc('update_my_contact_v14',{p_phone:phone});
+  if(error)throw error;
+  const {data:{user}}=await getSupabaseClient().auth.getUser();
+  if(user?.email!==email){const {error:e2}=await getSupabaseClient().auth.updateUser({email});if(e2)throw e2}
+  msg.textContent='تم حفظ بيانات التواصل. إذا غيّرت البريد قد يصلك رابط تأكيد.';
+  await loadV14UserCard();
+ }catch(e){msg.textContent='تعذر الحفظ: '+(e.message||e)}
+}
+async function loadV14CompletedCount(){
+ try{const {data,error}=await getSupabaseClient().rpc('get_completed_report_count_v14');if(error)throw error;document.getElementById('v14CompletedReports').textContent=Number(data||0).toLocaleString('ar-SA')}catch(e){document.getElementById('v14CompletedReports').textContent='—'}
+}
+async function trackV14Report(){
+ const n=document.getElementById('v14TrackNumber').value.trim(),box=document.getElementById('v14TrackResult');
+ if(!n){box.innerHTML='<small>اكتب رقم البلاغ أولًا.</small>';return}
+ box.innerHTML='<small>جاري الاستعلام...</small>';
+ try{
+  const {data,error}=await getSupabaseClient().rpc('track_public_report_v14',{p_report_number:Number(n)});if(error)throw error;
+  const r=Array.isArray(data)?data[0]:data;if(!r){box.innerHTML='<p>لم يتم العثور على البلاغ.</p>';return}
+  const labels={new:'تم استلام البلاغ',verifying:'جاري التحقق',dispatched:'تم توجيه الفريق',in_progress:'جاري التعامل',arrived:'تم الوصول',completed:'تم التعامل مع البلاغ',cancelled:'ملغي'};
+  const rescuers=Array.isArray(r.rescuer_names)?r.rescuer_names:[];
+  box.innerHTML=`<div class="resource-card"><h3>بلاغ #${esc(r.report_number)}</h3><p><b>الحالة:</b> ${esc(labels[r.workflow_status]||r.workflow_status||'قيد المتابعة')}</p><p><b>المنطقة:</b> ${esc(r.region||'—')}</p>${rescuers.length?`<div class="v14-rescuers"><b>المتطوعون الذين باشروا البلاغ:</b>${rescuers.map(x=>`<div>• ${esc(x)}</div>`).join('')}</div>`:''}${r.workflow_status==='completed'?(r.rating_submitted?`<div class="v14-rating-done">تم تقييم هذه الحالة مسبقًا. شكرًا لك.</div>`:`<button class="btn" style="margin-top:12px" onclick="openServiceRating(${Number(r.report_number)})">تقييم التجربة</button>`):''}</div>`;
+ }catch(e){box.innerHTML='<p>تعذر الاستعلام: '+esc(e.message||e)+'</p>'}
+}
+async function loadV14Partners(){
+ const box=document.getElementById('v14Partners');if(!box)return;
+ try{const {data,error}=await getSupabaseClient().from('supporting_partners').select('id,name,logo_url,website_url,sort_order').eq('is_active',true).order('sort_order').order('created_at');if(error)throw error;box.innerHTML=(data||[]).map(p=>`<a class="v14-partner" href="${esc(p.website_url||'#')}" ${p.website_url?'target="_blank" rel="noopener"':''} title="${esc(p.name||'جهة داعمة')}"><img src="${esc(p.logo_url)}" alt="${esc(p.name||'جهة داعمة')}"></a>`).join('')||'<small>سيتم إضافة الجهات الداعمة قريبًا.</small>'}catch(e){box.innerHTML='<small>شغّل ملف SQL الخاص بـ V14 لعرض الجهات الداعمة.</small>'}
+}
+async function addV14Partner(){
+ const name=document.getElementById('v14PartnerName').value.trim(),url=document.getElementById('v14PartnerUrl').value.trim(),f=document.getElementById('v14PartnerLogo')?.files?.[0],msg=document.getElementById('v14PartnerMsg');
+ if(!name||!f){msg.textContent='اكتب اسم الجهة واختر الشعار.';return}msg.textContent='جاري الإضافة...';
+ try{const logo=await uploadSiteImage(f,'supporting-partners');const {error}=await getSupabaseClient().from('supporting_partners').insert({name,logo_url:logo,website_url:url||null,is_active:true});if(error)throw error;document.getElementById('v14PartnerName').value='';document.getElementById('v14PartnerUrl').value='';document.getElementById('v14PartnerLogo').value='';msg.textContent='تمت إضافة الجهة.';await Promise.all([loadV14Partners(),loadV14PartnersAdmin()])}catch(e){msg.textContent='تعذر الإضافة: '+e.message}
+}
+async function loadV14PartnersAdmin(){
+ const box=document.getElementById('v14PartnersAdminList');if(!box)return;
+ try{const {data,error}=await getSupabaseClient().from('supporting_partners').select('*').order('sort_order').order('created_at');if(error)throw error;box.innerHTML=(data||[]).map(p=>`<div class="slide-admin-row"><img src="${esc(p.logo_url)}" alt=""><div><b>${esc(p.name)}</b><br><small>${esc(p.website_url||'بدون رابط')}</small></div><div class="row-actions"><button onclick="toggleV14Partner('${p.id}',${!p.is_active})">${p.is_active?'إخفاء':'إظهار'}</button><button class="danger" onclick="deleteV14Partner('${p.id}')">حذف</button></div></div>`).join('')||'<small>لا توجد جهات مضافة.</small>'}catch(e){box.innerHTML='<small>شغّل SQL الخاص بـ V14 أولًا.</small>'}
+}
+async function toggleV14Partner(id,on){await getSupabaseClient().from('supporting_partners').update({is_active:on}).eq('id',id);await Promise.all([loadV14Partners(),loadV14PartnersAdmin()])}
+async function deleteV14Partner(id){if(!confirm('حذف الجهة الداعمة؟'))return;await getSupabaseClient().from('supporting_partners').delete().eq('id',id);await Promise.all([loadV14Partners(),loadV14PartnersAdmin()])}
+function mountV14PublicSections(){
+ const hero=document.querySelector('main>section.hero');if(hero)document.getElementById('v14HeroMount')?.appendChild(hero);
+ const fv=document.getElementById('featuredVolunteer');if(fv)document.getElementById('v14FeaturedMount')?.appendChild(fv);
+ const news=document.getElementById('news');if(news)document.getElementById('v14NewsMount')?.appendChild(news);
+ const sm=document.getElementById('v14StatsMount');
+ ['leaderboard','livePulse','laithVision','readiness','impactMap','todayLaith','shareImpact'].forEach(id=>{const e=document.getElementById(id);if(e&&sm)sm.appendChild(e)});
+ const live=[...document.querySelectorAll('.live-stats')].find(x=>x.querySelector('#publicReportCount'));if(live&&sm){const w=document.createElement('div');w.className='v14-stats-live';w.appendChild(live);sm.prepend(w)}
+}
+function syncV14Brand(){
+ const img=document.getElementById('brandLogoImg'),box=document.getElementById('v14BrandLogo');
+ if(img?.src&&img.style.display!=='none')box.innerHTML=`<img src="${img.src}" alt="شعار ليث" style="max-width:130px;max-height:58px;object-fit:contain">`;
+}
+function enableV14HeroSwipe(){
+ const box=document.getElementById('heroSlides');if(!box||box.dataset.v14Swipe)return;box.dataset.v14Swipe='1';let sx=0;
+ function go(dir){const s=[...box.querySelectorAll('.hero-slide')];if(s.length<2)return;let i=s.findIndex(x=>x.classList.contains('active'));if(i<0)i=0;s[i].classList.remove('active');i=(i+dir+s.length)%s.length;s[i].classList.add('active')}
+ box.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});box.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>35)go(dx>0?-1:1)},{passive:true});
+}
+function showV14AdminTab(tab){
+ document.querySelectorAll('#v14AdminBottomNav button').forEach(b=>b.classList.toggle('active',b.dataset.adminTab===tab));
+ const members=document.getElementById('membersList'),reports=document.getElementById('reportsList'),cms=document.getElementById('v14CmsArea');
+ if(members)members.style.display='none';if(reports)reports.style.display='none';if(cms)cms.style.display='none';
+ if(tab==='volunteers'){loadMembers('approved');if(members)members.style.display='block'}
+ if(tab==='reports'){loadReports();if(reports)reports.style.display='block'}
+ if(tab==='ops'){openOpsCenter();setTimeout(()=>showV14AdminTab('volunteers'),100)}
+ if(tab==='content'){if(cms)cms.style.display='block';loadV14PartnersAdmin()}
+ if(tab==='more'){openMyProfile();setTimeout(()=>showV14AdminTab('volunteers'),100)}
+}
+function prepareV14Admin(){
+ const panel=document.getElementById('adminPanel'),nav=document.getElementById('v14AdminBottomNav');if(!panel||!nav)return;
+ const topCms=[...panel.querySelectorAll('.admin-wrap>div')].find(d=>d.querySelector(':scope > h2')?.textContent.includes('إدارة محتوى الموقع'));
+ if(topCms){topCms.id='v14CmsArea';topCms.style.display='none'}
+ const ob=new MutationObserver(()=>{if(getComputedStyle(panel).display!=='none')nav.style.display='grid';else nav.style.display='none'});ob.observe(panel,{attributes:true,attributeFilter:['style','class']});
+}
+function v14SeasonFormChanged(){const m=document.getElementById('seasonMode')?.value,s=document.getElementById('seasonSymbol');if(!s)return;const d={normal:'',national:'🇸🇦',flag_day:'🇸🇦',hajj:'🕋',ramadan:'☾',eid_fitr:'✦',eid_adha:'🕋',winter:'❄',awareness:'◆',custom:'✦'};if(!s.value||m!=='custom')s.value=d[m]||''}
+const oldApplySeason=typeof applySeason==='function'?applySeason:null;
+applySeason=function(s){
+ if(oldApplySeason)oldApplySeason(s);
+ const modes=['normal','national','flag_day','hajj','ramadan','eid_fitr','eid_adha','winter','awareness','custom'];
+ modes.forEach(x=>document.body.classList.remove('season-'+x));const m=s?.season_mode||'normal';document.body.classList.add('season-'+m);
+ document.documentElement.style.setProperty('--season-custom',s?.custom_color||'#0a8f88');
+ document.getElementById('v14SeasonMark')?.remove();
+ if(m!=='normal'){const mark=document.createElement('div');mark.id='v14SeasonMark';mark.className='v14-season-mark';mark.textContent=s?.season_symbol||({national:'🇸🇦',flag_day:'🇸🇦',hajj:'🕋',ramadan:'☾',eid_fitr:'✦',eid_adha:'🕋'}[m]||'✦');document.body.appendChild(mark)}
+};
+saveExperienceSettings=async function(){
+ const msg=document.getElementById('experienceMsg');try{const payload={id:1,season_mode:document.getElementById('seasonMode').value,season_label:document.getElementById('seasonLabel').value.trim(),custom_color:document.getElementById('seasonCustomColor').value,season_symbol:document.getElementById('seasonSymbol').value.trim(),updated_at:new Date().toISOString()};const {error}=await getSupabaseClient().from('laith_experience_settings').upsert(payload,{onConflict:'id'});if(error)throw error;msg.textContent='تم حفظ الهوية الموسمية.';applySeason(payload)}catch(e){msg.textContent='تعذر الحفظ: '+e.message}
+};
+loadExperienceSettings=async function(){try{const {data}=await getSupabaseClient().from('laith_experience_settings').select('*').eq('id',1).maybeSingle();if(data){applySeason(data);if(document.getElementById('seasonMode'))document.getElementById('seasonMode').value=data.season_mode||'normal';if(document.getElementById('seasonLabel'))document.getElementById('seasonLabel').value=data.season_label||'';if(document.getElementById('seasonCustomColor'))document.getElementById('seasonCustomColor').value=data.custom_color||'#0a8f88';if(document.getElementById('seasonSymbol'))document.getElementById('seasonSymbol').value=data.season_symbol||''}}catch(e){}};
+document.addEventListener('DOMContentLoaded',()=>{mountV14PublicSections();prepareV14Admin();loadV14Partners();loadV14CompletedCount();loadV14UserCard();setTimeout(()=>{syncV14Brand();enableV14HeroSwipe()},1200);setTimeout(loadV14PartnersAdmin,1800)});
 </script>
 
 </body>
