@@ -3405,6 +3405,16 @@ body.season-custom .v14-bottom-nav button.active,body.season-custom .v14-home-se
 
 <div id="v14ProfileEditOverlay" class="v6-overlay"><div class="v6-modal" style="width:min(560px,100%)">
  <div class="v6-modal-head"><h2 style="margin:0">تعديل الملف الشخصي</h2><button class="v6-close" onclick="closeV6Overlay('v14ProfileEditOverlay')">×</button></div>
+ <div id="v19ProfilePhotoBlock" style="display:flex;align-items:center;gap:14px;margin:16px 0;padding:14px;background:#f4f8f9;border-radius:18px">
+   <img id="v19ProfilePhotoPreview" class="avatar" src="" alt="الصورة الشخصية" style="width:82px;height:82px;flex:0 0 82px">
+   <div style="flex:1">
+     <b>الصورة الشخصية</b>
+     <p style="margin:4px 0 9px;color:#64757d;font-size:13px">يمكنك إضافة أو تغيير صورتك. JPG / PNG / WEBP وبحد أقصى 5MB.</p>
+     <input id="v19ProfilePhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="previewV19ProfilePhoto(this)">
+     <button class="btn light" type="button" onclick="uploadV19ProfilePhoto()" style="margin-top:8px">رفع / تغيير الصورة</button>
+     <div id="v19ProfilePhotoMsg" class="form-msg"></div>
+   </div>
+ </div>
  <div class="cms-grid" style="margin-top:15px">
   <div><label>الاسم</label><input id="v14ProfileName" disabled></div>
   <div><label>السجل المدني</label><input id="v14ProfileNational" disabled></div>
@@ -3449,6 +3459,10 @@ function openV14ProfileEdit(){
  document.getElementById('v14ProfilePhone').value=m?.phone||'';
  document.getElementById('v14ProfileEmail').value=user.email||'';
  document.getElementById('v14ProfileMsg').textContent='';
+ const p=document.getElementById('v19ProfilePhotoPreview');
+ if(p)p.src=m?.avatar_url||avatarPlaceholder(m?.full_name||user.user_metadata?.full_name||user.email);
+ const f=document.getElementById('v19ProfilePhotoFile');if(f)f.value='';
+ const pm=document.getElementById('v19ProfilePhotoMsg');if(pm)pm.textContent='';
  openV6Overlay('v14ProfileEditOverlay');
 }
 async function saveV14MyContact(){
@@ -4090,6 +4104,109 @@ function detectAdminOpenV18(){
 }
 setInterval(detectAdminOpenV18,1500);
 document.addEventListener('DOMContentLoaded',()=>{ensureV18PeerRatingsSection();detectAdminOpenV18()});
+</script>
+
+
+<style id="laith-v19-profile-photo-style">
+#v19ProfilePhotoFile{max-width:100%;font-family:inherit}
+#v19ProfilePhotoBlock .btn{min-height:40px}
+@media(max-width:560px){
+ #v19ProfilePhotoBlock{align-items:flex-start!important}
+ #v19ProfilePhotoPreview{width:70px!important;height:70px!important;flex-basis:70px!important}
+}
+</style>
+
+<script id="laith-v19-profile-photo-script">
+function previewV19ProfilePhoto(input){
+ const file=input?.files?.[0];if(!file)return;
+ const msg=document.getElementById('v19ProfilePhotoMsg');
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)){
+   if(msg)msg.textContent='اختر صورة JPG أو PNG أو WEBP فقط.'; input.value=''; return;
+ }
+ if(file.size>5*1024*1024){
+   if(msg)msg.textContent='حجم الصورة يجب ألا يتجاوز 5MB.'; input.value=''; return;
+ }
+ const preview=document.getElementById('v19ProfilePhotoPreview');
+ if(preview)preview.src=URL.createObjectURL(file);
+ if(msg)msg.textContent='الصورة جاهزة للرفع.';
+}
+
+async function uploadV19ProfilePhoto(){
+ const input=document.getElementById('v19ProfilePhotoFile');
+ const file=input?.files?.[0];
+ const msg=document.getElementById('v19ProfilePhotoMsg');
+ if(!file){if(msg)msg.textContent='اختر صورة أولًا.';return}
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)){if(msg)msg.textContent='صيغة الصورة غير مدعومة.';return}
+ if(file.size>5*1024*1024){if(msg)msg.textContent='حجم الصورة يجب ألا يتجاوز 5MB.';return}
+ if(msg)msg.textContent='جاري رفع الصورة...';
+ try{
+   const sb=getSupabaseClient();
+   const {data:{user},error:userErr}=await sb.auth.getUser();
+   if(userErr||!user)throw new Error('يجب تسجيل الدخول أولًا.');
+
+   const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+   const path=`${user.id}/avatar-${Date.now()}.${ext}`;
+
+   const {error:uploadErr}=await sb.storage.from('profile-photos').upload(path,file,{
+     cacheControl:'3600',
+     upsert:false,
+     contentType:file.type
+   });
+   if(uploadErr)throw uploadErr;
+
+   const {data:publicData}=sb.storage.from('profile-photos').getPublicUrl(path);
+   const avatarUrl=publicData?.publicUrl;
+   if(!avatarUrl)throw new Error('تعذر الحصول على رابط الصورة.');
+
+   const {error:saveErr}=await sb.rpc('set_my_avatar_v19',{p_avatar_url:avatarUrl});
+   if(saveErr)throw saveErr;
+
+   if(msg)msg.textContent='تم تحديث الصورة الشخصية بنجاح.';
+   if(input)input.value='';
+   const preview=document.getElementById('v19ProfilePhotoPreview');if(preview)preview.src=avatarUrl;
+
+   await Promise.allSettled([
+     typeof loadV14UserCard==='function'?loadV14UserCard():Promise.resolve(),
+     typeof loadMyProfile==='function'?loadMyProfile():Promise.resolve(),
+     typeof loadMemberDirectory==='function'?loadMemberDirectory():Promise.resolve(),
+     typeof loadV18PeerRatings==='function'?loadV18PeerRatings():Promise.resolve()
+   ]);
+ }catch(e){
+   console.error('V19 profile photo:',e);
+   let m=String(e?.message||e||'خطأ غير معروف');
+   if(m.toLowerCase().includes('row-level security')||m.toLowerCase().includes('policy')){
+     m='صلاحية رفع الصور غير مفعلة. شغّل ملف SQL الخاص بـ V19 ثم حاول مرة أخرى.';
+   }else if(m.includes('MEMBER_PROFILE_MISSING')||m.includes('ملف العضو غير موجود')){
+     m='حساب تسجيل الدخول غير مرتبط بملف عضو. يلزم إصلاح ربط العضو من لوحة الإدارة.';
+   }
+   if(msg)msg.textContent='تعذر تحديث الصورة: '+m;
+ }
+}
+
+/* توحيد زر الصورة القديم مع نفس النظام الآمن */
+window.uploadMyAvatar=async function(){
+ const old=document.getElementById('avatarFile');
+ if(!old?.files?.[0]){
+   const oldMsg=document.getElementById('avatarMsg');if(oldMsg)oldMsg.textContent='اختر صورة أولًا.';
+   return;
+ }
+ const file=old.files[0], oldMsg=document.getElementById('avatarMsg');
+ if(file.size>5*1024*1024){if(oldMsg)oldMsg.textContent='حجم الصورة يجب ألا يتجاوز 5MB.';return}
+ try{
+   if(oldMsg)oldMsg.textContent='جاري رفع الصورة...';
+   const sb=getSupabaseClient(),{data:{user}}=await sb.auth.getUser();
+   if(!user)throw new Error('يجب تسجيل الدخول أولًا.');
+   const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+   const path=`${user.id}/avatar-${Date.now()}.${ext}`;
+   const {error:upErr}=await sb.storage.from('profile-photos').upload(path,file,{upsert:false,contentType:file.type});
+   if(upErr)throw upErr;
+   const {data:u}=sb.storage.from('profile-photos').getPublicUrl(path);
+   const {error:sErr}=await sb.rpc('set_my_avatar_v19',{p_avatar_url:u.publicUrl});
+   if(sErr)throw sErr;
+   if(oldMsg)oldMsg.textContent='تم تحديث الصورة الشخصية.';
+   await Promise.allSettled([loadMyProfile(),loadMemberDirectory(),loadV14UserCard()]);
+ }catch(e){if(oldMsg)oldMsg.textContent='تعذر تحديث الصورة: '+String(e.message||e)}
+};
 </script>
 
 </body>
