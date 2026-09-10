@@ -231,6 +231,23 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 .task-chat{margin-top:16px;border-top:1px solid #e4e9ec;padding-top:14px}.chat-thread{max-height:280px;overflow:auto;background:#f6f8f9;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}.chat-msg{max-width:84%;background:#fff;border:1px solid #e0e6e9;border-radius:13px;padding:9px 11px;align-self:flex-start}.chat-msg.mine{align-self:flex-end;background:#e7f7ed;border-color:#c9e9d5}.chat-msg.admin{border-inline-start:4px solid #17232d}.chat-msg small{display:block;color:#7a858d;margin-bottom:4px}.chat-msg img{display:block;max-width:220px;max-height:180px;border-radius:10px;margin-top:6px}.chat-compose{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}.chat-compose textarea{min-height:72px;grid-column:1/-1}.chat-compose input[type=file]{font-size:12px}.required-note{background:#fff4e3;border:1px solid #f0d4a8;color:#80540c;border-radius:12px;padding:10px;font-size:12px;font-weight:800;margin-top:10px}.admin-assignment-card{border:1px solid #dfe5e9;border-radius:14px;padding:12px;margin-top:10px;background:#fafbfc}.proof-links{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.proof-links a{font-size:12px;font-weight:900}
 @media(max-width:700px){.task-details-grid{grid-template-columns:1fr}.task-media{grid-template-columns:1fr 1fr}.mission-progress{grid-template-columns:1fr}.mission-step{display:grid;grid-template-columns:32px 1fr;align-items:center;text-align:right}.mission-step .num{margin:0}.chat-compose{grid-template-columns:1fr}.task-media img,.task-media video{height:130px}}
 
+
+/* ===== V4: Strong contrast for all clickable icons / buttons ===== */
+.btn,.row-actions button,.status-actions button,.quick-action,.hero-action-inner .btn,.laith-contact-link,.laith-social-link,.featured-volunteer-badge{font-weight:900!important}
+/* Dark surfaces -> white text */
+.btn:not(.light),.row-actions button:not(.light),.status-actions button.active,.hero-action-inner .emergency-main,.laith-contact-link,.laith-social-link{color:#fff!important}
+/* Light surfaces -> dark text */
+.btn.light,.status-actions button:not(.active),.quick-action{color:#063b55!important}
+/* Gold surfaces -> navy text */
+.hero-action-inner .explore-main,.featured-volunteer-badge{color:#063b55!important}
+/* Circular service icons: navy background / white symbol */
+.quick-action .qa-icon{background:#063b55!important;color:#fff!important;border:2px solid #063b55!important}
+/* Emergency service icon: red background / white symbol for immediate visual contrast */
+.quick-action.emergency .qa-icon{background:#9d1d2e!important;color:#fff!important;border-color:#9d1d2e!important}
+/* Keep button/link text readable in every state */
+button,a.btn,.quick-action,.laith-contact-link,.laith-social-link{text-shadow:none!important}
+button:disabled,.btn:disabled{opacity:.62}
+
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
@@ -372,6 +389,21 @@ footer{margin:0;padding:34px 0;background:#062f45;color:#d5e1e6;border:0;text-al
 .laith-social-link{min-width:44px;padding:9px 12px;font-weight:800;font-size:13px}
 .laith-footer-empty{display:none;color:#b9cad2;font-size:13px;margin-top:8px}
 @media(max-width:640px){.laith-contact-actions,.laith-social-links{justify-content:stretch}.laith-contact-link{flex:1 1 calc(50% - 8px)}.laith-social-link{flex:1 1 calc(33.333% - 8px)}}
+
+/* ===== تحسينات الصفحة الرئيسية v3 ===== */
+header{z-index:9000}.nav{min-height:82px;height:auto;padding:8px 0}.auth-buttons{margin-inline-start:auto}
+.auth-buttons .btn{box-shadow:0 8px 22px rgba(6,59,85,.10)}
+.auth-buttons>a.btn{background:var(--laith-gold);color:#173d50}.auth-buttons #loginNavBtn{background:var(--laith-navy)}.auth-buttons #signupNavBtn{background:#fff;color:var(--laith-navy);border:1px solid #dfe6ea}
+.hero .actions{display:none!important}
+.hero-action-strip{background:#fff;border-bottom:1px solid #ece8df;padding:16px 0;position:relative;z-index:2}.hero-action-inner{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.hero-action-inner .btn{min-width:190px;border-radius:999px}.hero-action-inner .emergency-main{background:#9d1d2e;color:#fff}.hero-action-inner .explore-main{background:var(--laith-gold);color:#173d50}
+.quick-services-grid{grid-template-columns:repeat(3,1fr);max-width:900px;margin:auto}.quick-action{min-height:118px}.quick-action.emergency{background:#fff!important;color:var(--laith-navy)!important}
+#achievements .achievement-stat b{color:#fff!important}
+#about .section-head h2{max-width:820px}.official-about{background:#fff;border:1px solid #ece8df;border-radius:18px;padding:28px;box-shadow:0 12px 34px rgba(6,59,85,.05);font-size:15px;line-height:2.15;color:#536b78;margin-bottom:18px}.official-about strong{color:var(--laith-navy)}
+.secondary-slider-section{padding:42px 0 18px;background:#faf9f5}.secondary-slider-shell{position:relative;min-height:350px;border-radius:22px;overflow:hidden;background:#082f45;box-shadow:0 18px 46px rgba(6,59,85,.10)}.news-slide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}.news-slide.active{opacity:1}.secondary-slider-shell:after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);pointer-events:none}
+.featured-volunteer-section{padding:20px 0 52px;background:#fff}.featured-volunteer-wrap{max-width:900px;margin:auto}.featured-volunteer-card{position:relative;overflow:hidden;display:grid;grid-template-columns:210px 1fr;gap:28px;align-items:center;background:linear-gradient(135deg,#052f45,#0b5577);border-radius:26px;padding:28px;color:#fff;box-shadow:0 22px 55px rgba(5,47,69,.18)}.featured-volunteer-card:before{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(216,168,78,.13);left:-110px;top:-120px}.featured-volunteer-photo{width:190px;height:190px;border-radius:24px;object-fit:cover;background:#fff;border:4px solid rgba(255,255,255,.92);position:relative;z-index:1}.featured-volunteer-placeholder{width:190px;height:190px;border-radius:24px;background:rgba(255,255,255,.1);border:2px dashed rgba(255,255,255,.35);display:grid;place-items:center;font-size:54px;position:relative;z-index:1}.featured-volunteer-badge{display:inline-flex;align-items:center;gap:8px;background:var(--laith-gold);color:#173d50;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:900}.featured-volunteer-card h3{font-size:30px;margin:12px 0 4px}.featured-volunteer-subtitle{color:#f4d99f;font-weight:700;margin-bottom:8px}.featured-volunteer-card p{margin:0;color:#dce8ed;line-height:2}.featured-volunteer-period{margin-top:16px;font-size:13px;color:#c7d7de}.featured-volunteer-empty{text-align:center;background:#f8f7f3;border:1px dashed #d9d4c8;border-radius:20px;padding:30px;color:#72818a}
+.featured-admin-preview{display:flex;gap:14px;align-items:center;margin-top:12px;padding:12px;border:1px solid #edf1f4;border-radius:14px}.featured-admin-preview img{width:80px;height:80px;border-radius:16px;object-fit:cover;background:#edf1f4}
+@media(max-width:800px){header{position:sticky;top:0}.nav{gap:8px;align-items:center}.brand #brandSiteName{display:none}.auth-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;flex:1}.auth-buttons .btn{padding:8px 7px!important;font-size:10.5px!important;white-space:nowrap}.logo{width:48px;height:42px!important}.hero-action-inner .btn{min-width:0;flex:1 1 45%}.quick-services-grid{grid-template-columns:repeat(3,1fr);gap:8px}.quick-action{font-size:12px!important;padding:13px 6px!important;min-height:104px}.secondary-slider-shell{min-height:230px;border-radius:16px}.featured-volunteer-card{grid-template-columns:1fr;text-align:center;padding:22px}.featured-volunteer-photo,.featured-volunteer-placeholder{width:150px;height:150px;margin:auto}.featured-volunteer-card h3{font-size:24px}.featured-volunteer-badge{margin:auto}}
+@media(max-width:440px){.auth-buttons{grid-template-columns:repeat(3,1fr)}.auth-buttons .btn{font-size:9.5px!important;padding:8px 4px!important}.quick-action .qa-icon{width:40px;height:40px;font-size:18px}.hero-action-inner{gap:8px}.hero-action-inner .btn{font-size:12px;padding:10px 12px}}
 </style>
 
 </head>
@@ -398,16 +430,16 @@ footer{margin:0;padding:34px 0;background:#062f45;color:#d5e1e6;border:0;text-al
 </div>
 <div class="visual" id="homeVisual"><div id="heroSlides" class="hero-slides"></div><div class="dashboard">جمعية ليث للإنقاذ</div><div class="map"><i class="pin p1"></i><i class="pin p2"></i><i class="pin p3"></i></div></div>
 </div></section>
-
+<section class="hero-action-strip"><div class="wrap"><div class="hero-action-inner"><button class="btn emergency-main" onclick="openEmergency()">طلب إنقاذ عاجل</button><a class="btn explore-main" href="#about">استكشف المنصة</a></div></div></section>
 
 <section class="quick-services"><div class="wrap">
   <div class="quick-services-grid">
     <button class="quick-action emergency" onclick="openEmergency()"><span class="qa-icon">🚨</span>طلب إنقاذ</button>
-    <button class="quick-action" onclick="openReport('missing')"><span class="qa-icon">🔎</span>بلاغ مفقود</button>
-    <button class="quick-action" onclick="openReport('assistance')"><span class="qa-icon">🆘</span>أحتاج مساعدة</button>
     <button class="quick-action" onclick="openSignup()"><span class="qa-icon">🤝</span>تطوع معنا</button>
+    <button class="quick-action" onclick="openReport('assistance')"><span class="qa-icon">🆘</span>أحتاج مساعدة</button>
   </div>
 </div></section>
+<section class="featured-volunteer-section" id="featuredVolunteer"><div class="wrap featured-volunteer-wrap"><div id="featuredVolunteerCard" class="featured-volunteer-empty">سيتم الإعلان عن المتطوع المثالي لهذا الشهر قريبًا.</div></div></section>
 <section style="padding:18px 0 34px"><div class="wrap">
   <div class="live-stats">
     <div class="live-stat"><b id="publicReportCount">—</b><span>إجمالي البلاغات</span></div>
@@ -426,16 +458,15 @@ footer{margin:0;padding:34px 0;background:#062f45;color:#d5e1e6;border:0;text-al
 
 <section id="laithVolunteerBanner"><div class="wrap"><div class="join-inner"><div><div class="eyebrow">كن جزءًا من العطاء</div><h2>انضم إلى فريق المتطوعين</h2><p>معًا نصنع أثرًا ونبني فريقًا جاهزًا للاستجابة وخدمة المجتمع.</p></div><button class="btn" type="button" onclick="openSignup()">سجل الآن</button></div></div></section>
 
+<section class="secondary-slider-section" id="newsSliderSection"><div class="wrap"><div id="newsSliderShell" class="secondary-slider-shell"><div id="newsSlides"></div></div></div></section>
+
 <section id="news"><div class="wrap">
   <div class="section-head"><div><h2>الأخبار والمقالات</h2><p>آخر أخبار ومقالات جمعية ليث للإنقاذ.</p></div></div>
   <div id="publicPosts" class="posts-grid"><p>جاري تحميل المحتوى...</p></div>
 </div></section>
 
 
-<section class="ops-section" id="missing"><div class="wrap">
-  <div class="section-head"><div><h2>المفقودون</h2><p>بلاغات المفقودين النشطة والمعلومات الواردة من المجتمع.</p></div></div>
-  <div id="publicMissingPersons" class="missing-grid"><p>جاري تحميل البلاغات...</p></div>
-</div></section>
+
 <section class="ops-section" id="achievements"><div class="wrap">
   <div class="section-head"><div><h2>إنجازات الجمعية</h2><p>مؤشرات حية تتحدث تلقائيًا من النظام.</p></div></div>
   <div class="achievements-live">
@@ -446,9 +477,10 @@ footer{margin:0;padding:34px 0;background:#062f45;color:#d5e1e6;border:0;text-al
   </div>
 </div></section>
 <section id="about"><div class="wrap">
-<div class="section-head"><div><h2>منصة واحدة لكل عمليات الإنقاذ</h2><p>تصميم رسمي، حديث، واضح، ومتجاوب مع الجوال والكمبيوتر.</p></div></div>
-<div class="cards"><article class="card"><div class="num">01</div><div><span>عن الجمعية</span><h3>جمعية ليث للإنقاذ</h3><p>منظومة رقمية متكاملة لتنظيم أعمال الإنقاذ والبلاغات والمتطوعين وربط الإدارة بالميدان والمواطنين.</p></div></article><article class="card"><div class="num">02</div><div><span>البلاغات</span><h3>استقبال البلاغات وإدارتها</h3><p>تقديم البلاغات من المواطنين بدون إنشاء حساب، مع رقم مرجعي ومتابعة حالة البلاغ.</p></div></article><article class="card"><div class="num">03</div><div><span>المتطوعون</span><h3>إدارة المتطوعين والمهام</h3><p>ملفات متكاملة للمتطوعين، قبول ورفض المهام، تسجيل المشاركة وساعات التطوع تلقائياً.</p></div></article><article class="card"><div class="num">04</div><div><span>الخريطة المباشرة</span><h3>متابعة المتطوعين أثناء المهمة</h3><p>عرض موقع البلاغ والمتطوعين المشاركين ومسارات الحركة على خريطة الإدارة.</p></div></article></div>
-</div></section>
+<div class="section-head"><div><h2>عن جمعية ليث للإنقاذ</h2><p>عمل إنساني وميداني منظم لخدمة المجتمع وتعزيز السلامة والاستجابة.</p></div></div>
+<div class="official-about"><strong>جمعية ليث للإنقاذ</strong> جمعية متخصصة في أعمال الإنقاذ والإسعاف والاستجابة للحالات الطارئة، وتسهم في دعم سلامة المجتمع من خلال فرق ميدانية مؤهلة وتنظيم العمل التطوعي وتقديم المساندة الإسعافية والإنقاذية وفق أعلى معايير الجاهزية والمسؤولية. وتعمل الجمعية على تعزيز ثقافة السلامة، ورفع كفاءة الاستجابة، وتوظيف التقنية في إدارة البلاغات والعمليات بما يدعم سرعة الوصول وجودة الخدمة والأثر المجتمعي المستدام.</div>
+<div class="cards"><article class="card"><div class="num">01</div><div><span>الإنقاذ</span><h3>استجابة ميدانية منظمة</h3><p>تنظيم وتنفيذ مهام الإنقاذ والمساندة للحالات التي تتطلب تدخلاً ميدانياً وفق الجاهزية والاختصاص.</p></div></article><article class="card"><div class="num">02</div><div><span>الإسعاف</span><h3>مساندة إسعافية للحالات</h3><p>دعم الحالات الإسعافية ضمن نطاق عمل الجمعية وبما يساند سرعة الاستجابة وسلامة المستفيدين.</p></div></article><article class="card"><div class="num">03</div><div><span>التطوع</span><h3>تمكين المتطوعين</h3><p>استقطاب وتنظيم المتطوعين وتطوير مشاركتهم وربطهم بالمهام والفرق بما يعزز أثر العمل التطوعي.</p></div></article><article class="card"><div class="num">04</div><div><span>التقنية</span><h3>إدارة رقمية للعمليات</h3><p>استخدام الأنظمة الرقمية لإدارة البلاغات والمهام والفرق ورفع كفاءة المتابعة والتنسيق الميداني.</p></div></article></div>
+</div></section>>
 
 <section><div class="wrap"><div class="stats"><div class="stat"><b>01</b><span>بلاغ جديد</span><small>إرسال البلاغ</small></div><div class="stat"><b>02</b><span>المتطوعون</span><small>إدارة المشاركات</small></div><div class="stat"><b>03</b><span>المهام</span><small>متابعة التنفيذ</small></div><div class="stat"><b>04</b><span>التقارير</span><small>إحصائيات الأداء</small></div></div></div></section>
 
@@ -746,6 +778,31 @@ footer{margin:0;padding:34px 0;background:#062f45;color:#d5e1e6;border:0;text-al
         <input id="heroSlideFile" type="file" accept="image/png,image/jpeg,image/webp">
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" type="button" onclick="addHeroSlide()">إضافة الصورة</button><span id="slideMsg" class="form-msg"></span></div>
         <div id="adminSlides" style="margin-top:14px"><p>جاري التحميل...</p></div>
+      </div>
+
+      <div class="cms-box">
+        <h3>الصور المتحركة فوق الأخبار والمقالات</h3>
+        <p style="color:#687680">هذه مجموعة مستقلة تمامًا عن صور الواجهة الرئيسية؛ اختر صورًا مختلفة وتحكم في إظهارها وحذفها من هنا.</p>
+        <input id="newsSlideFile" type="file" accept="image/png,image/jpeg,image/webp">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" type="button" onclick="addNewsSlide()">إضافة الصورة</button><span id="newsSlideMsg" class="form-msg"></span></div>
+        <div id="adminNewsSlides" style="margin-top:14px"><p>جاري التحميل...</p></div>
+      </div>
+
+      <div class="cms-box">
+        <h3>المتطوع المثالي لهذا الشهر</h3>
+        <p style="color:#687680">اختر المتطوع من قائمة المتطوعين المعتمدين أو أدخل بياناته يدويًا، ثم حدد الشهر والسنة.</p>
+        <div class="cms-grid">
+          <div><label>طريقة الاختيار</label><select id="featuredSourceMode" onchange="toggleFeaturedSourceMode()"><option value="existing">اختيار من المتطوعين</option><option value="manual">إدخال يدوي</option></select></div>
+          <div id="featuredMemberSelectWrap"><label>المتطوع</label><select id="featuredMemberSelect" onchange="applySelectedFeaturedMember()"><option value="">اختر متطوعًا...</option></select></div>
+          <div><label>الشهر الميلادي</label><select id="featuredMonth"><option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option><option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option><option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option><option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option></select></div>
+          <div><label>السنة</label><select id="featuredYear"></select></div>
+          <div><label>اسم المتطوع</label><input id="featuredName" type="text" placeholder="اسم المتطوع المثالي"></div>
+          <div><label>التخصص / الصفة</label><input id="featuredSubtitle" type="text" placeholder="مثال: منقذ - فريق الاستجابة"></div>
+          <div style="grid-column:1/-1"><label>النص</label><textarea id="featuredDescription" placeholder="اكتب كلمة التكريم أو سبب الاختيار"></textarea></div>
+          <div style="grid-column:1/-1"><label>صورة المتطوع</label><input id="featuredImageFile" type="file" accept="image/png,image/jpeg,image/webp"></div>
+        </div>
+        <div id="featuredAdminPreview" class="featured-admin-preview" style="display:none"><img id="featuredPreviewImg" alt="معاينة"><div><b id="featuredPreviewName"></b><br><small id="featuredPreviewPeriod"></small></div></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px"><button class="btn" type="button" onclick="saveFeaturedVolunteer()">حفظ المتطوع المثالي</button><button class="btn light" type="button" onclick="loadFeaturedVolunteerAdmin()">تحديث</button><span id="featuredVolunteerMsg" class="form-msg"></span></div>
       </div>
 
       <div class="cms-box">
@@ -1156,6 +1213,8 @@ async function loginVolunteer(){
       await loadContactSettings();
       await loadAdminPosts();
       await loadAdminSlides();
+      await loadAdminNewsSlides();
+      await loadFeaturedVolunteerAdmin();
       await startRealtimeUpdates();
       startAdminReportAlerts();
       return;
@@ -1644,6 +1703,33 @@ async function loadAdminSlides(){const box=document.getElementById("adminSlides"
 async function addHeroSlide(){const f=document.getElementById("heroSlideFile")?.files?.[0],msg=document.getElementById("slideMsg");if(!f){msg.textContent="اختر صورة أولًا.";return;}msg.textContent="جاري الرفع...";try{const url=await uploadSiteImage(f,"hero-slides");const {error}=await getSupabaseClient().from("hero_slides").insert({image_url:url,is_active:true});if(error)throw error;document.getElementById("heroSlideFile").value="";msg.textContent="تمت إضافة الصورة.";await Promise.all([loadAdminSlides(),loadHeroSlides()]);}catch(e){msg.textContent="تعذر الإضافة: "+e.message;}}
 async function toggleHeroSlide(id,v){const {error}=await getSupabaseClient().from("hero_slides").update({is_active:v}).eq("id",id);if(error){alert(error.message);return;}await Promise.all([loadAdminSlides(),loadHeroSlides()]);}
 async function deleteHeroSlide(id){if(!confirm("حذف الصورة من العرض؟"))return;const {error}=await getSupabaseClient().from("hero_slides").delete().eq("id",id);if(error){alert(error.message);return;}await Promise.all([loadAdminSlides(),loadHeroSlides()]);}
+
+let newsSlideTimer=null;
+async function loadNewsSlides(){
+  const shell=document.getElementById("newsSliderShell"),box=document.getElementById("newsSlides");if(!shell||!box)return;
+  const {data,error}=await getSupabaseClient().from("news_slides").select("id,image_url,sort_order").eq("is_active",true).order("sort_order").order("created_at");
+  if(error){console.warn("news_slides:",error.message);shell.style.display="none";return;}
+  box.innerHTML=(data||[]).map((x,i)=>`<img class="news-slide ${i===0?'active':''}" src="${esc(x.image_url)}" alt="صورة من جمعية ليث">`).join("");
+  shell.style.display=(data||[]).length?"block":"none";
+  if(newsSlideTimer)clearInterval(newsSlideTimer);
+  if((data||[]).length>1){let i=0;newsSlideTimer=setInterval(()=>{const slides=[...box.querySelectorAll('.news-slide')];if(!slides.length)return;slides[i].classList.remove('active');i=(i+1)%slides.length;slides[i].classList.add('active');},4500);}
+}
+async function loadAdminNewsSlides(){const box=document.getElementById("adminNewsSlides");if(!box)return;const {data,error}=await getSupabaseClient().from("news_slides").select("*").order("sort_order").order("created_at");if(error){box.innerHTML="<p>شغّل ملف SQL الخاص بتحديثات الصفحة أولًا.</p>";return;}box.innerHTML=(data||[]).map(x=>`<div class="slide-admin-row"><img src="${esc(x.image_url)}" alt=""><div><b>${x.is_active?'ظاهرة فوق الأخبار':'مخفية'}</b><br><small>الترتيب: ${x.sort_order||0}</small></div><div class="row-actions"><button onclick="toggleNewsSlide('${x.id}',${!x.is_active})">${x.is_active?'إخفاء':'إظهار'}</button><button class="danger" onclick="deleteNewsSlide('${x.id}')">حذف</button></div></div>`).join('')||'<p>لم تضف صورًا لهذه المجموعة بعد.</p>';}
+async function addNewsSlide(){const f=document.getElementById("newsSlideFile")?.files?.[0],msg=document.getElementById("newsSlideMsg");if(!f){msg.textContent="اختر صورة أولًا.";return;}msg.textContent="جاري الرفع...";try{const url=await uploadSiteImage(f,"news-slides");const {error}=await getSupabaseClient().from("news_slides").insert({image_url:url,is_active:true});if(error)throw error;document.getElementById("newsSlideFile").value="";msg.textContent="تمت إضافة الصورة.";await Promise.all([loadAdminNewsSlides(),loadNewsSlides()]);}catch(e){msg.textContent="تعذر الإضافة: "+e.message;}}
+async function toggleNewsSlide(id,v){const {error}=await getSupabaseClient().from("news_slides").update({is_active:v}).eq("id",id);if(error){alert(error.message);return;}await Promise.all([loadAdminNewsSlides(),loadNewsSlides()]);}
+async function deleteNewsSlide(id){if(!confirm("حذف الصورة من مجموعة الأخبار؟"))return;const {error}=await getSupabaseClient().from("news_slides").delete().eq("id",id);if(error){alert(error.message);return;}await Promise.all([loadAdminNewsSlides(),loadNewsSlides()]);}
+
+const FEATURED_MONTHS=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+let featuredMembersCache=[];
+function ensureFeaturedYears(){const y=document.getElementById("featuredYear");if(!y||y.options.length)return;const now=new Date().getFullYear();for(let n=now-2;n<=now+5;n++){const o=document.createElement("option");o.value=n;o.textContent=n;y.appendChild(o);}y.value=String(now);const m=document.getElementById("featuredMonth");if(m)m.value=String(new Date().getMonth()+1);}
+function toggleFeaturedSourceMode(){const mode=document.getElementById("featuredSourceMode")?.value||"existing";const w=document.getElementById("featuredMemberSelectWrap");if(w)w.style.display=mode==="existing"?"block":"none";if(mode==="manual"){const sel=document.getElementById("featuredMemberSelect");if(sel)sel.value="";}}
+async function loadFeaturedMembers(){const sel=document.getElementById("featuredMemberSelect");if(!sel)return;const {data,error}=await getSupabaseClient().from("members").select("id,full_name,avatar_url,specialty").eq("account_status","approved").order("full_name");if(error){console.warn(error);return;}featuredMembersCache=data||[];sel.innerHTML='<option value="">اختر متطوعًا...</option>'+featuredMembersCache.map(m=>`<option value="${m.id}">${esc(m.full_name||"بدون اسم")}</option>`).join("");}
+function applySelectedFeaturedMember(){const id=document.getElementById("featuredMemberSelect")?.value;const m=featuredMembersCache.find(x=>x.id===id);if(!m)return;document.getElementById("featuredName").value=m.full_name||"";if(!document.getElementById("featuredSubtitle").value)document.getElementById("featuredSubtitle").value=m.specialty==="paramedic"?"مسعف":m.specialty==="rescuer"?"منقذ":(m.specialty||"");const img=document.getElementById("featuredPreviewImg");if(img&&m.avatar_url){img.src=m.avatar_url;document.getElementById("featuredAdminPreview").style.display="flex";}document.getElementById("featuredPreviewName").textContent=m.full_name||"";}
+function renderFeaturedVolunteer(v){const box=document.getElementById("featuredVolunteerCard");if(!box)return;if(!v){box.className="featured-volunteer-empty";box.innerHTML="سيتم الإعلان عن المتطوع المثالي لهذا الشهر قريبًا.";return;}const month=FEATURED_MONTHS[(Number(v.month)||1)-1]||"";const photo=v.image_url?`<img class="featured-volunteer-photo" src="${esc(v.image_url)}" alt="${esc(v.volunteer_name||'المتطوع المثالي')}">`:`<div class="featured-volunteer-placeholder">★</div>`;box.className="featured-volunteer-card";box.innerHTML=`${photo}<div><span class="featured-volunteer-badge">★ المتطوع المثالي لهذا الشهر</span><h3>${esc(v.volunteer_name||"")}</h3>${v.subtitle?`<div class="featured-volunteer-subtitle">${esc(v.subtitle)}</div>`:""}${v.description?`<p>${esc(v.description)}</p>`:""}<div class="featured-volunteer-period">${month} ${esc(v.year||"")}</div></div>`;}
+async function loadFeaturedVolunteer(){const {data,error}=await getSupabaseClient().from("featured_volunteer").select("*").eq("id",1).maybeSingle();if(error){console.warn("featured_volunteer:",error.message);renderFeaturedVolunteer(null);return;}renderFeaturedVolunteer(data||null);}
+async function loadFeaturedVolunteerAdmin(){ensureFeaturedYears();await loadFeaturedMembers();const {data,error}=await getSupabaseClient().from("featured_volunteer").select("*").eq("id",1).maybeSingle();const msg=document.getElementById("featuredVolunteerMsg");if(error){if(msg)msg.textContent="شغّل ملف SQL الخاص بتحديثات الصفحة أولًا.";return;}if(!data){toggleFeaturedSourceMode();return;}document.getElementById("featuredSourceMode").value=data.source_member_id?"existing":"manual";toggleFeaturedSourceMode();document.getElementById("featuredMemberSelect").value=data.source_member_id||"";document.getElementById("featuredMonth").value=String(data.month||new Date().getMonth()+1);document.getElementById("featuredYear").value=String(data.year||new Date().getFullYear());document.getElementById("featuredName").value=data.volunteer_name||"";document.getElementById("featuredSubtitle").value=data.subtitle||"";document.getElementById("featuredDescription").value=data.description||"";if(data.image_url){document.getElementById("featuredPreviewImg").src=data.image_url;document.getElementById("featuredAdminPreview").style.display="flex";document.getElementById("featuredPreviewName").textContent=data.volunteer_name||"";document.getElementById("featuredPreviewPeriod").textContent=`${FEATURED_MONTHS[(Number(data.month)||1)-1]} ${data.year||""}`;}}
+async function saveFeaturedVolunteer(){const msg=document.getElementById("featuredVolunteerMsg");msg.textContent="جاري الحفظ...";try{ensureFeaturedYears();const mode=document.getElementById("featuredSourceMode").value;const memberId=mode==="existing"?(document.getElementById("featuredMemberSelect").value||null):null;const name=document.getElementById("featuredName").value.trim();if(!name){msg.textContent="اكتب اسم المتطوع أو اختره من القائمة.";return;}const {data:old}=await getSupabaseClient().from("featured_volunteer").select("image_url").eq("id",1).maybeSingle();let imageUrl=old?.image_url||null;if(memberId){const m=featuredMembersCache.find(x=>x.id===memberId);if(m?.avatar_url)imageUrl=m.avatar_url;}const f=document.getElementById("featuredImageFile")?.files?.[0];if(f)imageUrl=await uploadSiteImage(f,"featured-volunteer");const payload={id:1,source_member_id:memberId,month:Number(document.getElementById("featuredMonth").value),year:Number(document.getElementById("featuredYear").value),volunteer_name:name,subtitle:document.getElementById("featuredSubtitle").value.trim()||null,description:document.getElementById("featuredDescription").value.trim()||null,image_url:imageUrl,updated_at:new Date().toISOString()};const {data,error}=await getSupabaseClient().from("featured_volunteer").upsert(payload,{onConflict:"id"}).select().single();if(error)throw error;renderFeaturedVolunteer(data);msg.textContent="تم حفظ المتطوع المثالي وظهر في الصفحة الرئيسية.";await loadFeaturedVolunteerAdmin();}catch(e){console.error(e);msg.textContent="تعذر الحفظ: "+(e.message||"خطأ غير معروف");}}
+
 function playNewReportSound(){try{const C=window.AudioContext||window.webkitAudioContext;const ctx=new C();const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.7);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.7);}catch(e){console.warn(e);}}
 function scheduleRealtimeOperationalRefresh(){
   if(realtimeRefreshTimer)clearTimeout(realtimeRefreshTimer);
@@ -1779,7 +1865,7 @@ window.addEventListener("DOMContentLoaded",async()=>{
     const client=getSupabaseClient();
     await loadSiteSettings();
     await loadContactSettings();
-    await Promise.all([loadPublicPosts(),loadPublicStats(),loadHeroSlides(),loadPublicLeaderboard(),loadPublicMissingPersons()]);
+    await Promise.all([loadPublicPosts(),loadPublicStats(),loadHeroSlides(),loadNewsSlides(),loadFeaturedVolunteer(),loadPublicLeaderboard()]);
     startPublicLeaderboardUpdates();
     const {data:{session}}=await Promise.race([
       client.auth.getSession(),
@@ -1797,6 +1883,8 @@ window.addEventListener("DOMContentLoaded",async()=>{
       await loadSiteSettings();
       await loadAdminPosts();
       await loadAdminSlides();
+      await loadAdminNewsSlides();
+      await loadFeaturedVolunteerAdmin();
       await startRealtimeUpdates();
       startAdminReportAlerts();
     }else{
