@@ -359,6 +359,19 @@ footer{margin:0;padding:34px 0;background:#062f45;color:#d5e1e6;border:0;text-al
 #laithVolunteerBanner{background:linear-gradient(90deg,#0a4867,#052f45);color:#fff;padding:36px 0;position:relative;overflow:hidden}#laithVolunteerBanner .join-inner{display:flex;align-items:center;justify-content:space-between;gap:30px}#laithVolunteerBanner .eyebrow{color:#e0b453;font-size:13px;font-weight:800}#laithVolunteerBanner h2{font-size:30px;margin:5px 0 7px}#laithVolunteerBanner p{margin:0;color:#d8e3e7}#laithVolunteerBanner .btn{background:var(--laith-gold);color:#143c50;border-radius:22px}
 @media(max-width:900px){.hero-grid>div:first-child{padding-left:40%;}.cards{grid-template-columns:repeat(2,1fr)}.quick-services-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:800px){header .nav{padding:8px 0}.logo{width:52px;height:44px}.navlinks{display:none}.auth-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}.hero,.hero-grid,.hero .visual{min-height:520px}.hero-grid>div:first-child{min-height:520px;padding:50px 20px;align-items:flex-start}.hero-grid>div:first-child:before{background:linear-gradient(0deg,rgba(3,31,47,.94),rgba(3,31,47,.48))}.hero .visual:after{background:linear-gradient(0deg,rgba(3,31,47,.88),rgba(3,31,47,.15))}.hero h1{font-size:38px}.hero p{font-size:14px}.quick-services-grid{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:1fr}.live-stats{grid-template-columns:repeat(2,1fr)}.live-stat{border-left:0;border-bottom:1px solid #eee7da}.stats{grid-template-columns:repeat(2,1fr)}.leaderboard-podium{grid-template-columns:1fr}.podium-card.first,.podium-card.second,.podium-card.third{order:initial;transform:none}.steps{grid-template-columns:1fr}.cta{padding:28px 18px}#laithVolunteerBanner .join-inner{flex-direction:column;align-items:flex-start}}
+
+/* ===== Laith footer social/contact links ===== */
+.laith-footer-contact{margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.16)}
+.laith-footer-contact h3{margin:0 0 12px;color:#fff;font-size:18px}
+.laith-contact-actions,.laith-social-links{display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:wrap}
+.laith-contact-link,.laith-social-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:9px 14px;border-radius:999px;text-decoration:none!important;color:#fff!important;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);transition:.2s ease}
+.laith-contact-link:hover,.laith-social-link:hover{transform:translateY(-2px);background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.45)}
+.laith-contact-link.whatsapp{background:#0b6b57;border-color:#0f8a70}
+.laith-contact-link.phone{background:#0a4059}
+.laith-social-links{margin-top:10px}
+.laith-social-link{min-width:44px;padding:9px 12px;font-weight:800;font-size:13px}
+.laith-footer-empty{display:none;color:#b9cad2;font-size:13px;margin-top:8px}
+@media(max-width:640px){.laith-contact-actions,.laith-social-links{justify-content:stretch}.laith-contact-link{flex:1 1 calc(50% - 8px)}.laith-social-link{flex:1 1 calc(33.333% - 8px)}}
 </style>
 
 </head>
@@ -455,7 +468,24 @@ footer{margin:0;padding:34px 0;background:#062f45;color:#d5e1e6;border:0;text-al
 </div></div></section>
 </main>
 
-<footer><div class="wrap">جمعية ليث للإنقاذ — منصة رقمية متخصصة في إدارة البلاغات والإنقاذ والتطوع.</div></footer>
+<footer><div class="wrap">
+  <div>جمعية ليث للإنقاذ — منصة رقمية متخصصة في إدارة البلاغات والإنقاذ والتطوع.</div>
+  <div class="laith-footer-contact" id="laithFooterContact">
+    <h3>تواصل معنا</h3>
+    <div class="laith-contact-actions">
+      <a id="footerPhoneLink" class="laith-contact-link phone" href="#" style="display:none">اتصال مباشر</a>
+      <a id="footerWhatsAppLink" class="laith-contact-link whatsapp" href="#" target="_blank" rel="noopener" style="display:none">واتساب</a>
+    </div>
+    <div class="laith-social-links">
+      <a id="footerInstagram" class="laith-social-link" href="#" target="_blank" rel="noopener" style="display:none">Instagram</a>
+      <a id="footerX" class="laith-social-link" href="#" target="_blank" rel="noopener" style="display:none">X</a>
+      <a id="footerSnapchat" class="laith-social-link" href="#" target="_blank" rel="noopener" style="display:none">Snapchat</a>
+      <a id="footerTikTok" class="laith-social-link" href="#" target="_blank" rel="noopener" style="display:none">TikTok</a>
+      <a id="footerYouTube" class="laith-social-link" href="#" target="_blank" rel="noopener" style="display:none">YouTube</a>
+    </div>
+    <div id="footerContactEmpty" class="laith-footer-empty">يمكن للإدارة إضافة حسابات التواصل ورقم الجوال من لوحة التحكم.</div>
+  </div>
+</div></footer>
 
 
 <div id="emergencyOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:11000;align-items:center;justify-content:center;padding:14px">
@@ -689,6 +719,24 @@ footer{margin:0;padding:34px 0;background:#062f45;color:#d5e1e6;border:0;text-al
           <img id="cmsLogoPreview" class="preview-logo" alt="معاينة الشعار" style="display:none">
           <button class="btn" type="button" onclick="saveSiteSettings()">حفظ الهوية</button>
           <span id="cmsSettingsMsg" class="form-msg"></span>
+        </div>
+      </div>
+
+      <div class="cms-box">
+        <h3>بيانات التواصل الاجتماعي</h3>
+        <p style="color:#687680">أضف روابط حسابات الجمعية ورقم الجوال. تظهر في أسفل الموقع وتفتح مباشرة عند الضغط.</p>
+        <div class="cms-grid">
+          <div><label>رقم الجوال</label><input id="cmsContactPhone" type="tel" inputmode="tel" placeholder="05XXXXXXXX"></div>
+          <div><label>رقم واتساب</label><input id="cmsWhatsApp" type="tel" inputmode="tel" placeholder="05XXXXXXXX أو 9665XXXXXXXX"></div>
+          <div><label>Instagram</label><input id="cmsInstagram" type="url" placeholder="https://instagram.com/..."></div>
+          <div><label>X / Twitter</label><input id="cmsX" type="url" placeholder="https://x.com/..."></div>
+          <div><label>Snapchat</label><input id="cmsSnapchat" type="url" placeholder="https://snapchat.com/add/..."></div>
+          <div><label>TikTok</label><input id="cmsTikTok" type="url" placeholder="https://tiktok.com/@..."></div>
+          <div style="grid-column:1/-1"><label>YouTube</label><input id="cmsYouTube" type="url" placeholder="https://youtube.com/@..."></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px">
+          <button class="btn" type="button" onclick="saveContactSettings()">حفظ بيانات التواصل</button>
+          <span id="cmsContactMsg" class="form-msg"></span>
         </div>
       </div>
 
@@ -1105,6 +1153,7 @@ async function loginVolunteer(){
       document.getElementById("adminPanel").style.display="block";
       await loadMembers("pending");
       await loadSiteSettings();
+      await loadContactSettings();
       await loadAdminPosts();
       await loadAdminSlides();
       await startRealtimeUpdates();
@@ -1668,10 +1717,68 @@ function closeAchievementAdmin(){document.getElementById("achievementOverlay").s
 async function saveAchievement(){const memberId=document.getElementById("achievementMemberId").value,title=document.getElementById("achievementTitle").value.trim(),desc=document.getElementById("achievementDescription").value.trim(),f=document.getElementById("achievementFile").files[0],msg=document.getElementById("achievementMsg");if(!title){msg.textContent="اكتب عنوان الإنجاز.";return;}msg.textContent="جاري الحفظ...";let path=null;if(f){const {data:{user}}=await getSupabaseClient().auth.getUser();const ext=(f.name.split('.').pop()||'pdf').toLowerCase();path=`${memberId}/${Date.now()}-${user.id}.${ext}`;const {error:up}=await getSupabaseClient().storage.from("certificates").upload(path,f,{upsert:false});if(up){msg.textContent="تعذر رفع الشهادة: "+up.message;return;}}const {error}=await getSupabaseClient().from("member_achievements").insert({member_id:memberId,title,description:desc||null,certificate_path:path});if(error){msg.textContent="تعذر حفظ الإنجاز: "+error.message;return;}msg.textContent="تم إرسال الإنجاز للعضو.";setTimeout(closeAchievementAdmin,700);}
 async function loadMyAchievements(){const box=document.getElementById("myAchievements");if(!box)return;const {data,error}=await getSupabaseClient().from("member_achievements").select("id,title,description,certificate_path,awarded_at").order("awarded_at",{ascending:false});if(error){box.innerHTML="<p>تعذر تحميل الإنجازات.</p>";return;}const rows=[];for(const a of (data||[])){let link='';if(a.certificate_path){const {data:signed}=await getSupabaseClient().storage.from("certificates").createSignedUrl(a.certificate_path,3600);if(signed?.signedUrl)link=`<a class="btn light" target="_blank" rel="noopener" href="${esc(signed.signedUrl)}">فتح الشهادة</a>`;}rows.push(`<div class="achievement-card"><h4>${esc(a.title)}</h4><p>${esc(a.description||'')}</p><small>${esc(formatDateTime(a.awarded_at))}</small><div class="row-actions">${link}</div></div>`);}box.innerHTML=rows.join('')||'<p>لا توجد إنجازات أو شهادات مضافة حتى الآن.</p>';}
 
+
+function normalizePublicUrl(v){
+  v=String(v||"").trim();
+  if(!v)return "";
+  if(/^https?:\/\//i.test(v))return v;
+  return "https://"+v.replace(/^\/+/,"");
+}
+function whatsappNumber(v){
+  let n=String(v||"").replace(/\D/g,"");
+  if(n.startsWith("00"))n=n.slice(2);
+  if(n.startsWith("05"))n="966"+n.slice(1);
+  else if(n.startsWith("5")&&n.length===9)n="966"+n;
+  return n;
+}
+function applyContactSettings(c){
+  const setLink=(id,url)=>{const a=document.getElementById(id);if(!a)return;if(url){a.href=url;a.style.display="inline-flex"}else{a.removeAttribute("href");a.style.display="none"}};
+  const phone=String(c?.phone||"").trim();
+  const wa=whatsappNumber(c?.whatsapp||phone);
+  setLink("footerPhoneLink",phone?"tel:"+phone.replace(/\s/g,""):"");
+  const phoneEl=document.getElementById("footerPhoneLink");if(phoneEl&&phone)phoneEl.textContent="اتصال: "+phone;
+  setLink("footerWhatsAppLink",wa?"https://wa.me/"+wa:"");
+  setLink("footerInstagram",normalizePublicUrl(c?.instagram_url));
+  setLink("footerX",normalizePublicUrl(c?.x_url));
+  setLink("footerSnapchat",normalizePublicUrl(c?.snapchat_url));
+  setLink("footerTikTok",normalizePublicUrl(c?.tiktok_url));
+  setLink("footerYouTube",normalizePublicUrl(c?.youtube_url));
+  const hasAny=!!(phone||wa||c?.instagram_url||c?.x_url||c?.snapchat_url||c?.tiktok_url||c?.youtube_url);
+  const empty=document.getElementById("footerContactEmpty");if(empty)empty.style.display=hasAny?"none":"block";
+}
+async function loadContactSettings(){
+  try{
+    const {data,error}=await getSupabaseClient().from("site_contacts").select("*").eq("id",1).maybeSingle();
+    if(error){console.warn("site_contacts:",error.message);applyContactSettings(null);return;}
+    applyContactSettings(data||null);
+    const map={cmsContactPhone:"phone",cmsWhatsApp:"whatsapp",cmsInstagram:"instagram_url",cmsX:"x_url",cmsSnapchat:"snapchat_url",cmsTikTok:"tiktok_url",cmsYouTube:"youtube_url"};
+    Object.entries(map).forEach(([id,key])=>{const el=document.getElementById(id);if(el)el.value=data?.[key]||""});
+  }catch(e){console.warn(e)}
+}
+async function saveContactSettings(){
+  const msg=document.getElementById("cmsContactMsg");if(msg)msg.textContent="جاري الحفظ...";
+  try{
+    const payload={
+      id:1,
+      phone:document.getElementById("cmsContactPhone")?.value.trim()||null,
+      whatsapp:document.getElementById("cmsWhatsApp")?.value.trim()||null,
+      instagram_url:document.getElementById("cmsInstagram")?.value.trim()||null,
+      x_url:document.getElementById("cmsX")?.value.trim()||null,
+      snapchat_url:document.getElementById("cmsSnapchat")?.value.trim()||null,
+      tiktok_url:document.getElementById("cmsTikTok")?.value.trim()||null,
+      youtube_url:document.getElementById("cmsYouTube")?.value.trim()||null,
+      updated_at:new Date().toISOString()
+    };
+    const {data,error}=await getSupabaseClient().from("site_contacts").upsert(payload,{onConflict:"id"}).select().single();
+    if(error)throw error;applyContactSettings(data);if(msg)msg.textContent="تم حفظ بيانات التواصل وستظهر أسفل الموقع.";
+  }catch(e){console.error(e);if(msg)msg.textContent="تعذر الحفظ: "+(e.message||"خطأ غير معروف")}
+}
+
 window.addEventListener("DOMContentLoaded",async()=>{
   try{
     const client=getSupabaseClient();
     await loadSiteSettings();
+    await loadContactSettings();
     await Promise.all([loadPublicPosts(),loadPublicStats(),loadHeroSlides(),loadPublicLeaderboard(),loadPublicMissingPersons()]);
     startPublicLeaderboardUpdates();
     const {data:{session}}=await Promise.race([
