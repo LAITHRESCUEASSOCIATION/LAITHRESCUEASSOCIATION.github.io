@@ -3472,12 +3472,44 @@ async function trackV14Report(){
  if(!n){box.innerHTML='<small>اكتب رقم البلاغ أولًا.</small>';return}
  box.innerHTML='<small>جاري الاستعلام...</small>';
  try{
-  const {data,error}=await getSupabaseClient().rpc('track_public_report_v14',{p_report_number:Number(n)});if(error)throw error;
-  const r=Array.isArray(data)?data[0]:data;if(!r){box.innerHTML='<p>لم يتم العثور على البلاغ.</p>';return}
-  const labels={new:'تم استلام البلاغ',verifying:'جاري التحقق',dispatched:'تم توجيه الفريق',in_progress:'جاري التعامل',arrived:'تم الوصول',completed:'تم التعامل مع البلاغ',cancelled:'ملغي'};
+  const {data,error}=await getSupabaseClient().rpc('track_public_report_v14',{p_report_number:Number(n)});
+  if(error)throw error;
+  const r=Array.isArray(data)?data[0]:data;
+  if(!r){box.innerHTML='<p>لم يتم العثور على البلاغ.</p>';return}
+
+  const closed=['completed','closed'].includes(String(r.workflow_status||'').toLowerCase());
+
+  // الخصوصية بعد الإغلاق: لا نعرض أي بيانات تشغيلية أو أسماء متطوعين.
+  if(closed){
+    box.innerHTML=`<div class="resource-card" style="text-align:center">
+      <small style="display:block;color:#6f7f87">رقم الحالة</small>
+      <h3 style="font-size:28px;margin:6px 0">#${esc(r.report_number)}</h3>
+      ${r.rating_submitted
+        ? `<div class="v14-rating-done">تم تقييم هذه الحالة مسبقًا. شكرًا لك.</div>`
+        : `<button class="btn" style="margin-top:12px" onclick="openServiceRating(${Number(r.report_number)})">تقييم التجربة</button>`}
+    </div>`;
+    return;
+  }
+
+  const labels={
+    new:'تم استلام البلاغ',
+    verifying:'جاري التحقق',
+    dispatched:'تم توجيه الفريق',
+    in_progress:'جاري التعامل',
+    accepted:'تم قبول المهمة',
+    arrived:'تم الوصول',
+    cancelled:'ملغي'
+  };
   const rescuers=Array.isArray(r.rescuer_names)?r.rescuer_names:[];
-  box.innerHTML=`<div class="resource-card"><h3>بلاغ #${esc(r.report_number)}</h3><p><b>الحالة:</b> ${esc(labels[r.workflow_status]||r.workflow_status||'قيد المتابعة')}</p><p><b>المنطقة:</b> ${esc(r.region||'—')}</p>${rescuers.length?`<div class="v14-rescuers"><b>المتطوعون الذين باشروا البلاغ:</b>${rescuers.map(x=>`<div>• ${esc(x)}</div>`).join('')}</div>`:''}${r.workflow_status==='completed'?(r.rating_submitted?`<div class="v14-rating-done">تم تقييم هذه الحالة مسبقًا. شكرًا لك.</div>`:`<button class="btn" style="margin-top:12px" onclick="openServiceRating(${Number(r.report_number)})">تقييم التجربة</button>`):''}</div>`;
- }catch(e){box.innerHTML='<p>تعذر الاستعلام: '+esc(e.message||e)+'</p>'}
+  box.innerHTML=`<div class="resource-card">
+    <h3>بلاغ #${esc(r.report_number)}</h3>
+    <p><b>الحالة:</b> ${esc(labels[r.workflow_status]||r.workflow_status||'قيد المتابعة')}</p>
+    ${r.region?`<p><b>المنطقة:</b> ${esc(r.region)}</p>`:''}
+    ${rescuers.length?`<div class="v14-rescuers"><b>المتطوعون الذين باشروا البلاغ:</b>${rescuers.map(x=>`<div>• ${esc(x)}</div>`).join('')}</div>`:''}
+  </div>`;
+ }catch(e){
+  box.innerHTML='<p>تعذر الاستعلام: '+esc(e.message||e)+'</p>';
+ }
 }
 async function loadV14Partners(){
  const box=document.getElementById('v14Partners');if(!box)return;
@@ -3542,6 +3574,219 @@ saveExperienceSettings=async function(){
 };
 loadExperienceSettings=async function(){try{const {data}=await getSupabaseClient().from('laith_experience_settings').select('*').eq('id',1).maybeSingle();if(data){applySeason(data);if(document.getElementById('seasonMode'))document.getElementById('seasonMode').value=data.season_mode||'normal';if(document.getElementById('seasonLabel'))document.getElementById('seasonLabel').value=data.season_label||'';if(document.getElementById('seasonCustomColor'))document.getElementById('seasonCustomColor').value=data.custom_color||'#0a8f88';if(document.getElementById('seasonSymbol'))document.getElementById('seasonSymbol').value=data.season_symbol||''}}catch(e){}};
 document.addEventListener('DOMContentLoaded',()=>{mountV14PublicSections();prepareV14Admin();loadV14Partners();loadV14CompletedCount();loadV14UserCard();setTimeout(()=>{syncV14Brand();enableV14HeroSwipe()},1200);setTimeout(loadV14PartnersAdmin,1800)});
+</script>
+
+
+<style id="laith-v16-fixed-navigation-tools">
+/* V16: تثبيت شريط التبويبات السفلي ورفع أدوات المساعدة */
+
+body{
+  padding-bottom:calc(86px + env(safe-area-inset-bottom))!important;
+}
+
+/* شريط التبويبات العام ثابت دائمًا أسفل الشاشة */
+#v14BottomNav.v14-bottom-nav{
+  position:fixed!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  top:auto!important;
+  width:100%!important;
+  height:calc(76px + env(safe-area-inset-bottom))!important;
+  min-height:76px!important;
+  padding-bottom:env(safe-area-inset-bottom)!important;
+  margin:0!important;
+  z-index:2147483600!important;
+  transform:none!important;
+  translate:none!important;
+  will-change:auto!important;
+  backface-visibility:hidden!important;
+  background:rgba(255,255,255,.98)!important;
+  box-shadow:0 -8px 28px rgba(0,0,0,.10)!important;
+}
+
+/* شريط الإدارة كذلك ثابت */
+#v14AdminBottomNav.v14-admin-bottom-nav{
+  position:fixed!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  top:auto!important;
+  width:100%!important;
+  height:calc(72px + env(safe-area-inset-bottom))!important;
+  padding-bottom:env(safe-area-inset-bottom)!important;
+  margin:0!important;
+  z-index:2147483610!important;
+  transform:none!important;
+  background:#fff!important;
+  box-shadow:0 -8px 28px rgba(0,0,0,.10)!important;
+}
+
+/* أدوات المساعدة ثابتة على اليسار ومرفوعة عن التبويبات */
+body > .laith-float-stack{
+  position:fixed!important;
+  left:max(10px,env(safe-area-inset-left))!important;
+  right:auto!important;
+  top:42%!important;
+  bottom:auto!important;
+  transform:translateY(-50%)!important;
+  margin:0!important;
+  z-index:2147483620!important;
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+
+/* منع أي قاعدة قديمة من إنزال الأدوات لأسفل */
+@media(max-width:768px){
+  body > .laith-float-stack{
+    left:max(7px,env(safe-area-inset-left))!important;
+    top:38%!important;
+    bottom:auto!important;
+    transform:translateY(-50%)!important;
+  }
+
+  body > .laith-float-stack > .laith-float-btn{
+    width:42px!important;
+    height:42px!important;
+    min-width:42px!important;
+    min-height:42px!important;
+  }
+
+  /* النوافذ المنبثقة للأدوات تفتح فوق شريط التبويبات */
+  #assistantOverlay,#commandOverlay,#accessibilityOverlay,#roleExperienceOverlay{
+    bottom:calc(86px + env(safe-area-inset-bottom))!important;
+    max-height:calc(100dvh - 110px - env(safe-area-inset-bottom))!important;
+  }
+}
+
+@media(max-width:390px){
+  body > .laith-float-stack{
+    top:36%!important;
+    left:max(5px,env(safe-area-inset-left))!important;
+  }
+}
+
+/* iOS/Safari: تجنب تغيّر موضع العناصر الثابتة أثناء التمرير */
+@supports (-webkit-touch-callout:none){
+  #v14BottomNav.v14-bottom-nav,
+  #v14AdminBottomNav.v14-admin-bottom-nav,
+  body > .laith-float-stack{
+    -webkit-transform:translateZ(0);
+  }
+}
+</style>
+
+<script id="laith-v16-fixed-navigation-tools-js">
+(function(){
+  function lockFixedUI(){
+    const bottom=document.getElementById('v14BottomNav');
+    if(bottom){
+      bottom.style.setProperty('position','fixed','important');
+      bottom.style.setProperty('bottom','0','important');
+      bottom.style.setProperty('left','0','important');
+      bottom.style.setProperty('right','0','important');
+      bottom.style.setProperty('transform','none','important');
+      if(bottom.parentElement!==document.body) document.body.appendChild(bottom);
+    }
+
+    const admin=document.getElementById('v14AdminBottomNav');
+    if(admin){
+      admin.style.setProperty('position','fixed','important');
+      admin.style.setProperty('bottom','0','important');
+      admin.style.setProperty('left','0','important');
+      admin.style.setProperty('right','0','important');
+      admin.style.setProperty('transform','none','important');
+      if(admin.parentElement!==document.body) document.body.appendChild(admin);
+    }
+
+    const tools=document.querySelector('.laith-float-stack');
+    if(tools){
+      if(tools.parentElement!==document.body) document.body.appendChild(tools);
+      tools.style.setProperty('position','fixed','important');
+      tools.style.setProperty('left', window.innerWidth<=768 ? '7px':'10px','important');
+      tools.style.setProperty('right','auto','important');
+      tools.style.setProperty('top', window.innerWidth<=768 ? '38%':'42%','important');
+      tools.style.setProperty('bottom','auto','important');
+      tools.style.setProperty('transform','translateY(-50%)','important');
+      tools.style.setProperty('z-index','2147483620','important');
+      tools.style.setProperty('display','flex','important');
+      tools.style.setProperty('visibility','visible','important');
+      tools.style.setProperty('opacity','1','important');
+    }
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',lockFixedUI,{once:true});
+  }else{
+    lockFixedUI();
+  }
+  window.addEventListener('pageshow',lockFixedUI);
+  window.addEventListener('resize',lockFixedUI);
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) lockFixedUI(); });
+})();
+</script>
+
+
+<style id="laith-v17-auth-menu-style">
+/* V17 — عناصر الضيف فقط */
+.v14-guest-only{display:grid}
+body.v14-authenticated .v14-guest-only{display:none!important}
+</style>
+
+<script id="laith-v17-auth-menu-js">
+(function(){
+  function markGuestOnly(){
+    const more=document.querySelector('.v14-more-list');
+    if(!more) return;
+    more.querySelectorAll('button').forEach(btn=>{
+      const t=(btn.textContent||'').replace(/\s+/g,' ').trim();
+      if(t.includes('تطوع معنا') || t.includes('تسجيل الدخول')){
+        btn.classList.add('v14-guest-only');
+      }
+    });
+  }
+
+  async function syncV14AuthMenu(){
+    markGuestOnly();
+    try{
+      const {data:{session}}=await getSupabaseClient().auth.getSession();
+      document.body.classList.toggle('v14-authenticated',!!session?.user);
+      if(session?.user && typeof loadV14UserCard==='function'){
+        await loadV14UserCard();
+      }
+    }catch(e){
+      console.warn('V17 auth menu sync',e);
+    }
+  }
+
+  async function initV17(){
+    markGuestOnly();
+    await syncV14AuthMenu();
+
+    try{
+      getSupabaseClient().auth.onAuthStateChange((_event,session)=>{
+        document.body.classList.toggle('v14-authenticated',!!session?.user);
+        if(session?.user && typeof loadV14UserCard==='function'){
+          setTimeout(()=>loadV14UserCard(),0);
+        }
+      });
+    }catch(e){}
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',initV17,{once:true});
+  }else{
+    initV17();
+  }
+
+  // عند فتح تبويب المزيد نعيد التحقق مباشرة.
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest?.('[data-v14-page="more"]');
+    if(btn) setTimeout(syncV14AuthMenu,0);
+  });
+})();
 </script>
 
 </body>
