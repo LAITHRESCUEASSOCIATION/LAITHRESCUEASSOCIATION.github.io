@@ -3093,5 +3093,105 @@ async function openRescuerRatingAdmin(id,name){document.getElementById('rescuerR
 })();
 </script>
 
+
+<style id="laith-v12-mobile-fixed-tools">
+/* V12 — force assistance tools to remain visible and usable on phones */
+.laith-float-stack{
+  position:fixed!important;
+  left:max(8px,env(safe-area-inset-left))!important;
+  right:auto!important;
+  top:50%!important;
+  bottom:auto!important;
+  transform:translateY(-50%)!important;
+  z-index:2147483000!important;
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  flex-direction:column!important;
+  gap:8px!important;
+  pointer-events:auto!important;
+}
+.laith-float-btn{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  place-items:center!important;
+  width:48px!important;
+  height:48px!important;
+  min-width:48px!important;
+  min-height:48px!important;
+  padding:0!important;
+  border-radius:50%!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent;
+}
+@media(max-width:700px){
+  .laith-float-stack{
+    left:max(6px,env(safe-area-inset-left))!important;
+    top:52%!important;
+    gap:6px!important;
+  }
+  .laith-float-btn{
+    width:43px!important;
+    height:43px!important;
+    min-width:43px!important;
+    min-height:43px!important;
+    font-size:16px!important;
+  }
+  #assistantOverlay,#commandOverlay,#accessibilityOverlay,#roleExperienceOverlay{
+    position:fixed!important;
+    left:56px!important;
+    right:8px!important;
+    bottom:max(8px,env(safe-area-inset-bottom))!important;
+    top:auto!important;
+    width:auto!important;
+    max-width:none!important;
+    height:auto!important;
+    max-height:calc(100dvh - 16px)!important;
+    padding:0!important;
+    margin:0!important;
+    z-index:2147482990!important;
+    pointer-events:none!important;
+    background:transparent!important;
+  }
+  #assistantOverlay .v6-modal,#commandOverlay .v6-modal,
+  #accessibilityOverlay .v6-modal,#roleExperienceOverlay .v6-modal{
+    width:100%!important;
+    max-width:none!important;
+    max-height:calc(100dvh - 16px)!important;
+    overflow:auto!important;
+    -webkit-overflow-scrolling:touch;
+    pointer-events:auto!important;
+    border-radius:18px!important;
+  }
+}
+@media(max-width:390px){
+  .laith-float-stack{left:max(4px,env(safe-area-inset-left))!important}
+  .laith-float-btn{
+    width:40px!important;height:40px!important;
+    min-width:40px!important;min-height:40px!important;
+  }
+  #assistantOverlay,#commandOverlay,#accessibilityOverlay,#roleExperienceOverlay{
+    left:50px!important;right:5px!important;
+  }
+}
+</style>
+<script id="laith-v12-mobile-tools-js">
+document.addEventListener("DOMContentLoaded", function(){
+  const stack=document.querySelector(".laith-float-stack");
+  if(stack){
+    stack.style.setProperty("display","flex","important");
+    stack.style.setProperty("visibility","visible","important");
+    stack.style.setProperty("opacity","1","important");
+    stack.style.setProperty("pointer-events","auto","important");
+    document.body.appendChild(stack);
+  }
+  ["assistantOverlay","commandOverlay","accessibilityOverlay","roleExperienceOverlay"].forEach(function(id){
+    const el=document.getElementById(id);
+    if(el) document.body.appendChild(el);
+  });
+});
+</script>
+
 </body>
 </html>
