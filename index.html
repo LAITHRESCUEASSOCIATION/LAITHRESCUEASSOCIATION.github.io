@@ -1719,9 +1719,49 @@ function closeDispatch(){document.getElementById("dispatchOverlay").style.displa
 async function submitDispatch(){
   const reportId=document.getElementById("dispatchReportId").value;
   const memberIds=[...document.querySelectorAll('input[name="dispatchMember"]:checked')].map(x=>x.value);
-  const msg=document.getElementById("dispatchMsg");if(!memberIds.length){msg.textContent="اختر عضوًا واحدًا على الأقل.";return;}msg.textContent="جاري إرسال البلاغ...";
-  const {error}=await getSupabaseClient().rpc("dispatch_report_v21",{p_report_id:reportId,p_member_ids:memberIds});
-  if(error){console.error(error);msg.textContent="تعذر ترحيل البلاغ: "+error.message;return;}closeDispatch();alert("تم ترحيل البلاغ للأعضاء المحددين.");await loadReports();
+  const msg=document.getElementById("dispatchMsg");
+  if(!memberIds.length){msg.textContent="اختر عضوًا واحدًا على الأقل.";return;}
+  msg.textContent="جاري ترحيل البلاغ وإرسال تنبيه البريد...";
+
+  const {error}=await getSupabaseClient().rpc("dispatch_report_v21",{
+    p_report_id:reportId,
+    p_member_ids:memberIds
+  });
+
+  if(error){
+    console.error(error);
+    msg.textContent="تعذر ترحيل البلاغ: "+error.message;
+    return;
+  }
+
+  let emailResult=null;
+  let emailError=null;
+  try{
+    const invokeResult=await getSupabaseClient().functions.invoke("send-assignment-gmail",{
+      body:{report_id:reportId,member_ids:memberIds}
+    });
+    emailResult=invokeResult.data;
+    emailError=invokeResult.error;
+  }catch(e){
+    emailError=e;
+  }
+
+  closeDispatch();
+
+  if(emailError){
+    console.error("Gmail notification error:",emailError);
+    alert("تم ترحيل البلاغ للمتطوعين، لكن تعذر إرسال تنبيه البريد الإلكتروني.");
+  }else{
+    const sent=Number(emailResult?.sent||0);
+    const failed=Number(emailResult?.failed||0);
+    if(failed>0){
+      alert(`تم ترحيل البلاغ. تم إرسال ${sent} تنبيه بريد، وتعذر إرسال ${failed}.`);
+    }else{
+      alert(`تم ترحيل البلاغ وإرسال تنبيه البريد الإلكتروني إلى ${sent} متطوع.`);
+    }
+  }
+
+  await loadReports();
 }
 async function cancelReport(id){if(!confirm("هل تريد إلغاء هذا البلاغ؟ سيتم إلغاء جميع التكليفات غير المنتهية."))return;const {error}=await getSupabaseClient().rpc("cancel_report",{p_report_id:id});if(error){alert("تعذر إلغاء البلاغ: "+error.message);return;}await loadReports();}
 async function closeWholeReport(id){if(!confirm("هل تريد إيقاف البلاغ كاملًا؟ سيتم احتساب مدة كل عضو منذ وقت قبوله للمهمة."))return;const {error}=await getSupabaseClient().rpc("close_report",{p_report_id:id});if(error){alert("تعذر إيقاف البلاغ: "+error.message);return;}alert("تم إيقاف البلاغ واحتساب الساعات التطوعية.");await loadReports();}
