@@ -248,6 +248,67 @@ footer{padding:35px 0;color:#74818b;font-size:13px;border-top:1px solid #e3e8eb;
 button,a.btn,.quick-action,.laith-contact-link,.laith-social-link{text-shadow:none!important}
 button:disabled,.btn:disabled{opacity:.62}
 
+
+
+/* === V11: Fixed left assistance tools, non-blocking drawers === */
+.laith-float-stack{
+  position:fixed!important;
+  left:14px!important;
+  right:auto!important;
+  top:50%!important;
+  bottom:auto!important;
+  transform:translateY(-50%)!important;
+  z-index:120500!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:10px!important;
+}
+.laith-float-btn{
+  width:50px!important;height:50px!important;min-width:50px!important;min-height:50px!important;
+  display:grid!important;place-items:center!important;
+  border:2px solid rgba(255,255,255,.9)!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.24)!important;
+  line-height:1!important;
+}
+#assistantOverlay,#commandOverlay,#accessibilityOverlay,#roleExperienceOverlay{
+  position:fixed!important;
+  inset:auto auto 18px 76px!important;
+  width:min(640px,calc(100vw - 96px))!important;
+  height:auto!important;
+  max-height:calc(100dvh - 36px)!important;
+  padding:0!important;
+  background:transparent!important;
+  z-index:120450!important;
+  align-items:flex-end!important;
+  justify-content:flex-start!important;
+  pointer-events:none!important;
+}
+#assistantOverlay .v6-modal,#commandOverlay .v6-modal,#accessibilityOverlay .v6-modal,#roleExperienceOverlay .v6-modal{
+  width:100%!important;
+  max-height:calc(100dvh - 36px)!important;
+  overflow:auto!important;
+  overscroll-behavior:contain!important;
+  pointer-events:auto!important;
+  border:1px solid #dbe5ea!important;
+  box-shadow:0 20px 55px rgba(0,0,0,.28)!important;
+  border-radius:22px!important;
+}
+#accessibilityOverlay .v6-card{cursor:pointer!important;touch-action:manipulation!important}
+#assistantOverlay input,#commandOverlay input{font-size:16px!important}
+body.elder-mode .laith-float-stack{font-size:initial!important}
+body.elder-mode .laith-float-btn{width:56px!important;height:56px!important}
+@media(max-width:700px){
+  .laith-float-stack{left:8px!important;gap:7px!important}
+  .laith-float-btn{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;font-size:17px!important}
+  #assistantOverlay,#commandOverlay,#accessibilityOverlay,#roleExperienceOverlay{
+    left:60px!important;bottom:10px!important;width:calc(100vw - 70px)!important;max-height:calc(100dvh - 20px)!important
+  }
+  #assistantOverlay .v6-modal,#commandOverlay .v6-modal,#accessibilityOverlay .v6-modal,#roleExperienceOverlay .v6-modal{
+    max-height:calc(100dvh - 20px)!important;padding:16px!important;border-radius:18px!important
+  }
+  #accessibilityOverlay .v6-grid{grid-template-columns:1fr!important}
+  .assistant-log{height:min(44dvh,330px)!important}
+}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
@@ -2886,8 +2947,12 @@ let v6PublicPostsCache=[],v6ImpactCache=[];
 function v6Esc(x){return typeof esc==='function'?esc(x):String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
 function v6Num(x){return Number(x||0)||0}
 function v6SetText(id,v){const e=document.getElementById(id);if(e)e.textContent=v}
-function closeV6Overlay(id){const e=document.getElementById(id);if(e)e.style.display='none'}
-function openV6Overlay(id){const e=document.getElementById(id);if(e)e.style.display='flex'}
+function closeV6Overlay(id){const e=document.getElementById(id);if(!e)return;e.style.display='none';e.setAttribute('aria-hidden','true');}
+function openV6Overlay(id){
+  const e=document.getElementById(id);if(!e)return;
+  ['assistantOverlay','commandOverlay','accessibilityOverlay','roleExperienceOverlay'].forEach(x=>{if(x!==id)closeV6Overlay(x)});
+  e.style.display='flex';e.setAttribute('aria-hidden','false');
+}
 function openLaithAssistant(){openV6Overlay('assistantOverlay');setTimeout(()=>document.getElementById('assistantInput')?.focus(),100)}
 function openCommandSearch(){openV6Overlay('commandOverlay');setTimeout(()=>document.getElementById('commandSearchInput')?.focus(),100)}
 function openAccessibilityPanel(){openV6Overlay('accessibilityOverlay')}
@@ -3009,6 +3074,23 @@ if(s===6)h=`<h2>الخصوصية</h2><label style="display:block;margin:15px 0">
 b.innerHTML=h+`<div class="rating-nav"><button class="btn light" onclick="prevRatingV9()">${s===1?'إغلاق':'السابق'}</button><button class="btn" onclick="nextRatingV9()">${s===1?'تقييم التجربة':s===6?'إرسال التقييم':'التالي'}</button></div>`}
 async function submitRatingV9(){const b=document.getElementById('serviceRatingBody');b.innerHTML='<p>جاري إرسال تقييمك...</p>';try{const {data,error}=await getSupabaseClient().rpc('submit_service_rating',{p_report_number:ratingV9.reportNumber,p_overall_rating:ratingV9.overall,p_liked_items:ratingV9.liked,p_rescuer_rating:ratingV9.rescuer||null,p_respect_rating:ratingV9.respect||null,p_care_rating:ratingV9.care||null,p_professionalism_rating:ratingV9.professionalism||null,p_rescuer_note:ratingV9.rescuerNote||null,p_response_rating:ratingV9.response||null,p_reached_location:ratingV9.reached,p_improvement_note:ratingV9.note||null,p_quality_consent:ratingV9.consent,p_contact_requested:ratingV9.contact,p_low_rating_reasons:ratingV9.low});if(error)throw error;b.innerHTML=`<div style="text-align:center;padding:20px"><h2>شكرًا لتقييمك 💚</h2><p>تقييمك وصل إلى فريق جمعية ليث، ويساعدنا على تقديم خدمة أفضل للمستفيدين.</p><h3>رقم الحالة: #LY-${ratingV9.reportNumber}</h3>${ratingV9.overall===5?`<button class="btn light" onclick="navigator.share?navigator.share({title:'تجربتي مع جمعية ليث',text:'كانت تجربتي مع جمعية ليث ممتازة.'}):alert('يمكنك مشاركة تجربتك عبر حساباتك الاجتماعية.')">مشاركة تجربتي</button>`:''}<button class="btn" onclick="closeV9Overlay('serviceRatingOverlay');location.hash='home'">العودة للرئيسية</button></div>`}catch(e){let msg=e.message||String(e);if(msg.includes('RATING_ALREADY_SUBMITTED'))msg='تم استلام تقييم لهذه الحالة مسبقًا، شكرًا لك.';b.innerHTML=`<h3>تعذر إرسال التقييم</h3><p>${v6Esc(msg)}</p><button class="btn" onclick="closeV9Overlay('serviceRatingOverlay')">إغلاق</button>`}}
 async function openRescuerRatingAdmin(id,name){document.getElementById('rescuerRatingAdminOverlay').style.display='flex';const b=document.getElementById('rescuerRatingAdminBody');b.innerHTML='<p>جاري تحميل التقييمات...</p>';const [{data:s,error},{data:rows}]=await Promise.all([getSupabaseClient().rpc('get_rescuer_rating_summary',{p_member_id:id}),getSupabaseClient().from('service_ratings').select('overall_rating,rescuer_rating,response_rating,low_rating_reasons,rescuer_note,improvement_note,created_at,report_number').eq('rescuer_id',id).order('created_at',{ascending:false}).limit(20)]);if(error){b.innerHTML='<p>تعذر تحميل التقييمات: '+v6Esc(error.message)+'</p>';return}const x=Array.isArray(s)?s[0]:s;b.innerHTML=`<h2>${v6Esc(name)}</h2><div class="rating-summary-admin"><div><b>${x?.avg_rating||'—'} ⭐</b><br>تقييم المنقذ</div><div><b>${x?.total_ratings||0}</b><br>تقييمًا</div><div><b>${x?.satisfaction_percent||0}%</b><br>رضا المستفيدين</div><div><b>${x?.excellent_treatment_percent||0}%</b><br>تقييم ممتاز للتعامل</div><div><b>${x?.excellent_speed_percent||0}%</b><br>تقييم ممتاز للسرعة</div></div><h3>آخر التقييمات</h3>${(rows||[]).map(r=>`<div class="resource-card"><b>بلاغ #${v6Esc(r.report_number)} · ${v6Esc(r.overall_rating)} ⭐</b><br><small>${v6Esc(formatDateTime(r.created_at))}</small>${r.low_rating_reasons?.length?`<p><b>أسباب التحسين:</b> ${r.low_rating_reasons.map(v6Esc).join('، ')}</p>`:''}${r.rescuer_note?`<p><b>ملاحظة عن المنقذ:</b> ${v6Esc(r.rescuer_note)}</p>`:''}${r.improvement_note?`<p><b>ملاحظة عامة:</b> ${v6Esc(r.improvement_note)}</p>`:''}</div>`).join('')||'<p>لا توجد تقييمات لهذا المنقذ حتى الآن.</p>'}`}
+</script>
+
+
+<script id="laithV11FixedToolsScript">
+(function(){
+  const toolIds=['assistantOverlay','commandOverlay','accessibilityOverlay','roleExperienceOverlay'];
+  function normalize(){
+    toolIds.forEach(id=>{const e=document.getElementById(id);if(e && getComputedStyle(e).display==='none')e.setAttribute('aria-hidden','true')});
+  }
+  document.addEventListener('keydown',function(ev){
+    if(ev.key==='Escape') toolIds.forEach(id=>closeV6Overlay(id));
+  });
+  // Prevent tool-card taps from bubbling into unrelated page handlers on touch devices.
+  document.querySelector('.laith-float-stack')?.addEventListener('click',ev=>ev.stopPropagation());
+  document.getElementById('accessibilityOverlay')?.addEventListener('click',ev=>ev.stopPropagation());
+  normalize();
+})();
 </script>
 
 </body>
