@@ -1628,11 +1628,12 @@ async function loadMembers(status="approved"){
         <div><b>آخر دخول:</b> ${m.last_login_at?esc(formatDateTime(m.last_login_at)):"لم يسجل دخولًا بعد"}</div>
         <div><b>الصفة:</b> ${roleName[m.role||"volunteer"]||"متطوع"}</div>
         <div><b>الساعات التطوعية:</b> ${formatMinutes(m.total_volunteer_minutes||0)}</div>
-        ${isPending?"":`<div><b>عدد البلاغات التي باشرها:</b> ${missionCounts[m.id]||0}</div>`}
+        ${isPending?"":`<div><b>عدد البلاغات التي باشرها:</b> ${missionCounts[m.id]||0}</div><div id="v18-member-rating-${m.id}"><b>التقييم:</b> <span class="v18-rating-loading">...</span></div>`}
       </div>
       <div class="row-actions">${actions}</div>
     </div>`;
   }).join("");
+  if(!isPending) loadV18AdminMemberRatings(data.map(m=>m.id));
 }
 
 function escJs(v){return String(v??"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\r?\n/g," ");}
@@ -3039,7 +3040,7 @@ async function trackCitizenReport(){
   const n=document.getElementById("citizenTrackNumber").value.trim(),box=document.getElementById("citizenTrackResult");if(!n){box.innerHTML="<small>اكتب رقم البلاغ.</small>";return;}box.innerHTML="<small>جاري التحقق...</small>";
   const {data,error}=await getSupabaseClient().rpc("track_public_report",{p_report_number:Number(n)});if(error){box.innerHTML=`<small>تعذر التتبع: ${esc(error.message)}</small>`;return;}const r=Array.isArray(data)?data[0]:data;if(!r){box.innerHTML="<small>لم يتم العثور على البلاغ.</small>";return;}
   const order=["new","verifying","dispatched","in_progress","completed"],idx=Math.max(0,order.indexOf(r.workflow_status));const labels=[["تم استلام البلاغ","✅"],["جاري التحقق","🔄"],["تم توجيه فريق","🚙"],["الفريق في الطريق","📍"],["تم التعامل مع البلاغ","✅"]];
-  box.innerHTML=`<div><b>بلاغ رقم #${esc(r.report_number)}</b> · ${esc(r.region||"")}</div>`+labels.map((x,i)=>`<div class="track-step ${i<idx?"done":i===idx?"current":""}">${x[1]} ${x[0]}</div>`).join("")+(r.workflow_status==="completed"?`<div class="rating-finish-card"><h3>تم إنهاء طلب المساعدة بنجاح</h3><p>سعدنا بخدمتك، ونأمل أن تكون تجربتك مع جمعية ليث عند حسن ظنك. تقييمك يساعدنا على تطوير خدماتنا وتحسين تجربة المستفيدين.</p><button class="btn" onclick="openServiceRating(${Number(r.report_number)})">تقييم التجربة</button></div>`:"");
+  box.innerHTML=`<div><b>بلاغ رقم #${esc(r.report_number)}</b> · ${esc(r.region||"")}</div>`+labels.map((x,i)=>`<div class="track-step ${i<idx?"done":i===idx?"current":""}">${x[1]} ${x[0]}</div>`).join("")+(r.workflow_status==="completed"?`<div class="rating-finish-card"><h3>تم إنهاء طلب المساعدة بنجاح</h3><p>سعدنا بخدمتك، ونأمل أن تكون تجربتك مع جمعية ليث عند حسن ظنك. تقييمك يساعدنا على تطوير خدماتنا وتحسين تجربة المستفيدين.</p><button class="btn" onclick="openServiceRatingV18(${Number(r.report_number)})">تقييم التجربة</button></div>`:"");
 }
 async function classifyAllOpenReports(){const {error}=await getSupabaseClient().rpc("classify_open_reports");if(error)console.warn(error);}
 async function flushOfflineQueue(){if(!navigator.onLine)return;let q=[];try{q=JSON.parse(localStorage.getItem(OPS_QUEUE_KEY)||"[]")}catch(e){}if(!q.length)return;for(const item of [...q]){try{if(item.type==="arrival")await getSupabaseClient().rpc("mark_assignment_arrived",item.payload);q.shift();localStorage.setItem(OPS_QUEUE_KEY,JSON.stringify(q));}catch(e){break;}}}
@@ -3486,7 +3487,7 @@ async function trackV14Report(){
       <h3 style="font-size:28px;margin:6px 0">#${esc(r.report_number)}</h3>
       ${r.rating_submitted
         ? `<div class="v14-rating-done">تم تقييم هذه الحالة مسبقًا. شكرًا لك.</div>`
-        : `<button class="btn" style="margin-top:12px" onclick="openServiceRating(${Number(r.report_number)})">تقييم التجربة</button>`}
+        : `<button class="btn" style="margin-top:12px" onclick="openServiceRatingV18(${Number(r.report_number)})">تقييم التجربة</button>`}
     </div>`;
     return;
   }
@@ -3787,6 +3788,308 @@ body.v14-authenticated .v14-guest-only{display:none!important}
     if(btn) setTimeout(syncV14AuthMenu,0);
   });
 })();
+</script>
+
+
+<style id="laith-v18-suite-style">
+:root{--v18:#0a8f88;--v18-dark:#083f58;--v18-soft:#f2f8f8;--v18-gold:#d6ad59}
+.v18-overlay{position:fixed;inset:0;background:rgba(2,22,31,.72);z-index:2147483640;display:none;align-items:flex-end;justify-content:center;padding:12px}
+.v18-overlay.show{display:flex}.v18-sheet{width:min(980px,100%);max-height:92dvh;overflow:auto;background:#f7fafb;border-radius:28px 28px 16px 16px;padding:18px;box-shadow:0 30px 80px #0006}
+.v18-head{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:-18px;background:#f7fafb;padding:14px 0;z-index:3}
+.v18-head h2{margin:0;color:var(--v18-dark)}.v18-close{border:0;background:#e7eef0;width:42px;height:42px;border-radius:50%;font-size:24px}
+.v18-tabs{display:flex;gap:8px;overflow:auto;padding:5px 0 14px;position:sticky;top:60px;background:#f7fafb;z-index:2}.v18-tabs button{white-space:nowrap;border:1px solid #d7e2e5;background:#fff;border-radius:999px;padding:10px 14px;font-family:inherit;font-weight:800}.v18-tabs button.active{background:var(--v18-dark);color:#fff;border-color:var(--v18-dark)}
+.v18-panel{display:none}.v18-panel.active{display:block}.v18-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.v18-card{background:#fff;border:1px solid #dfe8ea;border-radius:20px;padding:16px;box-shadow:0 6px 18px #0b34450b}.v18-card h3{margin:0 0 8px;color:var(--v18-dark)}.v18-card p{margin:4px 0;color:#627780;line-height:1.7}
+.v18-kpi{font-size:30px;font-weight:900;color:var(--v18-dark)}.v18-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.v18-field{display:grid;gap:6px;margin:10px 0}.v18-field input,.v18-field select,.v18-field textarea{width:100%;padding:11px 12px;border:1px solid #ccdadd;border-radius:12px;font-family:inherit}.v18-field textarea{min-height:90px}
+.v18-btn{border:0;background:var(--v18-dark);color:#fff;border-radius:12px;padding:10px 14px;font-family:inherit;font-weight:900}.v18-btn.soft{background:#e7f3f2;color:#076a66}.v18-btn.danger{background:#9f2430}.v18-btn.gold{background:var(--v18-gold);color:#173a48}
+.v18-list{display:grid;gap:9px;margin-top:10px}.v18-item{background:#fff;border:1px solid #dfe8ea;border-radius:15px;padding:12px}.v18-pill{display:inline-flex;padding:5px 9px;border-radius:999px;background:#edf5f5;font-size:12px;font-weight:900;color:#365660}
+.v18-starline{display:inline-flex;gap:1px;direction:ltr}.v18-starline span{font-size:18px;color:#d4dce0}.v18-starline span.on{color:#d6ad59}.v18-rating-box{background:#fff;border:1px solid #dfe8ea;border-radius:18px;padding:14px;margin:10px 0}.v18-rescuer-pick{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;border:1px solid #dce6e8;border-radius:18px;padding:12px;margin:10px 0}.v18-rescuer-pick img{width:64px;height:64px;object-fit:cover;border-radius:50%;border:2px solid #e4bd6c}.v18-rate-stars button{border:0;background:none;font-size:32px;color:#ccd5d9;padding:2px;cursor:pointer}.v18-rate-stars button.on{color:#d6ad59}
+.v18-peer-ratings{margin-top:18px}.v18-peer-row{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;background:#fff;border:1px solid #e0e8ea;border-radius:15px;padding:10px;margin:8px 0}.v18-peer-row img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+.v18-admin-launch{position:fixed;right:12px;bottom:88px;z-index:2147483500;border:0;border-radius:16px;background:#083f58;color:#fff;padding:11px 14px;font-family:inherit;font-weight:900;box-shadow:0 8px 25px #0003;display:none}
+body.admin-open .v18-admin-launch{display:block}
+@media(max-width:760px){.v18-grid{grid-template-columns:1fr}.v18-sheet{padding:14px}.v18-tabs{top:54px}.v18-rescuer-pick{grid-template-columns:52px 1fr}.v18-rescuer-pick img{width:52px;height:52px}.v18-rescuer-pick .v18-rate-stars{grid-column:1/-1}.v18-admin-launch{right:8px;bottom:84px;font-size:12px;padding:9px 11px}}
+</style>
+
+<button id="v18AdminLaunch" class="v18-admin-launch" onclick="openV18Suite()">مركز التطوير V18</button>
+
+<div id="v18RatingOverlay" class="v18-overlay" role="dialog" aria-modal="true">
+  <div class="v18-sheet" style="max-width:720px">
+    <div class="v18-head"><h2>تقييم تجربة البلاغ</h2><button class="v18-close" onclick="closeV18('v18RatingOverlay')">×</button></div>
+    <div id="v18RatingBody"></div>
+  </div>
+</div>
+
+<div id="v18SuiteOverlay" class="v18-overlay" role="dialog" aria-modal="true">
+ <div class="v18-sheet">
+  <div class="v18-head"><div><h2>مركز ذكاء العمليات والسلامة V18</h2><small>الفرز، السلامة، الجودة، الأصول، التدريب، الإشعارات والتقارير التنفيذية</small></div><button class="v18-close" onclick="closeV18('v18SuiteOverlay')">×</button></div>
+  <div class="v18-tabs">
+   <button class="active" data-v18tab="intel" onclick="showV18Tab('intel',this)">ذكاء البلاغات</button>
+   <button data-v18tab="safety" onclick="showV18Tab('safety',this)">سلامة المتطوعين</button>
+   <button data-v18tab="quality" onclick="showV18Tab('quality',this)">الجودة والشكاوى</button>
+   <button data-v18tab="assets" onclick="showV18Tab('assets',this)">الأصول والاعتمادات</button>
+   <button data-v18tab="training" onclick="showV18Tab('training',this)">التدريب والحضور</button>
+   <button data-v18tab="system" onclick="showV18Tab('system',this)">النظام والتقارير</button>
+   <button data-v18tab="ratings" onclick="showV18Tab('ratings',this)">تقييمات المستفيدين</button>
+  </div>
+
+  <section id="v18-intel" class="v18-panel active">
+   <div class="v18-grid">
+    <div class="v18-card"><h3>البلاغات الحرجة</h3><div id="v18CriticalCount" class="v18-kpi">—</div><p>بلاغات ذات أولوية عالية أو حرجة.</p></div>
+    <div class="v18-card"><h3>بلاغات متأخرة</h3><div id="v18DelayedCount" class="v18-kpi">—</div><p>تجاوزت مهلة الاستجابة المحددة.</p></div>
+    <div class="v18-card"><h3>اشتباه تكرار</h3><div id="v18DuplicateCount" class="v18-kpi">—</div><p>بلاغات تم ربطها ببلاغ محتمل مكرر.</p></div>
+   </div>
+   <div class="v18-card" style="margin-top:12px"><h3>خريطة حرارة مختصرة حسب المنطقة</h3><div id="v18HeatmapList" class="v18-list"></div></div>
+   <div class="v18-card" style="margin-top:12px"><h3>غرف الحوادث النشطة</h3><div id="v18IncidentRooms" class="v18-list"></div></div>
+  </section>
+
+  <section id="v18-safety" class="v18-panel">
+   <div class="v18-grid">
+    <div class="v18-card"><h3>نداءات SOS المفتوحة</h3><div id="v18SosCount" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>فحوص سلامة متأخرة</h3><div id="v18CheckinLate" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>تنبيهات تصعيد</h3><div id="v18EscalationCount" class="v18-kpi">—</div></div>
+   </div>
+   <div class="v18-card" style="margin-top:12px"><h3>آخر نداءات السلامة</h3><div id="v18SafetyList" class="v18-list"></div></div>
+  </section>
+
+  <section id="v18-quality" class="v18-panel">
+   <div class="v18-grid">
+    <div class="v18-card"><h3>شكاوى مفتوحة</h3><div id="v18ComplaintCount" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>مراجعات جودة معلقة</h3><div id="v18QualityCount" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>رضا المستفيدين</h3><div id="v18Satisfaction" class="v18-kpi">—</div></div>
+   </div>
+   <div class="v18-card" style="margin-top:12px"><h3>آخر الشكاوى والملاحظات</h3><div id="v18QualityList" class="v18-list"></div></div>
+  </section>
+
+  <section id="v18-assets" class="v18-panel">
+   <div class="v18-grid">
+    <div class="v18-card"><h3>صيانة مستحقة</h3><div id="v18MaintenanceDue" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>معدات مستلمة</h3><div id="v18CheckedOut" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>اعتمادات منتهية/قريبة</h3><div id="v18CertDue" class="v18-kpi">—</div></div>
+   </div>
+   <div class="v18-card" style="margin-top:12px"><h3>قائمة السلامة قبل المهمة</h3><div id="v18ChecklistList" class="v18-list"></div></div>
+  </section>
+
+  <section id="v18-training" class="v18-panel">
+   <div class="v18-grid">
+    <div class="v18-card"><h3>الدورات النشطة</h3><div id="v18CourseCount" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>حضور هذا الشهر</h3><div id="v18AttendanceCount" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>اكتمال التدريب</h3><div id="v18TrainingCompletion" class="v18-kpi">—</div></div>
+   </div>
+   <div class="v18-card" style="margin-top:12px"><h3>الدورات والاختبارات</h3><div id="v18TrainingList" class="v18-list"></div></div>
+  </section>
+
+  <section id="v18-system" class="v18-panel">
+   <div class="v18-grid">
+    <div class="v18-card"><h3>إشعارات غير مقروءة</h3><div id="v18NotificationsCount" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>مشاكل صحة النظام</h3><div id="v18HealthIssues" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>جاهزية اليوم</h3><div id="v18ReadinessDaily" class="v18-kpi">—</div></div>
+   </div>
+   <div class="v18-card" style="margin-top:12px">
+    <h3>التقرير التنفيذي الشهري</h3>
+    <div class="v18-row"><input id="v18ReportMonth" type="month" style="max-width:220px;padding:10px;border:1px solid #ccdadd;border-radius:12px"><button class="v18-btn" onclick="loadV18ExecutiveReport()">إنشاء التقرير</button><button class="v18-btn gold" onclick="window.print()">طباعة / حفظ PDF</button></div>
+    <div id="v18ExecutiveReport" class="v18-list"></div>
+   </div>
+  </section>
+
+  <section id="v18-ratings" class="v18-panel">
+   <div class="v18-grid">
+    <div class="v18-card"><h3>متوسط التقييم</h3><div id="v18RatingAvg" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>نسبة الرضا</h3><div id="v18RatingPct" class="v18-kpi">—</div></div>
+    <div class="v18-card"><h3>إجمالي التقييمات</h3><div id="v18RatingTotal" class="v18-kpi">—</div></div>
+   </div>
+   <div class="v18-card" style="margin-top:12px"><h3>آخر تقييمات المستفيدين</h3><div id="v18RatingsAdminList" class="v18-list"></div></div>
+  </section>
+ </div>
+</div>
+
+<script id="laith-v18-suite-script">
+let v18Rating={reportNumber:null,overall:0,note:'',volunteers:[],selected:{}};
+
+function closeV18(id){document.getElementById(id)?.classList.remove('show')}
+function starHtmlV18(value,count=5){value=Number(value||0);return `<span class="v18-starline">${Array.from({length:count},(_,i)=>`<span class="${i<Math.round(value)?'on':''}">★</span>`).join('')}</span>`}
+function showV18Tab(tab,btn){
+ document.querySelectorAll('.v18-panel').forEach(x=>x.classList.remove('active'));
+ document.getElementById('v18-'+tab)?.classList.add('active');
+ document.querySelectorAll('.v18-tabs button').forEach(x=>x.classList.toggle('active',x.dataset.v18tab===tab));
+ loadV18SuiteTab(tab);
+}
+function openV18Suite(){document.getElementById('v18SuiteOverlay')?.classList.add('show');loadV18SuiteTab('intel')}
+async function loadV18SuiteTab(tab){
+ if(tab==='intel')return loadV18Intel();
+ if(tab==='safety')return loadV18Safety();
+ if(tab==='quality')return loadV18Quality();
+ if(tab==='assets')return loadV18Assets();
+ if(tab==='training')return loadV18Training();
+ if(tab==='system')return loadV18System();
+ if(tab==='ratings')return loadV18RatingsAdmin();
+}
+async function v18Rpc(name,args={}){
+ const {data,error}=await getSupabaseClient().rpc(name,args);
+ if(error)throw error;
+ return data;
+}
+
+async function openServiceRatingV18(reportNumber){
+ const ov=document.getElementById('v18RatingOverlay'),b=document.getElementById('v18RatingBody');
+ ov.classList.add('show');b.innerHTML='<p>جاري تحميل المتطوعين الذين باشروا البلاغ...</p>';
+ try{
+  const raw=await v18Rpc('get_report_rating_context_v18',{p_report_number:Number(reportNumber)});
+  const x=Array.isArray(raw)?raw[0]:raw;
+  if(!x){b.innerHTML='<p>لم يتم العثور على البلاغ.</p>';return}
+  if(x.already_submitted){b.innerHTML='<div class="v18-rating-box"><h3>تم تقييم هذه الحالة مسبقًا</h3><p>شكرًا لمساهمتك في تطوير الخدمة.</p></div>';return}
+  const volunteers=Array.isArray(x.volunteers)?x.volunteers:(x.volunteers||[]);
+  v18Rating={reportNumber:Number(reportNumber),overall:0,note:'',volunteers,selected:{}};
+  volunteers.forEach(v=>v18Rating.selected[v.member_id]=0);
+  renderV18Rating();
+ }catch(e){b.innerHTML='<p>تعذر فتح التقييم: '+esc(e.message||e)+'</p>'}
+}
+function setV18Overall(n){v18Rating.overall=n;renderV18Rating()}
+function setV18VolunteerRating(id,n){v18Rating.selected[id]=n;renderV18Rating()}
+function rateAllV18(n=5){v18Rating.volunteers.forEach(v=>v18Rating.selected[v.member_id]=n);renderV18Rating()}
+function renderV18Rating(){
+ const b=document.getElementById('v18RatingBody');if(!b)return;
+ b.innerHTML=`<div class="v18-rating-box"><small>رقم الحالة</small><h3>#${esc(v18Rating.reportNumber)}</h3>
+ <label><b>تقييم التجربة بشكل عام</b></label><div class="v18-rate-stars">${[1,2,3,4,5].map(n=>`<button class="${n<=v18Rating.overall?'on':''}" onclick="setV18Overall(${n})">★</button>`).join('')}</div></div>
+ <div class="v18-row" style="justify-content:space-between"><h3>المتطوعون الذين باشروا البلاغ</h3>${v18Rating.volunteers.length>1?`<button class="v18-btn soft" onclick="rateAllV18(5)">تقييم الجميع 5 نجوم</button>`:''}</div>
+ ${v18Rating.volunteers.length?v18Rating.volunteers.map(v=>`<div class="v18-rescuer-pick">
+   <img src="${esc(v.avatar_url||avatarPlaceholder(v.full_name))}" alt="">
+   <div><b>${esc(v.full_name||'متطوع')}</b><br><small>${esc(v.specialty||'منقذ')}</small></div>
+   <div class="v18-rate-stars">${[1,2,3,4,5].map(n=>`<button class="${n<=Number(v18Rating.selected[v.member_id]||0)?'on':''}" onclick="setV18VolunteerRating('${v.member_id}',${n})">★</button>`).join('')}</div>
+ </div>`).join(''):'<div class="v18-rating-box">لم يتم العثور على متطوعين مرتبطين بالحالة.</div>'}
+ <div class="v18-field"><label><b>ملاحظتك أو تجربتك</b> <small>(اختياري)</small></label><textarea id="v18RatingNote" placeholder="اكتب ملاحظتك هنا...">${esc(v18Rating.note||'')}</textarea></div>
+ <button class="v18-btn" onclick="submitV18Rating()">إرسال التقييم</button>`;
+}
+async function submitV18Rating(){
+ const note=document.getElementById('v18RatingNote')?.value.trim()||'';
+ if(!v18Rating.overall){alert('اختر تقييم التجربة أولًا.');return}
+ const rows=Object.entries(v18Rating.selected).filter(([id,r])=>Number(r)>0).map(([member_id,rating])=>({member_id,rating:Number(rating)}));
+ if(v18Rating.volunteers.length && !rows.length){alert('قيّم متطوعًا واحدًا على الأقل أو جميع المتطوعين.');return}
+ try{
+  await v18Rpc('submit_service_rating_v18',{p_report_number:v18Rating.reportNumber,p_overall_rating:v18Rating.overall,p_note:note||null,p_rescuer_ratings:rows});
+  document.getElementById('v18RatingBody').innerHTML='<div class="v18-rating-box" style="text-align:center"><h2>شكرًا لك</h2><p>تم حفظ تقييمك بنجاح، وسيظهر للإدارة ضمن مؤشرات الجودة.</p></div>';
+  setTimeout(()=>closeV18('v18RatingOverlay'),1800);
+ }catch(e){
+  const m=String(e.message||e);
+  alert(m.includes('RATING_ALREADY_SUBMITTED')?'تم تقييم هذا البلاغ مسبقًا.':'تعذر حفظ التقييم: '+m);
+ }
+}
+
+async function loadV18AdminMemberRatings(ids){
+ if(!ids?.length)return;
+ try{
+  const rows=await v18Rpc('get_member_ratings_v18',{p_member_ids:ids});
+  (rows||[]).forEach(r=>{
+   const el=document.getElementById('v18-member-rating-'+r.member_id);
+   if(el)el.innerHTML=`<b>التقييم:</b> ${starHtmlV18(r.avg_rating)} <b>${Number(r.avg_rating||0).toFixed(1)}</b> <small>(${r.rating_count||0})</small>`;
+  });
+ }catch(e){console.warn('ratings',e)}
+}
+async function loadV18PeerRatings(){
+ const box=document.getElementById('v18PeerRatings');if(!box)return;
+ try{
+  const rows=await v18Rpc('get_visible_volunteer_ratings_v18');
+  box.innerHTML=(rows||[]).map(r=>`<div class="v18-peer-row"><img src="${esc(r.avatar_url||avatarPlaceholder(r.full_name))}"><div><b>${esc(r.full_name)}</b><br><small>${esc(r.specialty||'متطوع')}</small></div><div style="text-align:left">${starHtmlV18(r.avg_rating)}<br><b>${Number(r.avg_rating||0).toFixed(1)}</b> <small>(${r.rating_count||0})</small></div></div>`).join('')||'<small>لا توجد تقييمات حتى الآن.</small>';
+ }catch(e){box.innerHTML='<small>تعذر تحميل تقييمات المتطوعين.</small>'}
+}
+
+async function loadV18Intel(){
+ try{
+  const d=await v18Rpc('get_ops_intelligence_v18');
+  const x=Array.isArray(d)?d[0]:d||{};
+  document.getElementById('v18CriticalCount').textContent=x.critical_count??0;
+  document.getElementById('v18DelayedCount').textContent=x.delayed_count??0;
+  document.getElementById('v18DuplicateCount').textContent=x.duplicate_count??0;
+  const heat=Array.isArray(x.heatmap)?x.heatmap:[];
+  document.getElementById('v18HeatmapList').innerHTML=heat.map(h=>`<div class="v18-item"><b>${esc(h.region||'غير محدد')}</b> — ${h.count} بلاغ</div>`).join('')||'<small>لا توجد بيانات كافية.</small>';
+  const rooms=Array.isArray(x.incident_rooms)?x.incident_rooms:[];
+  document.getElementById('v18IncidentRooms').innerHTML=rooms.map(r=>`<div class="v18-item"><b>${esc(r.title)}</b><br><small>${esc(r.status)} · ${esc(r.commander_name||'بدون قائد')}</small></div>`).join('')||'<small>لا توجد غرف حوادث نشطة.</small>';
+ }catch(e){console.warn(e)}
+}
+async function loadV18Safety(){
+ try{
+  const d=await v18Rpc('get_safety_dashboard_v18'),x=Array.isArray(d)?d[0]:d||{};
+  document.getElementById('v18SosCount').textContent=x.open_sos??0;document.getElementById('v18CheckinLate').textContent=x.late_checkins??0;document.getElementById('v18EscalationCount').textContent=x.open_escalations??0;
+  document.getElementById('v18SafetyList').innerHTML=(x.items||[]).map(i=>`<div class="v18-item"><b>${esc(i.type)}</b> · ${esc(i.member_name||'متطوع')}<br><small>${esc(i.message||'')}</small></div>`).join('')||'<small>لا توجد تنبيهات سلامة حالية.</small>';
+ }catch(e){console.warn(e)}
+}
+async function loadV18Quality(){
+ try{
+  const d=await v18Rpc('get_quality_dashboard_v18'),x=Array.isArray(d)?d[0]:d||{};
+  document.getElementById('v18ComplaintCount').textContent=x.open_complaints??0;document.getElementById('v18QualityCount').textContent=x.pending_reviews??0;document.getElementById('v18Satisfaction').textContent=(x.satisfaction_percent??0)+'%';
+  document.getElementById('v18QualityList').innerHTML=(x.items||[]).map(i=>`<div class="v18-item"><b>${esc(i.kind)}</b>${i.report_number?` · #${esc(i.report_number)}`:''}<br><span class="v18-pill">${esc(i.status)}</span>${i.text?`<p>${esc(i.text)}</p>`:''}</div>`).join('')||'<small>لا توجد عناصر معلقة.</small>';
+ }catch(e){console.warn(e)}
+}
+async function loadV18Assets(){
+ try{
+  const d=await v18Rpc('get_assets_dashboard_v18'),x=Array.isArray(d)?d[0]:d||{};
+  document.getElementById('v18MaintenanceDue').textContent=x.maintenance_due??0;document.getElementById('v18CheckedOut').textContent=x.checked_out??0;document.getElementById('v18CertDue').textContent=x.certifications_due??0;
+  document.getElementById('v18ChecklistList').innerHTML=(x.checklists||[]).map(i=>`<div class="v18-item"><b>${esc(i.title)}</b><br><small>${esc(i.status)}${i.report_number?` · #${esc(i.report_number)}`:''}</small></div>`).join('')||'<small>لا توجد قوائم فحص حالية.</small>';
+ }catch(e){console.warn(e)}
+}
+async function loadV18Training(){
+ try{
+  const d=await v18Rpc('get_training_dashboard_v18'),x=Array.isArray(d)?d[0]:d||{};
+  document.getElementById('v18CourseCount').textContent=x.active_courses??0;document.getElementById('v18AttendanceCount').textContent=x.month_attendance??0;document.getElementById('v18TrainingCompletion').textContent=(x.completion_percent??0)+'%';
+  document.getElementById('v18TrainingList').innerHTML=(x.courses||[]).map(c=>`<div class="v18-item"><b>${esc(c.title)}</b><br><small>${esc(c.status)} · ${c.completed_count||0} مكتمل</small></div>`).join('')||'<small>لا توجد دورات.</small>';
+ }catch(e){console.warn(e)}
+}
+async function loadV18System(){
+ try{
+  const d=await v18Rpc('get_system_dashboard_v18'),x=Array.isArray(d)?d[0]:d||{};
+  document.getElementById('v18NotificationsCount').textContent=x.unread_notifications??0;document.getElementById('v18HealthIssues').textContent=x.health_issues??0;document.getElementById('v18ReadinessDaily').textContent=(x.readiness_percent??0)+'%';
+ }catch(e){console.warn(e)}
+}
+async function loadV18RatingsAdmin(){
+ try{
+  const d=await v18Rpc('get_ratings_dashboard_v18'),x=Array.isArray(d)?d[0]:d||{};
+  document.getElementById('v18RatingAvg').innerHTML=`${starHtmlV18(x.avg_rating)} ${Number(x.avg_rating||0).toFixed(1)}`;
+  document.getElementById('v18RatingPct').textContent=(x.satisfaction_percent??0)+'%';document.getElementById('v18RatingTotal').textContent=x.total_ratings??0;
+  document.getElementById('v18RatingsAdminList').innerHTML=(x.items||[]).map(r=>`<div class="v18-item"><b>بلاغ #${esc(r.report_number)}</b> · ${starHtmlV18(r.overall_rating)}<br><small>${esc(r.created_at||'')}</small>${r.note?`<p><b>نص المبلّغ:</b> ${esc(r.note)}</p>`:''}${(r.rescuers||[]).length?`<p>${r.rescuers.map(v=>`${esc(v.full_name)}: ${starHtmlV18(v.rating)} ${v.rating}/5`).join('<br>')}</p>`:''}</div>`).join('')||'<small>لا توجد تقييمات حتى الآن.</small>';
+ }catch(e){document.getElementById('v18RatingsAdminList').innerHTML='<small>تعذر تحميل التقييمات.</small>'}
+}
+async function loadV18ExecutiveReport(){
+ const month=document.getElementById('v18ReportMonth').value;if(!month){alert('اختر الشهر.');return}
+ const box=document.getElementById('v18ExecutiveReport');box.innerHTML='<small>جاري إنشاء التقرير...</small>';
+ try{
+  const d=await v18Rpc('get_executive_report_v18',{p_month:month+'-01'}),x=Array.isArray(d)?d[0]:d||{};
+  box.innerHTML=`<div class="v18-item"><h3>التقرير التنفيذي — ${esc(month)}</h3>
+   <p><b>البلاغات:</b> ${x.total_reports||0} · <b>المكتملة:</b> ${x.completed_reports||0}</p>
+   <p><b>متوسط الاستجابة:</b> ${x.avg_response_minutes||0} دقيقة · <b>رضا المستفيدين:</b> ${x.satisfaction_percent||0}%</p>
+   <p><b>الساعات التطوعية:</b> ${x.volunteer_hours||0} ساعة · <b>أكثر منطقة نشاطًا:</b> ${esc(x.top_region||'—')}</p>
+  </div>`;
+ }catch(e){box.innerHTML='<small>تعذر إنشاء التقرير: '+esc(e.message||e)+'</small>'}
+}
+
+// تحسين خطأ الجاهزية: لا نرسل حالة لمعرّف عضو غير موجود.
+const _v18OldSetMyReadiness=window.setMyReadiness;
+window.setMyReadiness=async function(status){
+ try{
+  const d=await v18Rpc('set_my_readiness_v18',{p_status:status});
+  await loadMyOperationalStatus?.();
+  return d;
+ }catch(e){
+  const m=String(e.message||e);
+  alert(m.includes('MEMBER_PROFILE_MISSING')?'حسابك مسجل في الدخول لكن ملف العضو غير مرتبط بشكل صحيح. يلزم ربط حسابك بسجل الأعضاء من لوحة الإدارة.':'تعذر تحديث الجاهزية: '+m);
+ }
+};
+
+function ensureV18PeerRatingsSection(){
+ const more=document.getElementById('v14MorePage');if(!more||document.getElementById('v18PeerRatings'))return;
+ const sec=document.createElement('section');sec.className='v18-peer-ratings';sec.innerHTML='<div class="v14-section-title"><h2>تقييمات المتطوعين</h2><small>يظهر للمتطوعين المسجلين التقييم بالنجوم فقط</small></div><div id="v18PeerRatings"><small>جاري التحميل...</small></div>';
+ const about=document.getElementById('v14AboutBox');more.insertBefore(sec,about||null);
+}
+const _v18OldLoadV14UserCard=window.loadV14UserCard;
+window.loadV14UserCard=async function(){
+ if(_v18OldLoadV14UserCard)await _v18OldLoadV14UserCard();
+ ensureV18PeerRatingsSection();
+ try{const {data:{user}}=await getSupabaseClient().auth.getUser();if(user)loadV18PeerRatings();}catch(e){}
+};
+
+function detectAdminOpenV18(){
+ const panel=document.querySelector('.admin-shell');
+ document.body.classList.toggle('admin-open',!!panel && getComputedStyle(panel).display!=='none');
+}
+setInterval(detectAdminOpenV18,1500);
+document.addEventListener('DOMContentLoaded',()=>{ensureV18PeerRatingsSection();detectAdminOpenV18()});
 </script>
 
 </body>
