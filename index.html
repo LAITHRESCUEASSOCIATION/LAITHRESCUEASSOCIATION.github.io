@@ -4209,5 +4209,83 @@ window.uploadMyAvatar=async function(){
 };
 </script>
 
+
+<style id="laith-v20-remove-assistant-tools">
+/* V20: حذف الأدوات المساعدة بالكامل */
+.laith-float-stack,
+#assistantOverlay,
+#commandOverlay,
+#accessibilityOverlay,
+#roleExperienceOverlay,
+#v6AssistantOverlay,
+#v6SearchOverlay,
+#v6AccessibilityOverlay,
+#v6RoleOverlay,
+[id*="searchHistory"],
+[class*="search-history"],
+[class*="searchHistory"]{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+</style>
+
+<script id="laith-v20-cleanup">
+(function(){
+  const selectors=[
+    '.laith-float-stack',
+    '#assistantOverlay','#commandOverlay','#accessibilityOverlay','#roleExperienceOverlay',
+    '#v6AssistantOverlay','#v6SearchOverlay','#v6AccessibilityOverlay','#v6RoleOverlay',
+    '[id*="searchHistory"]','[class*="search-history"]','[class*="searchHistory"]'
+  ];
+
+  function removeV20Tools(){
+    selectors.forEach(s=>document.querySelectorAll(s).forEach(el=>el.remove()));
+
+    // حذف أي زر مساعد قديم بالاسم إذا بقي من نسخة سابقة.
+    document.querySelectorAll('button,a').forEach(el=>{
+      const t=(el.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+      const title=(el.getAttribute('title')||'').toLowerCase();
+      const aria=(el.getAttribute('aria-label')||'').toLowerCase();
+      const hay=[t,title,aria].join(' ');
+      if(
+        hay.includes('المساعد الذكي') ||
+        hay.includes('مساعد ذكي') ||
+        hay.includes('ai assistant') ||
+        hay.includes('إمكانية الوصول') ||
+        hay.includes('تجربة الدور') ||
+        hay.includes('بحث ذكي')
+      ){
+        const floating=el.closest('.laith-float-stack');
+        if(floating) floating.remove();
+      }
+    });
+
+    // تنظيف سجل البحث المحلي فقط، بدون المساس ببيانات الحساب أو البلاغات.
+    try{
+      const removeKeys=[];
+      for(let i=0;i<localStorage.length;i++){
+        const k=localStorage.key(i);
+        if(k && /(search.?history|recent.?search|laith.?search)/i.test(k)) removeKeys.push(k);
+      }
+      removeKeys.forEach(k=>localStorage.removeItem(k));
+      const sessionKeys=[];
+      for(let i=0;i<sessionStorage.length;i++){
+        const k=sessionStorage.key(i);
+        if(k && /(search.?history|recent.?search|laith.?search)/i.test(k)) sessionKeys.push(k);
+      }
+      sessionKeys.forEach(k=>sessionStorage.removeItem(k));
+    }catch(e){}
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',removeV20Tools,{once:true});
+  }else removeV20Tools();
+
+  window.addEventListener('pageshow',removeV20Tools);
+})();
+</script>
+
 </body>
 </html>
