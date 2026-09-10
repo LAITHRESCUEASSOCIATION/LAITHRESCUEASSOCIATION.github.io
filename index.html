@@ -404,6 +404,30 @@ header{z-index:9000}.nav{min-height:82px;height:auto;padding:8px 0}.auth-buttons
 .featured-admin-preview{display:flex;gap:14px;align-items:center;margin-top:12px;padding:12px;border:1px solid #edf1f4;border-radius:14px}.featured-admin-preview img{width:80px;height:80px;border-radius:16px;object-fit:cover;background:#edf1f4}
 @media(max-width:800px){header{position:sticky;top:0}.nav{gap:8px;align-items:center}.brand #brandSiteName{display:none}.auth-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;flex:1}.auth-buttons .btn{padding:8px 7px!important;font-size:10.5px!important;white-space:nowrap}.logo{width:48px;height:42px!important}.hero-action-inner .btn{min-width:0;flex:1 1 45%}.quick-services-grid{grid-template-columns:repeat(3,1fr);gap:8px}.quick-action{font-size:12px!important;padding:13px 6px!important;min-height:104px}.secondary-slider-shell{min-height:230px;border-radius:16px}.featured-volunteer-card{grid-template-columns:1fr;text-align:center;padding:22px}.featured-volunteer-photo,.featured-volunteer-placeholder{width:150px;height:150px;margin:auto}.featured-volunteer-card h3{font-size:24px}.featured-volunteer-badge{margin:auto}}
 @media(max-width:440px){.auth-buttons{grid-template-columns:repeat(3,1fr)}.auth-buttons .btn{font-size:9.5px!important;padding:8px 4px!important}.quick-action .qa-icon{width:40px;height:40px;font-size:18px}.hero-action-inner{gap:8px}.hero-action-inner .btn{font-size:12px;padding:10px 12px}}
+
+/* ===== V5: تحسين تباين جميع النصوص في الواجهة الرئيسية ===== */
+/* البطاقات والخلفيات الفاتحة: نص داكن وواضح */
+.card,.post-card,.live-stat,.public-report-stat,.workflow,.step,.podium-card,.leaderboard-empty,.official-about,.featured-volunteer-empty,.quick-action{color:#063b55!important}
+.card h3,.post-card h3,.section-head h2,.leaderboard-head h2,.workflow h2,.quick-action,.live-stat b,.public-report-stat b,.podium-hours{color:#063b55!important}
+.card p,.card span,.post-card p,.post-meta,.section-head p,.leaderboard-head p,.podium-meta,.public-report-stat span,.live-stat span,.official-about,.featured-volunteer-empty{color:#2f4c5b!important}
+.step{background:#eef3f6!important;color:#063b55!important}
+
+/* البطاقات والخلفيات الداكنة: كل النص أبيض أو أبيض مائل للذهبي */
+.cta,.featured-volunteer-card,.achievement-stat{color:#fff!important}
+.cta h2,.cta p,.featured-volunteer-card h3,.featured-volunteer-card p,.featured-volunteer-period,.featured-volunteer-subtitle,.achievement-stat b,.achievement-stat small{color:#fff!important;opacity:1!important}
+.featured-volunteer-subtitle{color:#ffe8b5!important}
+
+/* أزرار الشريط العلوي */
+.auth-buttons #loginNavBtn{background:#063b55!important;color:#fff!important}
+.auth-buttons #signupNavBtn{background:#fff!important;color:#063b55!important;border:2px solid #063b55!important}
+.auth-buttons a.btn{background:#d8a84e!important;color:#063b55!important}
+
+/* الروابط والأزرار العامة */
+.btn:not(.light):not(.explore-main){color:#fff!important}
+.btn.light,.explore-main{color:#063b55!important}
+
+/* منع النص الرمادي الخافت في الصفحة الرئيسية */
+main small, main .muted, main [class*="meta"]{opacity:1}
 </style>
 
 </head>
