@@ -1720,7 +1720,7 @@ async function submitDispatch(){
   const reportId=document.getElementById("dispatchReportId").value;
   const memberIds=[...document.querySelectorAll('input[name="dispatchMember"]:checked')].map(x=>x.value);
   const msg=document.getElementById("dispatchMsg");if(!memberIds.length){msg.textContent="اختر عضوًا واحدًا على الأقل.";return;}msg.textContent="جاري إرسال البلاغ...";
-  const {error}=await getSupabaseClient().rpc("dispatch_report",{p_report_id:reportId,p_member_ids:memberIds});
+  const {error}=await getSupabaseClient().rpc("dispatch_report_v21",{p_report_id:reportId,p_member_ids:memberIds});
   if(error){console.error(error);msg.textContent="تعذر ترحيل البلاغ: "+error.message;return;}closeDispatch();alert("تم ترحيل البلاغ للأعضاء المحددين.");await loadReports();
 }
 async function cancelReport(id){if(!confirm("هل تريد إلغاء هذا البلاغ؟ سيتم إلغاء جميع التكليفات غير المنتهية."))return;const {error}=await getSupabaseClient().rpc("cancel_report",{p_report_id:id});if(error){alert("تعذر إلغاء البلاغ: "+error.message);return;}await loadReports();}
@@ -4285,6 +4285,90 @@ window.uploadMyAvatar=async function(){
 
   window.addEventListener('pageshow',removeV20Tools);
 })();
+</script>
+
+
+<style id="laith-v21-dispatch-style">
+#v21MissionAlert{display:none;position:fixed;left:12px;right:12px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:2147483630;background:#fff;border:2px solid #d6ad59;border-radius:18px;padding:13px 14px;box-shadow:0 14px 38px #0003;direction:rtl}
+#v21MissionAlert.show{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#v21MissionAlert b{color:#083f58}#v21MissionAlert small{display:block;color:#61737c;margin-top:3px}
+#v21MissionAlert .btn{white-space:nowrap}
+#v21MissionBadge{display:none;min-width:21px;height:21px;padding:0 6px;border-radius:999px;background:#9d1d2e;color:#fff;place-items:center;font-size:11px;font-weight:900;margin-inline-start:5px}
+#v21MissionBadge.show{display:inline-grid}
+@media(max-width:560px){#v21MissionAlert{align-items:flex-start!important}#v21MissionAlert.show{display:grid;grid-template-columns:1fr auto}#v21MissionAlert .btn{padding:9px 11px;font-size:12px}}
+</style>
+
+<div id="v21MissionAlert">
+ <div><b>لديك بلاغ جديد</b><small id="v21MissionAlertText">تم ترحيل مهمة جديدة إليك من مركز العمليات.</small></div>
+ <button class="btn" onclick="openV21MyMissions()">فتح المهمة</button>
+</div>
+
+<script id="laith-v21-dispatch-fix">
+let v21MissionPoll=null,v21LastAssignedIds=new Set();
+
+async function openV21MyMissions(){
+ document.getElementById('v21MissionAlert')?.classList.remove('show');
+ if(typeof openMemberDashboard==='function') await openMemberDashboard();
+ setTimeout(()=>document.getElementById('myTasks')?.scrollIntoView({behavior:'smooth',block:'start'}),150);
+}
+
+async function checkV21AssignedMissions(showAlert=true){
+ try{
+  const sb=getSupabaseClient();
+  const {data:{user}}=await sb.auth.getUser();
+  if(!user)return;
+  const {data,error}=await sb.from('report_assignments')
+   .select('id,status,assigned_at,report_id,reports(report_number,report_type,workflow_status)')
+   .eq('member_id',user.id)
+   .in('status',['assigned','accepted'])
+   .order('assigned_at',{ascending:false});
+  if(error)throw error;
+  const rows=data||[], pending=rows.filter(x=>x.status==='assigned');
+  const badge=document.getElementById('v21MissionBadge');
+  if(badge){badge.textContent=pending.length;badge.classList.toggle('show',pending.length>0)}
+  const fresh=pending.filter(x=>!v21LastAssignedIds.has(x.id));
+  if(showAlert && fresh.length){
+    const a=fresh[0],n=a.reports?.report_number||'—';
+    const box=document.getElementById('v21MissionAlert'),tx=document.getElementById('v21MissionAlertText');
+    if(tx)tx.textContent=`تم ترحيل البلاغ #${n} إليك. افتح المهمة للبدء بخطوات الاستجابة.`;
+    box?.classList.add('show');
+  }
+  v21LastAssignedIds=new Set(rows.map(x=>x.id));
+ }catch(e){console.warn('V21 mission check:',e)}
+}
+
+function installV21MissionEntry(){
+ const more=document.querySelector('.v14-more-list');
+ if(more && !document.getElementById('v21MyMissionsBtn')){
+   const b=document.createElement('button');
+   b.id='v21MyMissionsBtn';b.type='button';
+   b.innerHTML='<span>مهامي الحالية</span><span id="v21MissionBadge"></span>';
+   b.onclick=openV21MyMissions;
+   more.prepend(b);
+ }
+}
+
+async function initV21Dispatch(){
+ installV21MissionEntry();
+ await checkV21AssignedMissions(false);
+ if(v21MissionPoll)clearInterval(v21MissionPoll);
+ v21MissionPoll=setInterval(()=>checkV21AssignedMissions(true),10000);
+
+ try{
+  const sb=getSupabaseClient();
+  sb.channel('v21-my-dispatch-'+Date.now())
+   .on('postgres_changes',{event:'INSERT',schema:'public',table:'report_assignments'},async payload=>{
+      const {data:{user}}=await sb.auth.getUser();
+      if(user && payload?.new?.member_id===user.id){
+        await checkV21AssignedMissions(true);
+        if(document.getElementById('memberPanel')?.style.display==='block') await loadMyAssignments();
+      }
+   }).subscribe();
+ }catch(e){console.warn(e)}
+}
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initV21Dispatch,{once:true});
+else initV21Dispatch();
 </script>
 
 </body>
