@@ -1131,6 +1131,16 @@ footer{
 </div>
 
 <div id="adminPanel" class="admin-shell">
+
+<div id="v30ReliabilityEntry" class="v30-reliability-entry">
+  <div class="v30-reliability-copy">
+    <span class="v30-eyebrow">لوحة الإدارة المتقدمة</span>
+    <h2>مركز الاعتمادية والأمان</h2>
+    <p>مراقبة النظام، التصعيد، الصلاحيات، المصادقة الثنائية، سجل العمليات، النسخ الاحتياطي، الإحصائيات، وحالة الشبكة.</p>
+  </div>
+  <button class="btn v30-reliability-btn" type="button" onclick="openV29Suite()">فتح المركز</button>
+</div>
+
   <div class="admin-wrap">
     <div class="admin-top">
       <div><h2 style="margin:0">لوحة إدارة المتطوعين</h2><small>قبول ورفض وتعديل طلبات العضوية</small></div>
@@ -4661,6 +4671,102 @@ async function logV29ClientError(code,message,context={}){try{const {data:{sessi
 window.addEventListener("error",e=>logV29ClientError("WINDOW_ERROR",e.message,{source:e.filename,line:e.lineno,col:e.colno}));window.addEventListener("unhandledrejection",e=>logV29ClientError("UNHANDLED_REJECTION",e.reason?.message||String(e.reason||"unknown"),{}));
 document.addEventListener("DOMContentLoaded",renderV29Network);
 </script>
+
+
+<style id="laith-v30-visible-center-large-logo">
+/* V30 — إبراز مركز الاعتمادية وتكبير شعار الصفحة الرئيسية */
+#brandLogoBox.logo{
+  width:110px !important;
+  height:82px !important;
+  flex:0 0 110px !important;
+  border-radius:14px !important;
+  padding:4px !important;
+  background:#fff !important;
+  box-shadow:0 8px 24px rgba(6,47,69,.10) !important;
+}
+#brandLogoImg{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  border-radius:10px !important;
+}
+header .brand{
+  gap:14px !important;
+}
+#brandSiteName{
+  font-size:17px !important;
+  font-weight:900 !important;
+  color:#062f45 !important;
+}
+
+.v30-reliability-entry{
+  margin:18px auto 14px;
+  width:min(1180px,calc(100% - 28px));
+  background:linear-gradient(135deg,#062f45,#0b4966);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:22px;
+  padding:20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  box-shadow:0 18px 42px rgba(6,47,69,.18);
+}
+.v30-reliability-copy h2{
+  margin:4px 0 6px;
+  color:#fff;
+  font-size:24px;
+}
+.v30-reliability-copy p{
+  margin:0;
+  color:#dbe8ee;
+  line-height:1.8;
+  max-width:760px;
+}
+.v30-eyebrow{
+  display:inline-flex;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#d7ba76;
+  color:#062f45;
+  font-size:12px;
+  font-weight:900;
+}
+.v30-reliability-btn{
+  flex:0 0 auto;
+  min-width:170px;
+  background:#fff !important;
+  color:#062f45 !important;
+  border:0 !important;
+  font-weight:900 !important;
+  box-shadow:none !important;
+}
+.v30-reliability-btn:hover{
+  transform:translateY(-1px);
+}
+
+@media(max-width:800px){
+  #brandLogoBox.logo{
+    width:82px !important;
+    height:66px !important;
+    flex:0 0 82px !important;
+  }
+  header .nav{
+    min-height:78px !important;
+    height:auto !important;
+  }
+  .v30-reliability-entry{
+    width:calc(100% - 20px);
+    padding:16px;
+    border-radius:18px;
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .v30-reliability-copy h2{font-size:21px}
+  .v30-reliability-btn{width:100%;min-width:0}
+}
+</style>
 
 </body>
 </html>
