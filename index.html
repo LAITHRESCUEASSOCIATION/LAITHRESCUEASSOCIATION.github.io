@@ -1082,6 +1082,54 @@ footer{
 <div id="roleExperienceOverlay" class="v6-overlay"><div class="v6-modal"><div class="v6-modal-head"><div><h2 style="margin:0">كيف تريد استخدام منصة ليث؟</h2><small>نرتب لك المحتوى بحسب احتياجك، ويمكن تغييره في أي وقت.</small></div><button class="v6-close" onclick="closeV6Overlay('roleExperienceOverlay')">×</button></div><div class="role-grid" style="margin-top:18px"><button class="role-card" onclick="setVisitorRole('citizen')"><b>أنا مواطن</b><p>البلاغات والخدمات والمساعدة.</p></button><button class="role-card" onclick="setVisitorRole('volunteer')"><b>أنا متطوع</b><p>التطوع والبوابة والإنجازات.</p></button><button class="role-card" onclick="setVisitorRole('organization')"><b>أنا جهة</b><p>المبادرات والشراكات والأثر.</p></button><button class="role-card" onclick="setVisitorRole('media')"><b>أنا إعلامي</b><p>الأخبار والتقارير والمؤشرات.</p></button></div></div></div>
 <div id="publicVolunteerOverlay" class="v6-overlay"><div class="v6-modal" style="width:min(650px,100%)"><div class="v6-modal-head"><h2 style="margin:0">أثر متطوع</h2><button class="v6-close" onclick="closeV6Overlay('publicVolunteerOverlay')">×</button></div><div id="publicVolunteerContent" style="margin-top:16px"></div></div></div>
 
+
+<div id="v29SuiteOverlay" class="v29-overlay" aria-hidden="true">
+  <div class="v29-modal">
+    <div class="v29-head">
+      <div>
+        <h2>مركز الاعتمادية والأمان V29</h2>
+        <small>مراقبة النظام، التصعيد، الصلاحيات، MFA، النسخ الاحتياطي، السجل، الجوال والإحصائيات</small>
+      </div>
+      <button class="v29-close" type="button" onclick="closeV29Suite()">×</button>
+    </div>
+    <div class="v29-tabs">
+      <button class="active" onclick="showV29Tab('overview',this)">النظام</button>
+      <button onclick="showV29Tab('escalations',this)">التصعيد</button>
+      <button onclick="showV29Tab('security',this)">الأمان والصلاحيات</button>
+      <button onclick="showV29Tab('audit',this)">سجل العمليات</button>
+      <button onclick="showV29Tab('backup',this)">النسخ الاحتياطي</button>
+      <button onclick="showV29Tab('analytics',this)">الإحصائيات</button>
+      <button onclick="showV29Tab('mobile',this)">الجوال والشبكة</button>
+    </div>
+    <section id="v29-overview" class="v29-panel active">
+      <div id="v29HealthCards" class="v29-grid"><div class="v29-card">جاري فحص النظام...</div></div>
+      <div class="v29-card"><h3>المناوبة الحالية</h3><div id="v29CurrentShift">جاري التحميل...</div></div>
+      <div class="v29-card"><h3>آخر الأخطاء المسجلة</h3><div id="v29Errors">لا توجد بيانات بعد.</div></div>
+    </section>
+    <section id="v29-escalations" class="v29-panel">
+      <div class="v29-card"><div class="v29-card-head"><div><h3>التكليفات المتأخرة عن القبول</h3><small>المهلة حسب أولوية البلاغ.</small></div><button class="btn light" onclick="loadV29Escalations()">تحديث</button></div><div id="v29Escalations">جاري التحميل...</div></div>
+    </section>
+    <section id="v29-security" class="v29-panel">
+      <div class="v29-grid">
+        <div class="v29-card"><h3>صلاحياتي الحالية</h3><div id="v29Permissions">جاري التحميل...</div></div>
+        <div class="v29-card"><h3>المصادقة الثنائية MFA</h3><div id="v29MfaState">جاري التحقق...</div><div class="v29-actions"><button class="btn" onclick="startV29Mfa()">تفعيل MFA</button><button class="btn light" onclick="refreshV29Mfa()">تحديث الحالة</button></div><div id="v29MfaEnroll" style="margin-top:12px"></div></div>
+      </div>
+      <div class="v29-card"><h3>الحماية</h3><p>التحقق النهائي للصلاحيات يتم من Supabase عبر دوال الخادم، وليس بمجرد إخفاء الأزرار في الواجهة.</p></div>
+    </section>
+    <section id="v29-audit" class="v29-panel">
+      <div class="v29-grid"><div class="v29-card"><h3>آخر العمليات</h3><div id="v29Audit">جاري التحميل...</div></div><div class="v29-card"><h3>أخطاء الواجهة</h3><div id="v29ClientErrors">جاري التحميل...</div></div></div>
+    </section>
+    <section id="v29-backup" class="v29-panel">
+      <div class="v29-card"><h3>نسخة تشغيلية احتياطية</h3><p>نسخة من البيانات التشغيلية الأساسية داخل Supabase، مع إمكانية تنزيلها JSON.</p><div class="v29-actions"><button class="btn" onclick="createV29Backup()">إنشاء نسخة الآن</button><button class="btn light" onclick="downloadLatestV29Backup()">تنزيل آخر نسخة JSON</button><button class="btn light" onclick="restoreLatestV29Content()">استعادة إعدادات الموقع</button></div><div id="v29BackupStatus" style="margin-top:12px"></div></div>
+    </section>
+    <section id="v29-analytics" class="v29-panel"><div id="v29Analytics" class="v29-grid"><div class="v29-card">جاري التحميل...</div></div></section>
+    <section id="v29-mobile" class="v29-panel">
+      <div class="v29-grid"><div class="v29-card"><h3>حالة الاتصال</h3><div id="v29NetworkState"></div></div><div class="v29-card"><h3>العمليات المؤجلة</h3><div id="v29OfflineQueue"></div><div class="v29-actions"><button class="btn light" onclick="flushOfflineQueue()">محاولة الإرسال الآن</button></div></div></div>
+      <div class="v29-card"><h3>تجربة المتطوع</h3><p>يبقى التسلسل الحالي كما هو: قبول ← وصول ← إثبات وصول ← إثبات انتهاء ← إغلاق. وتم تعزيز التعامل مع الشبكة الضعيفة لتسجيل الوصول.</p></div>
+    </section>
+  </div>
+</div>
+
 <div id="adminPanel" class="admin-shell">
   <div class="admin-wrap">
     <div class="admin-top">
@@ -1091,7 +1139,7 @@ footer{
     <div class="admin-actions">
       <button class="btn" type="button" onclick="loadMembers('pending')">طلبات المتطوعين الجديدة</button>
       <button class="btn light" type="button" onclick="loadMembers('approved')">المتطوعون الفعّالون</button>
-      <button class="btn light" type="button" onclick="loadReports()">البلاغات</button><button class="btn" type="button" onclick="openOpsCenter()">مركز العمليات</button><button class="btn light" type="button" onclick="openOperationsMap()">الخريطة المباشرة</button><button class="btn light" type="button" onclick="showAdminAnalytics()">التقارير والإحصائيات</button>
+      <button class="btn light" type="button" onclick="loadReports()">البلاغات</button><button class="btn" type="button" onclick="openOpsCenter()">مركز العمليات</button><button class="btn light" type="button" onclick="openOperationsMap()">الخريطة المباشرة</button><button class="btn light" type="button" onclick="showAdminAnalytics()">التقارير والإحصائيات</button><button class="btn" type="button" onclick="openV29Suite()">مركز الاعتمادية والأمان</button>
     </div>
     <div id="adminNewReportAlert" class="admin-alert">ورد بلاغ جديد إلى المنصة.</div>
 
@@ -4564,6 +4612,55 @@ footer .wrap,
   opacity:1!important;
 }
 </style>
+
+
+<style id="laith-v29-styles">
+.v29-overlay{display:none;position:fixed;inset:0;z-index:10050;background:rgba(2,23,35,.78);padding:18px;overflow:auto}
+.v29-overlay.open{display:flex;align-items:flex-start;justify-content:center}
+.v29-modal{width:min(1180px,100%);background:#f6f8fa;border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.28);overflow:hidden;margin:auto}
+.v29-head{background:#062f45;color:#fff;padding:20px 22px;display:flex;justify-content:space-between;gap:18px;align-items:center}
+.v29-head h2{margin:0 0 5px}.v29-head small{color:#d7e4ea}.v29-close{width:42px;height:42px;border:0;border-radius:50%;background:#fff;color:#062f45;font-size:27px;cursor:pointer}
+.v29-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;background:#fff;border-bottom:1px solid #dfe6ea}
+.v29-tabs button{border:1px solid #dce4e8;background:#f7f9fa;color:#12384b;padding:9px 13px;border-radius:12px;font-weight:800;cursor:pointer}
+.v29-tabs button.active{background:#062f45;color:#fff;border-color:#062f45}.v29-panel{display:none;padding:18px}.v29-panel.active{display:block}
+.v29-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px}.v29-card{background:#fff;border:1px solid #dde6ea;border-radius:17px;padding:16px;box-shadow:0 8px 22px rgba(4,43,63,.04)}
+.v29-card h3{margin:0 0 10px;color:#062f45}.v29-card p{line-height:1.8;color:#526570}.v29-card-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.v29-kpi{font-size:28px;font-weight:900;color:#062f45;display:block}.v29-ok{color:#147a48}.v29-warn{color:#a46600}.v29-bad{color:#b42318}.v29-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.v29-row{padding:10px 0;border-bottom:1px solid #edf1f3}.v29-row:last-child{border-bottom:0}.v29-tag{display:inline-flex;padding:4px 8px;border-radius:999px;background:#edf3f6;font-size:12px;font-weight:800}
+.v29-danger{background:#fff3f2;border-color:#ffd2ce}.v29-empty{color:#71818a;padding:12px 0}#v29MfaEnroll img{max-width:220px;background:#fff;padding:10px;border-radius:14px;border:1px solid #dce5e9}
+@media(max-width:800px){.v29-overlay{padding:0}.v29-modal{border-radius:0;min-height:100vh}.v29-grid{grid-template-columns:1fr}.v29-head{position:sticky;top:0;z-index:2}.v29-tabs{position:sticky;top:82px;z-index:2;overflow-x:auto;flex-wrap:nowrap}.v29-tabs button{white-space:nowrap}.v29-panel{padding:12px}}
+</style>
+<script id="laith-v29-suite">
+const V29_OFFLINE_KEY="laith_ops_queue_v29";
+function v29Esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function v29Fmt(v){return Number(v||0).toLocaleString("ar-SA")} function v29Date(v){try{return v?new Date(v).toLocaleString("ar-SA"):"—"}catch(e){return"—"}}
+async function v29Rpc(name,args={}){const {data,error}=await getSupabaseClient().rpc(name,args);if(error)throw error;return data}
+function openV29Suite(){const o=document.getElementById("v29SuiteOverlay");if(!o)return;o.classList.add("open");o.setAttribute("aria-hidden","false");refreshV29Suite()}
+function closeV29Suite(){const o=document.getElementById("v29SuiteOverlay");if(o){o.classList.remove("open");o.setAttribute("aria-hidden","true")}}
+function showV29Tab(name,btn){document.querySelectorAll(".v29-panel").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".v29-tabs button").forEach(x=>x.classList.remove("active"));document.getElementById("v29-"+name)?.classList.add("active");btn?.classList.add("active");if(name==="escalations")loadV29Escalations();if(name==="security"){loadV29Permissions();refreshV29Mfa()}if(name==="audit")loadV29Audit();if(name==="analytics")loadV29Analytics();if(name==="mobile")renderV29Network()}
+async function refreshV29Suite(){await Promise.allSettled([loadV29Dashboard(),loadV29Escalations(),loadV29Permissions(),refreshV29Mfa(),loadV29Analytics()]);renderV29Network()}
+async function loadV29Dashboard(){const cards=document.getElementById("v29HealthCards"),shift=document.getElementById("v29CurrentShift"),errs=document.getElementById("v29Errors");try{const d=await v29Rpc("get_v29_command_center"),online=navigator.onLine,h=d?.health||{};cards.innerHTML=`<div class="v29-card"><span class="v29-kpi ${online?"v29-ok":"v29-bad"}">${online?"متصل":"غير متصل"}</span><small>اتصال الجهاز</small></div><div class="v29-card"><span class="v29-kpi ${h.database_ok?"v29-ok":"v29-bad"}">${h.database_ok?"سليم":"تحقق"}</span><small>قاعدة البيانات</small></div><div class="v29-card"><span class="v29-kpi ${Number(d?.overdue_assignments||0)?"v29-warn":"v29-ok"}">${v29Fmt(d?.overdue_assignments)}</span><small>تكليفات متأخرة</small></div><div class="v29-card"><span class="v29-kpi">${v29Fmt(d?.active_reports)}</span><small>بلاغات نشطة</small></div><div class="v29-card"><span class="v29-kpi">${v29Fmt(d?.available_volunteers)}</span><small>متطوعون متاحون</small></div><div class="v29-card"><span class="v29-kpi">${v29Fmt(d?.errors_24h)}</span><small>أخطاء 24 ساعة</small></div>`;const cs=d?.current_shift;shift.innerHTML=cs?`<b>${v29Esc(cs.title||"مناوبة حالية")}</b><br><small>${v29Esc(cs.team_name||"")} · ${v29Date(cs.starts_at)} — ${v29Date(cs.ends_at)}</small>`:'<div class="v29-empty">لا توجد مناوبة نشطة الآن.</div>';const es=d?.recent_errors||[];errs.innerHTML=es.length?es.map(x=>`<div class="v29-row"><b>${v29Esc(x.error_code||"خطأ")}</b> · ${v29Date(x.created_at)}<br><small>${v29Esc(x.message||"")}</small></div>`).join(""):'<div class="v29-empty">لا توجد أخطاء حديثة.</div>'}catch(e){cards.innerHTML=`<div class="v29-card v29-danger"><b>شغّل ملف SQL الخاص بـ V29 أولًا</b><p>${v29Esc(e.message||e)}</p></div>`}}
+async function loadV29Escalations(){const box=document.getElementById("v29Escalations");if(!box)return;box.textContent="جاري التحميل...";try{const rows=await v29Rpc("get_overdue_assignments_v29");box.innerHTML=(rows||[]).map(x=>`<div class="v29-row"><b>بلاغ #${v29Esc(x.report_number)} — ${v29Esc(x.volunteer_name||"متطوع")}</b> <span class="v29-tag">${v29Esc(x.priority_level||"normal")}</span><br><small>تم التكليف: ${v29Date(x.assigned_at)} · التأخير: ${v29Fmt(x.minutes_overdue)} دقيقة</small><div class="v29-actions"><button class="btn" onclick="escalateV29('${x.assignment_id}')">تسجيل تصعيد</button></div></div>`).join("")||'<div class="v29-empty">لا توجد تكليفات متأخرة.</div>'}catch(e){box.innerHTML=`<div class="v29-danger v29-card">${v29Esc(e.message||e)}</div>`}}
+async function escalateV29(id){try{const r=await v29Rpc("mark_assignment_escalated_v29",{p_assignment_id:id});alert(r?.message||"تم تسجيل التصعيد.");await Promise.all([loadV29Escalations(),loadV29Dashboard(),loadReports()])}catch(e){alert("تعذر التصعيد: "+(e.message||e))}}
+async function loadV29Permissions(){const box=document.getElementById("v29Permissions");if(!box)return;try{const d=await v29Rpc("get_my_permissions_v29"),caps=d?.capabilities||[];box.innerHTML=`<b>${v29Esc(d?.role_label||d?.role||"مستخدم")}</b><br><small>${caps.map(x=>`<span class="v29-tag">${v29Esc(x)}</span>`).join(" ")||"لا توجد صلاحيات إدارية"}</small>`}catch(e){box.innerHTML=`<small>${v29Esc(e.message||e)}</small>`}}
+async function refreshV29Mfa(){const box=document.getElementById("v29MfaState");if(!box)return;try{const {data,error}=await getSupabaseClient().auth.mfa.listFactors();if(error)throw error;const verified=(data?.totp||[]).filter(x=>x.status==="verified");box.innerHTML=verified.length?`<span class="v29-kpi v29-ok">مفعّل</span><small>${verified.length} عامل TOTP موثّق</small>`:`<span class="v29-kpi v29-warn">غير مفعّل</span><small>ننصح بتفعيله لحسابات الإدارة.</small>`}catch(e){box.innerHTML=`<small>تعذر قراءة MFA: ${v29Esc(e.message||e)}</small>`}}
+async function startV29Mfa(){const box=document.getElementById("v29MfaEnroll");box.textContent="جاري إنشاء عامل MFA...";try{const {data,error}=await getSupabaseClient().auth.mfa.enroll({factorType:"totp",friendlyName:"Laith Rescue Admin"});if(error)throw error;const qr=data?.totp?.qr_code,secret=data?.totp?.secret,factorId=data?.id;box.innerHTML=`${qr?`<img src="${v29Esc(qr)}" alt="QR"><br>`:""}<small>أضف الرمز إلى تطبيق المصادقة${secret?` أو استخدم المفتاح: <b>${v29Esc(secret)}</b>`:""}.</small><div class="v29-actions"><input id="v29MfaCode" inputmode="numeric" placeholder="رمز من 6 أرقام" style="max-width:220px"><button class="btn" onclick="verifyV29Mfa('${v29Esc(factorId)}')">تأكيد التفعيل</button></div>`}catch(e){box.innerHTML=`<small>${v29Esc(e.message||e)}</small>`}}
+async function verifyV29Mfa(factorId){const code=document.getElementById("v29MfaCode")?.value.trim();if(!code)return alert("اكتب رمز تطبيق المصادقة.");try{const c=await getSupabaseClient().auth.mfa.challenge({factorId});if(c.error)throw c.error;const v=await getSupabaseClient().auth.mfa.verify({factorId,challengeId:c.data.id,code});if(v.error)throw v.error;document.getElementById("v29MfaEnroll").innerHTML='<b class="v29-ok">تم تفعيل المصادقة الثنائية بنجاح.</b>';await refreshV29Mfa()}catch(e){alert("تعذر تأكيد MFA: "+(e.message||e))}}
+async function loadV29Audit(){try{const d=await v29Rpc("get_v29_audit_feed");document.getElementById("v29Audit").innerHTML=(d?.audit||[]).map(x=>`<div class="v29-row"><b>${v29Esc(x.action)}</b> · ${v29Esc(x.entity_type||"")}${x.entity_id?` #${v29Esc(x.entity_id)}`:""}<br><small>${v29Date(x.created_at)} · ${v29Esc(x.actor_name||"النظام")}</small></div>`).join("")||'<div class="v29-empty">لا يوجد سجل بعد.</div>';document.getElementById("v29ClientErrors").innerHTML=(d?.errors||[]).map(x=>`<div class="v29-row"><b>${v29Esc(x.error_code||"خطأ")}</b><br><small>${v29Esc(x.message||"")} · ${v29Date(x.created_at)}</small></div>`).join("")||'<div class="v29-empty">لا توجد أخطاء حديثة.</div>'}catch(e){document.getElementById("v29Audit").innerHTML=`<small>${v29Esc(e.message||e)}</small>`}}
+async function createV29Backup(){const box=document.getElementById("v29BackupStatus");box.textContent="جاري إنشاء النسخة...";try{const d=await v29Rpc("create_ops_backup_v29");box.innerHTML=`<b class="v29-ok">تم إنشاء النسخة.</b><br><small>المعرف: ${v29Esc(d?.backup_id||"—")}</small>`}catch(e){box.innerHTML=`<span class="v29-bad">${v29Esc(e.message||e)}</span>`}}
+async function downloadLatestV29Backup(){try{const d=await v29Rpc("get_latest_ops_backup_v29");if(!d?.payload)throw new Error("لا توجد نسخة احتياطية.");const blob=new Blob([JSON.stringify(d.payload,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`laith-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}catch(e){alert("تعذر تنزيل النسخة: "+(e.message||e))}}
+async function restoreLatestV29Content(){if(!confirm("سيتم استعادة هوية الموقع وروابط التواصل فقط من آخر نسخة. متابعة؟"))return;try{const d=await v29Rpc("restore_latest_content_v29");alert(d?.message||"تمت الاستعادة.");await Promise.all([loadSiteSettings(),loadContactSettings()])}catch(e){alert("تعذر الاستعادة: "+(e.message||e))}}
+async function loadV29Analytics(){const box=document.getElementById("v29Analytics");if(!box)return;try{const d=await v29Rpc("get_ops_metrics_v29");box.innerHTML=`<div class="v29-card"><span class="v29-kpi">${v29Fmt(d?.total_reports)}</span><small>إجمالي البلاغات</small></div><div class="v29-card"><span class="v29-kpi">${v29Fmt(d?.completed_reports)}</span><small>مكتملة</small></div><div class="v29-card"><span class="v29-kpi">${v29Fmt(d?.avg_accept_minutes)}</span><small>متوسط القبول / دقيقة</small></div><div class="v29-card"><span class="v29-kpi">${v29Fmt(d?.avg_arrival_minutes)}</span><small>متوسط الوصول / دقيقة</small></div><div class="v29-card"><span class="v29-kpi">${v29Fmt(d?.volunteer_hours)}</span><small>ساعات التطوع</small></div><div class="v29-card"><span class="v29-kpi">${v29Fmt(d?.active_volunteers)}</span><small>متطوعون فعّالون</small></div><div class="v29-card" style="grid-column:1/-1"><h3>أعلى المناطق</h3>${(d?.top_regions||[]).map(x=>`<span class="v29-tag">${v29Esc(x.region)}: ${v29Fmt(x.count)}</span>`).join(" ")||"—"}</div><div class="v29-card" style="grid-column:1/-1"><h3>أنواع البلاغات</h3>${(d?.report_types||[]).map(x=>`<span class="v29-tag">${v29Esc(x.report_type)}: ${v29Fmt(x.count)}</span>`).join(" ")||"—"}</div>`}catch(e){box.innerHTML=`<div class="v29-card v29-danger">${v29Esc(e.message||e)}</div>`}}
+function renderV29Network(){const n=document.getElementById("v29NetworkState"),q=document.getElementById("v29OfflineQueue");if(n)n.innerHTML=`<span class="v29-kpi ${navigator.onLine?"v29-ok":"v29-bad"}">${navigator.onLine?"متصل":"بدون اتصال"}</span>`;let legacy=[],v29=[];try{legacy=JSON.parse(localStorage.getItem(OPS_QUEUE_KEY)||"[]")}catch(e){}try{v29=JSON.parse(localStorage.getItem(V29_OFFLINE_KEY)||"[]")}catch(e){}if(q)q.innerHTML=`<span class="v29-kpi">${v29Fmt((legacy?.length||0)+(v29?.length||0))}</span><small>عملية مؤجلة على هذا الجهاز.</small>`}
+function queueV29Offline(item){let q=[];try{q=JSON.parse(localStorage.getItem(V29_OFFLINE_KEY)||"[]")}catch(e){}q.push({...item,queued_at:new Date().toISOString()});localStorage.setItem(V29_OFFLINE_KEY,JSON.stringify(q));renderV29Network()}
+async function flushV29Offline(){if(!navigator.onLine)return;let q=[];try{q=JSON.parse(localStorage.getItem(V29_OFFLINE_KEY)||"[]")}catch(e){}const remaining=[];for(const item of q){try{if(item.type==="arrival"){const r=await getSupabaseClient().rpc("mark_assignment_arrived",item.payload);if(r.error)throw r.error}else remaining.push(item)}catch(e){remaining.push(item)}}localStorage.setItem(V29_OFFLINE_KEY,JSON.stringify(remaining));renderV29Network()}
+window.addEventListener("online",()=>{flushOfflineQueue().catch(()=>{});flushV29Offline().catch(()=>{});renderV29Network()});window.addEventListener("offline",renderV29Network);
+const markMyArrivalLegacyV29=markMyArrival;
+markMyArrival=async function(id){let pos=null;try{pos=await requestInitialPosition()}catch(e){alert("لتسجيل الوصول يجب السماح للموقع بتحديد موقعك الحالي.");return}const payload={p_assignment_id:id,p_latitude:pos?.coords?.latitude??null,p_longitude:pos?.coords?.longitude??null};if(!navigator.onLine){queueV29Offline({type:"arrival",payload});alert("تم حفظ تسجيل الوصول وسيُرسل عند عودة الإنترنت.");return}const {error}=await getSupabaseClient().rpc("mark_assignment_arrived",payload);if(error){queueV29Offline({type:"arrival",payload});alert("تعذر الإرسال الآن، وتم حفظ تسجيل الوصول لإعادة المحاولة.");return}await loadMyAssignments()}
+async function logV29ClientError(code,message,context={}){try{const {data:{session}}=await getSupabaseClient().auth.getSession();if(!session)return;await getSupabaseClient().rpc("log_client_error_v29",{p_error_code:String(code||"CLIENT_ERROR").slice(0,80),p_message:String(message||"").slice(0,1500),p_context:context})}catch(e){}}
+window.addEventListener("error",e=>logV29ClientError("WINDOW_ERROR",e.message,{source:e.filename,line:e.lineno,col:e.colno}));window.addEventListener("unhandledrejection",e=>logV29ClientError("UNHANDLED_REJECTION",e.reason?.message||String(e.reason||"unknown"),{}));
+document.addEventListener("DOMContentLoaded",renderV29Network);
+</script>
 
 </body>
 </html>
