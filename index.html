@@ -4486,5 +4486,30 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 else initV21Dispatch();
 </script>
 
+
+<style id="laith-v24-footer-fix">
+/* V24: إصلاح نهائي — بعض تنسيقات الواجهة القديمة كانت تخفي الفوتر بعد تنسيقات V23 */
+footer{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  margin-top:28px!important;
+  padding:34px 0 calc(110px + env(safe-area-inset-bottom))!important;
+  background:#062f45!important;
+  color:#d5e1e6!important;
+}
+footer .wrap,
+#laithFooterContact{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+.laith-contact-actions,
+.laith-social-links{
+  visibility:visible!important;
+  opacity:1!important;
+}
+</style>
+
 </body>
 </html>
