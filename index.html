@@ -1141,6 +1141,27 @@ footer{
   <button class="btn v30-reliability-btn" type="button" onclick="openV29Suite()">فتح المركز</button>
 </div>
 
+<div id="v31ReportEmailAlerts" class="v31-email-alert-card">
+  <div class="v31-email-alert-head">
+    <div>
+      <span class="v31-email-badge">تنبيهات فورية</span>
+      <h3>بريد تنبيه البلاغات الجديدة</h3>
+      <p>أضف حتى 20 بريدًا. عند وصول بلاغ جديد من مواطن يصل تنبيه لكل بريد هنا ليدخل الفريق إلى لوحة الإدارة ويرحّل البلاغ.</p>
+    </div>
+  </div>
+  <label for="v31ReportAlertEmails"><b>عناوين البريد المستلمة للتنبيه</b></label>
+  <textarea id="v31ReportAlertEmails" rows="4" placeholder="مثال:
+operations@example.com
+supervisor@example.com
+
+ضع كل بريد في سطر، أو افصل بينها بفاصلة."></textarea>
+  <div class="v31-email-actions">
+    <button class="btn" type="button" onclick="saveReportAlertRecipientsV31()">حفظ عناوين التنبيه</button>
+    <button class="btn light" type="button" onclick="loadReportAlertRecipientsV31()">تحديث القائمة</button>
+  </div>
+  <div id="v31ReportAlertMsg" class="v31-email-msg"></div>
+</div>
+
   <div class="admin-wrap">
     <div class="admin-top">
       <div><h2 style="margin:0">لوحة إدارة المتطوعين</h2><small>قبول ورفض وتعديل طلبات العضوية</small></div>
@@ -1722,6 +1743,7 @@ async function loginVolunteer(){
       await loadMembers("pending");
       await loadSiteSettings();
       await loadContactSettings();
+      await loadReportAlertRecipientsV31();
       await loadAdminPosts();
       await loadAdminSlides();
       await loadAdminNewsSlides();
@@ -2179,7 +2201,10 @@ async function submitPublicReport(){
   msg.textContent="جاري إرسال البلاغ...";
   const {data,error}=await getSupabaseClient().rpc("create_public_report",{p_name:name||"مبلغ",p_phone:phone,p_report_type:type,p_description:description,p_location:location||null,p_region:region||null,p_latitude:reportLat,p_longitude:reportLng});
   if(error){console.error(error);msg.textContent="تعذر إرسال البلاغ: "+error.message;return;}
-  const row=Array.isArray(data)?data[0]:data;try{if(files.length)await uploadReportMedia(row.report_id,files);}catch(e){console.error(e);msg.textContent="تم إنشاء البلاغ لكن تعذر رفع بعض المرفقات: "+e.message;}
+  const row=Array.isArray(data)?data[0]:data;
+  const alertPromise=notifyNewReportByEmailV31(row?.report_id).catch(e=>console.warn("تعذر إرسال تنبيه البلاغ بالبريد",e));
+  try{if(files.length)await uploadReportMedia(row.report_id,files);}catch(e){console.error(e);msg.textContent="تم إنشاء البلاغ لكن تعذر رفع بعض المرفقات: "+e.message;}
+  await alertPromise;
   document.getElementById("reportSuccess").innerHTML=`<div class="report-number-box">تم إرسال البلاغ بنجاح<br>رقم المتابعة<br><b>${esc(row.report_number)}</b><br><small>احتفظ بهذا الرقم لمتابعة البلاغ.</small></div>`;if(!files.length)msg.textContent="";loadPublicStats();
 }
 async function loadPublicStats(){const {data,error}=await getSupabaseClient().rpc("get_public_stats");if(error){console.warn("stats",error);await loadPublicReportCount();return;}const s=Array.isArray(data)?data[0]:data;if(!s)return;const map={publicReportCount:s.total_reports,statRescues:s.completed_reports,statVolunteers:s.volunteers,statHours:s.volunteer_hours,statRegions:s.regions_served,achRescues:s.completed_reports,achVolunteers:s.volunteers,achHours:s.volunteer_hours,achRegions:s.regions_served};for(const [id,v] of Object.entries(map)){const el=document.getElementById(id);if(el)el.textContent=Number(v||0).toLocaleString("ar-SA");}}
@@ -4765,6 +4790,112 @@ header .brand{
   }
   .v30-reliability-copy h2{font-size:21px}
   .v30-reliability-btn{width:100%;min-width:0}
+}
+</style>
+
+
+<script id="laith-v31-new-report-email-alerts">
+async function notifyNewReportByEmailV31(reportId){
+  if(!reportId) return;
+  const client=getSupabaseClient();
+  const {data,error}=await client.functions.invoke("send-new-report-alert",{
+    body:{report_id:reportId}
+  });
+  if(error) throw error;
+  if(data?.failed) console.warn("بعض تنبيهات البريد لم تصل",data);
+  return data;
+}
+
+function parseReportAlertEmailsV31(){
+  const raw=document.getElementById("v31ReportAlertEmails")?.value||"";
+  return [...new Set(
+    raw.split(/[\n,;]+/)
+      .map(x=>x.trim().toLowerCase())
+      .filter(Boolean)
+  )];
+}
+
+async function loadReportAlertRecipientsV31(){
+  const box=document.getElementById("v31ReportAlertEmails");
+  const msg=document.getElementById("v31ReportAlertMsg");
+  if(!box||!msg||!currentIsAdmin) return;
+  msg.textContent="جاري تحميل عناوين التنبيه...";
+  try{
+    const {data,error}=await getSupabaseClient().rpc("get_report_alert_recipients_v31");
+    if(error) throw error;
+    box.value=(data||[]).filter(x=>x.enabled!==false).map(x=>x.email).join("\n");
+    msg.textContent=(data||[]).length
+      ? `مفعّل حاليًا لـ ${(data||[]).length} بريد.`
+      : "لا توجد عناوين بعد. أضف البريد المطلوب ثم اضغط حفظ.";
+  }catch(e){
+    console.error(e);
+    msg.textContent="تعذر تحميل عناوين التنبيه: "+(e?.message||e);
+  }
+}
+
+async function saveReportAlertRecipientsV31(){
+  const msg=document.getElementById("v31ReportAlertMsg");
+  if(!msg) return;
+  const emails=parseReportAlertEmailsV31();
+  if(emails.length>20){
+    msg.textContent="الحد الأعلى 20 بريدًا.";
+    return;
+  }
+  const invalid=emails.find(x=>!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x));
+  if(invalid){
+    msg.textContent="تحقق من البريد: "+invalid;
+    return;
+  }
+  msg.textContent="جاري حفظ عناوين التنبيه...";
+  try{
+    const {data,error}=await getSupabaseClient().rpc("set_report_alert_recipients_v31",{p_emails:emails});
+    if(error) throw error;
+    msg.textContent=`تم الحفظ. سيصل تنبيه البلاغات الجديدة إلى ${Number(data||0).toLocaleString("ar-SA")} بريد.`;
+    await loadReportAlertRecipientsV31();
+  }catch(e){
+    console.error(e);
+    msg.textContent="تعذر الحفظ: "+(e?.message||e);
+  }
+}
+</script>
+
+
+<style id="laith-v31-new-report-email-alerts-style">
+.v31-email-alert-card{
+  width:min(1180px,calc(100% - 28px));
+  margin:0 auto 16px;
+  background:#fff;
+  border:1px solid #dfe7ec;
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(6,47,69,.08);
+}
+.v31-email-alert-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.v31-email-alert-head h3{margin:6px 0;color:#062f45;font-size:21px}
+.v31-email-alert-head p{margin:0;color:#486273;line-height:1.8;max-width:850px}
+.v31-email-badge{display:inline-flex;background:#d7ba76;color:#062f45;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:900}
+#v31ReportAlertEmails{
+  width:100%;
+  margin-top:8px;
+  border:1px solid #cbd8df;
+  border-radius:14px;
+  padding:13px 14px;
+  font:inherit;
+  font-size:15px;
+  line-height:1.8;
+  color:#062f45;
+  background:#f9fbfc;
+  resize:vertical;
+  direction:ltr;
+  text-align:left;
+  box-sizing:border-box;
+}
+.v31-email-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.v31-email-msg{margin-top:10px;color:#486273;font-size:14px;min-height:22px}
+@media(max-width:800px){
+  .v31-email-alert-card{width:calc(100% - 20px);padding:16px;border-radius:17px}
+  .v31-email-alert-head h3{font-size:19px}
+  .v31-email-actions .btn{width:100%}
 }
 </style>
 
