@@ -639,7 +639,7 @@ footer{
 }
 </style>
 
-<meta name="laith-version" content="V34 QR + PWA + Web Push">
+<meta name="laith-version" content="V35 Volunteer Portal + QR + PWA + Web Push">
 </head>
 <body id="top">
 <header><div class="wrap nav">
@@ -863,10 +863,8 @@ footer{
     <div id="v14UserCard" class="v14-user-card"></div>
     <div class="v14-more-list">
       <button onclick="openSignup()"><i>♟</i><span><b>تطوع معنا</b><small>انضم إلى متطوعي جمعية ليث</small></span><em>‹</em></button>
-      <button onclick="openAuth()"><i>⌾</i><span><b>تسجيل الدخول</b><small>الدخول إلى حساب العضو</small></span><em>‹</em></button>
-      <button onclick="openAccessibilityPanel()"><i>Aa</i><span><b>إمكانية الوصول</b><small>وضع كبار السن والتباين والخط</small></span><em>‹</em></button>
-      <button onclick="openLaithAssistant()"><i>✦</i><span><b>مساعد ليث</b><small>البحث والمساعدة الذكية</small></span><em>‹</em></button>
-      <button onclick="openV14About()"><i>ⓘ</i><span><b>عن الجمعية</b><small>تعرف على جمعية ليث للإنقاذ</small></span><em>‹</em></button>
+      <button onclick="openAuth()"><i>⌾</i><span><b>تسجيل الدخول</b><small>الدخول إلى حساب المتطوع</small></span><em>‹</em></button>
+      <button onclick="openVolunteerPortalV35()"><i>♟</i><span><b>بوابة المتطوع</b><small>الملف الشخصي، المهام، QR، الساعات والإشعارات</small></span><em>‹</em></button>
     </div>
     <div id="v14AboutBox" class="v14-about-box">
       <h2>جمعية ليث للإنقاذ</h2>
@@ -1411,7 +1409,7 @@ supervisor@example.com
 <div id="memberPanel" class="admin-shell" style="z-index:10002">
   <div class="admin-wrap">
     <div class="admin-top">
-      <div><h2 style="margin:0">بوابة العضو</h2><small>الملف الشخصي، البلاغات، والساعات التطوعية</small></div>
+      <div><h2 style="margin:0">بوابة المتطوع</h2><small>الملف الشخصي، البلاغات، والساعات التطوعية</small></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="backToHomeBtn" class="btn light" type="button" onclick="backToPublicSite()">العودة للموقع</button><button id="backToAdminBtn" class="btn light" type="button" onclick="backToAdmin()" style="display:none">العودة للإدارة</button><button class="btn light" type="button" onclick="logoutUser()">تسجيل خروج</button></div>
     </div>
     <div id="myProfileBox"></div>
@@ -3411,7 +3409,7 @@ async function collectSmartIndex(){const items=[];document.querySelectorAll('mai
 function rankSmart(items,q){const terms=String(q||'').toLowerCase().split(/\s+/).filter(x=>x.length>1);return items.map(it=>{const hay=(it.title+' '+it.text).toLowerCase();let score=0;terms.forEach(t=>{if(hay.includes(t))score+=it.title.toLowerCase().includes(t)?5:2});return {...it,score}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score)}
 async function runSmartSearch(){const q=document.getElementById('smartSearchInput').value.trim(),box=document.getElementById('smartSearchResults');if(!q){box.innerHTML='<small>اكتب ما تريد البحث عنه.</small>';return;}box.innerHTML='<small>جاري البحث...</small>';const results=rankSmart(await collectSmartIndex(),q).slice(0,6);box.innerHTML=results.length?results.map((r,i)=>`<div class="smart-result" onclick="v6SmartGo(${i})"><b>${v6Esc(r.title)}</b><p>${v6Esc(r.text.slice(0,180))}...</p></div>`).join(''):'<small>لم أجد نتيجة مطابقة. جرّب كلمات أبسط مثل: التطوع، الحج، الإنقاذ، المبادرات.</small>';window.v6LastSmartResults=results}
 function v6SmartGo(i){const r=window.v6LastSmartResults?.[i];r?.el?.scrollIntoView({behavior:'smooth'});}
-async function askLaithAssistant(){const input=document.getElementById('assistantInput'),log=document.getElementById('assistantLog');const q=input.value.trim();if(!q)return;log.insertAdjacentHTML('beforeend',`<div class="chat-msg chat-user">${v6Esc(q)}</div>`);input.value='';const low=q.toLowerCase();let answer='';if(/تطوع|متطوع|تسجيل/.test(low))answer='يمكنك التسجيل من زر «تسجيل جديد» أعلى الصفحة أو من «تطوع معنا». بعد إرسال الطلب تراجعه الإدارة، وعند القبول تتاح لك بوابة العضو.';else if(/بلاغ|إنقاذ|مساعدة|طوار/.test(low))answer='استخدم «طلب إنقاذ عاجل» أو «تقديم بلاغ». بعد الإرسال يمكنك متابعة رحلة البلاغ من الاستقبال حتى الإغلاق.';else if(/مبادرة|شراك/.test(low))answer='انتقل إلى قسم «صمّم مبادرتك» وحدد النوع والمنطقة وعدد المستفيدين والتاريخ، ثم أرسل التصور للجمعية.';else if(/فعال|حدث|اليوم/.test(low))answer='قسم «اليوم في ليث» يعرض ملخص النشاط العام والفعاليات والتحديثات بدون بيانات شخصية.';else {const rs=rankSmart(await collectSmartIndex(),q).slice(0,3);answer=rs.length?'وجدت لك: '+rs.map(x=>x.title).join('، ')+'. يمكنك استخدام البحث الشامل لفتح النتائج مباشرة.':'لم أجد إجابة مباشرة في المحتوى المنشور. جرّب صياغة السؤال بكلمات مثل التطوع، الإنقاذ، المبادرات، الأخبار أو الخدمات.'}log.insertAdjacentHTML('beforeend',`<div class="chat-msg chat-bot">${v6Esc(answer)}</div>`);log.scrollTop=log.scrollHeight}
+async function askLaithAssistant(){const input=document.getElementById('assistantInput'),log=document.getElementById('assistantLog');const q=input.value.trim();if(!q)return;log.insertAdjacentHTML('beforeend',`<div class="chat-msg chat-user">${v6Esc(q)}</div>`);input.value='';const low=q.toLowerCase();let answer='';if(/تطوع|متطوع|تسجيل/.test(low))answer='يمكنك التسجيل من زر «تسجيل جديد» أعلى الصفحة أو من «تطوع معنا». بعد إرسال الطلب تراجعه الإدارة، وعند القبول تتاح لك بوابة المتطوع.';else if(/بلاغ|إنقاذ|مساعدة|طوار/.test(low))answer='استخدم «طلب إنقاذ عاجل» أو «تقديم بلاغ». بعد الإرسال يمكنك متابعة رحلة البلاغ من الاستقبال حتى الإغلاق.';else if(/مبادرة|شراك/.test(low))answer='انتقل إلى قسم «صمّم مبادرتك» وحدد النوع والمنطقة وعدد المستفيدين والتاريخ، ثم أرسل التصور للجمعية.';else if(/فعال|حدث|اليوم/.test(low))answer='قسم «اليوم في ليث» يعرض ملخص النشاط العام والفعاليات والتحديثات بدون بيانات شخصية.';else {const rs=rankSmart(await collectSmartIndex(),q).slice(0,3);answer=rs.length?'وجدت لك: '+rs.map(x=>x.title).join('، ')+'. يمكنك استخدام البحث الشامل لفتح النتائج مباشرة.':'لم أجد إجابة مباشرة في المحتوى المنشور. جرّب صياغة السؤال بكلمات مثل التطوع، الإنقاذ، المبادرات، الأخبار أو الخدمات.'}log.insertAdjacentHTML('beforeend',`<div class="chat-msg chat-bot">${v6Esc(answer)}</div>`);log.scrollTop=log.scrollHeight}
 async function runCommandSearch(q){const box=document.getElementById('commandSearchResults');if(!q||q.trim().length<2){box.innerHTML='<small>ابدأ بكتابة كلمتين أو أكثر.</small>';return;}const rs=rankSmart(await collectSmartIndex(),q).slice(0,10);box.innerHTML=rs.length?rs.map((r,i)=>`<div class="command-item" onclick="closeV6Overlay('commandOverlay');window.v6CommandResults[${i}].el?.scrollIntoView({behavior:'smooth'})"><b>${v6Esc(r.title)}</b><br><small>${v6Esc(r.text.slice(0,140))}</small></div>`).join(''):'<small>لا توجد نتائج.</small>';window.v6CommandResults=rs}
 async function loadTodayV6(){const box=document.getElementById('todayInLaithGrid');if(!box)return;try{const sb=getSupabaseClient(),start=new Date();start.setHours(0,0,0,0);const [reports,posts,shifts]=await Promise.all([sb.from('reports').select('id,workflow_status',{count:'exact'}).gte('created_at',start.toISOString()).limit(100),sb.from('posts').select('id,title',{count:'exact'}).eq('published',true).gte('created_at',start.toISOString()).limit(5),sb.from('duty_shifts').select('id,title,start_at,end_at').gte('end_at',start.toISOString()).limit(10)]);box.innerHTML=`<div class="today-card"><b>بلاغات اليوم</b><span class="v6-number">${reports.count??reports.data?.length??0}</span><p>إجمالي البلاغات المسجلة اليوم.</p></div><div class="today-card"><b>مناوبات اليوم والقادمة</b><span class="v6-number">${shifts.data?.length||0}</span><p>مناوبات تشغيلية مجدولة.</p></div><div class="today-card"><b>محتوى جديد</b><span class="v6-number">${posts.count??posts.data?.length??0}</span><p>${posts.data?.[0]?.title?v6Esc(posts.data[0].title):'آخر الأخبار والتحديثات المنشورة.'}</p></div>`}catch(e){box.innerHTML='<div class="today-card">تعذر تحميل ملخص اليوم.</div>'}}
 async function loadGratitudeV6(){const box=document.getElementById('gratitudeWall');if(!box)return;try{const {data,error}=await getSupabaseClient().from('laith_gratitude').select('*').eq('is_active',true).order('created_at',{ascending:false}).limit(9);if(error)throw error;box.innerHTML=(data||[]).length?data.map(x=>`<div class="thanks-card"><div style="font-size:26px">❝</div><p class="story-quote">${v6Esc(x.message)}</p><small>${v6Esc(x.source_label||'من مجتمع ليث')}</small></div>`).join(''):'<div class="thanks-card">ستظهر هنا رسائل الامتنان المعتمدة.</div>'}catch(e){box.innerHTML='<div class="thanks-card">تعذر تحميل جدار الامتنان.</div>'}}
@@ -5077,5 +5075,23 @@ navigator.serviceWorker?.addEventListener("message",e=>{
 .v34-broadcast-card{margin:16px 18px;padding:20px;border-radius:20px;background:#fff;border:2px solid #d7ba76;box-shadow:0 12px 35px rgba(6,47,69,.10)}.v34-broadcast-card h3{margin:6px 0;color:#062f45;font-size:22px}.v34-broadcast-card p{margin:0 0 14px;color:#5f7280;line-height:1.7}.v34-badge{display:inline-flex;background:#062f45;color:#fff;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:900}.v34-broadcast-card input[type=text],.v34-broadcast-card textarea{width:100%;box-sizing:border-box;border:1px solid #cfdbe2;border-radius:12px;padding:12px;margin-top:6px;font:inherit}.v34-urgent-line{display:flex;gap:8px;align-items:center;margin:12px 0;color:#8b1e16;font-weight:800}.v34-send-push{background:#062f45!important;color:#fff!important}.v34-admin-msg{margin-top:10px;font-weight:800;color:#35515f}
 @media(max-width:700px){.v34-broadcast-card{margin:12px 8px;padding:15px}}
 </style>
+
+<script id="laith-v35-volunteer-portal">
+async function openVolunteerPortalV35(){
+  try{
+    const client=getSupabaseClient();
+    const {data:{session}}=await client.auth.getSession();
+    if(!session?.user){
+      openAuth();
+      return;
+    }
+    await openMemberDashboard();
+  }catch(e){
+    console.error("V35 volunteer portal:",e);
+    openAuth();
+  }
+}
+</script>
+
 </body>
 </html>
