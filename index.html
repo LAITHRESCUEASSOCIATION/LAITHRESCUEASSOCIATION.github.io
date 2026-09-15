@@ -363,6 +363,9 @@ body.elder-mode .laith-float-btn{width:56px!important;height:56px!important}
   #accessibilityOverlay .v6-grid{grid-template-columns:1fr!important}
   .assistant-log{height:min(44dvh,330px)!important}
 }
+
+/* V33: بطل فيديو ثابت + عدادات عند الظهور */
+.laith-fixed-hero{overflow:hidden;background:#062f45!important;isolation:isolate}.laith-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}.laith-fixed-hero:after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,rgba(2,20,31,.12),rgba(2,20,31,.02));pointer-events:none}.laith-fixed-hero .dashboard{z-index:5}.laith-hero-tech{position:absolute;z-index:4;left:58%;top:48%;width:170px;height:170px;transform:translate(-50%,-50%);pointer-events:none}.laith-hero-tech i{position:absolute;inset:0;border:1px solid rgba(72,218,255,.62);border-radius:50%;animation:laithSpin 8s linear infinite}.laith-hero-tech i:nth-child(2){inset:20px;animation-direction:reverse;animation-duration:5s}.laith-hero-tech i:nth-child(3){inset:42px;box-shadow:0 0 28px rgba(65,210,255,.4)}.laith-hero-tech span{position:absolute;left:50%;top:50%;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%);background:#c7f6ff;box-shadow:0 0 0 8px rgba(65,210,255,.16),0 0 30px #55dcff;animation:laithPulse 1.5s ease-in-out infinite}@keyframes laithSpin{to{transform:rotate(360deg)}}@keyframes laithPulse{50%{transform:translate(-50%,-50%) scale(1.35);opacity:.72}}@media(max-width:800px){.laith-hero-tech{width:120px;height:120px;left:62%}}@media(prefers-reduced-motion:reduce){.laith-hero-tech i,.laith-hero-tech span{animation:none!important}}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
@@ -655,7 +658,13 @@ footer{
 <p>جمعية تطوعية متخصصة في الإنقاذ والإغاثة، تجمع بين الاستجابة الميدانية والتنظيم الرقمي لخدمة المجتمع بكفاءة واحترافية.</p>
 <div class="actions"><button class="btn" onclick="openEmergency()">طلب إنقاذ عاجل</button><a class="btn light" href="#leaderboard">استكشف المنصة</a></div>
 </div>
-<div class="visual" id="homeVisual"><div id="heroSlides" class="hero-slides"></div><div class="dashboard">جمعية ليث للإنقاذ</div><div class="map"><i class="pin p1"></i><i class="pin p2"></i><i class="pin p3"></i></div></div>
+<div class="visual laith-fixed-hero" id="homeVisual">
+  <video id="laithHeroVideo" class="laith-hero-video" autoplay muted loop playsinline preload="metadata" poster="laith-rescuer-hero-fallback.png" aria-label="منقذ من جمعية ليث يتفاعل مع واجهة رقمية">
+    <source src="hero-rescuer.mp4" type="video/mp4">
+  </video>
+  <div class="laith-hero-tech" aria-hidden="true"><i></i><i></i><i></i><span></span></div>
+  <div class="dashboard">جمعية ليث للإنقاذ</div>
+</div>
 </div></section>
 <section class="hero-action-strip"><div class="wrap"><div class="hero-action-inner"><button class="btn emergency-main" onclick="openEmergency()">طلب إنقاذ عاجل</button><a class="btn explore-main" href="#about">استكشف المنصة</a></div></div></section>
 
@@ -4899,70 +4908,41 @@ async function saveReportAlertRecipientsV31(){
 }
 </style>
 
-
-<style id="laith-v32-interactive-hero">
-/* V32: Interactive cinematic hero + scroll counters */
-#homeVisual{isolation:isolate}
-#heroSlides{z-index:0}
-#homeVisual .v32-tech-layer{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
-#homeVisual .v32-orbit{position:absolute;left:42%;top:47%;width:clamp(150px,25vw,360px);aspect-ratio:1;border:1px solid rgba(70,214,255,.42);border-radius:50%;transform:translate(-50%,-50%);animation:v32spin 13s linear infinite;box-shadow:0 0 26px rgba(70,214,255,.12),inset 0 0 30px rgba(70,214,255,.06)}
-#homeVisual .v32-orbit:before,#homeVisual .v32-orbit:after{content:"";position:absolute;border-radius:50%;inset:12%;border:1px dashed rgba(70,214,255,.42)}
-#homeVisual .v32-orbit:after{inset:28%;border-style:solid;box-shadow:0 0 22px rgba(70,214,255,.28)}
-#homeVisual .v32-touch{position:absolute;left:42%;top:47%;width:16px;height:16px;border-radius:50%;background:#dffaff;transform:translate(-50%,-50%);box-shadow:0 0 0 0 rgba(70,214,255,.65),0 0 24px #46d6ff;animation:v32touch 2.2s ease-out infinite}
-#homeVisual .v32-scan{position:absolute;inset:-20%;background:linear-gradient(110deg,transparent 44%,rgba(98,221,255,.09) 49%,rgba(98,221,255,.18) 50%,rgba(98,221,255,.09) 51%,transparent 56%);animation:v32scan 5.5s ease-in-out infinite alternate}
-#homeVisual .v32-network{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(117,226,255,.48) 1px,transparent 1.5px);background-size:46px 46px;mask-image:linear-gradient(90deg,rgba(0,0,0,.75),transparent 68%);opacity:.24;animation:v32net 7s ease-in-out infinite alternate}
-@keyframes v32spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
-@keyframes v32touch{0%{box-shadow:0 0 0 0 rgba(70,214,255,.7),0 0 24px #46d6ff}70%{box-shadow:0 0 0 42px rgba(70,214,255,0),0 0 34px #46d6ff}100%{box-shadow:0 0 0 0 rgba(70,214,255,0),0 0 24px #46d6ff}}
-@keyframes v32scan{from{transform:translateX(-8%)}to{transform:translateX(12%)}}
-@keyframes v32net{from{transform:translateY(-8px);opacity:.16}to{transform:translateY(8px);opacity:.3}}
-.v32-counting{font-variant-numeric:tabular-nums}
-@media(max-width:800px){#homeVisual .v32-orbit,#homeVisual .v32-touch{left:38%;top:43%}}
-@media(prefers-reduced-motion:reduce){#homeVisual .v32-orbit,#homeVisual .v32-touch,#homeVisual .v32-scan,#homeVisual .v32-network{animation:none!important}}
-</style>
-<script id="laith-v32-features">
+\n<script>
 (function(){
-  const heroImage='laith-interactive-hero.png';
-  const originalLoadHeroSlides=window.loadHeroSlides;
-  if(typeof originalLoadHeroSlides==='function'){
-    window.loadHeroSlides=async function(){
-      await originalLoadHeroSlides.apply(this,arguments);
-      const box=document.getElementById('heroSlides'), visual=document.getElementById('homeVisual');
-      if(!box||!visual||box.querySelector('[data-v32-hero]')) return;
-      box.querySelectorAll('.hero-slide').forEach(x=>x.classList.remove('active'));
-      const img=document.createElement('img');
-      img.className='hero-slide active'; img.src=heroImage; img.alt='واجهة جمعية ليث التفاعلية'; img.dataset.v32Hero='1';
-      box.prepend(img); visual.classList.add('has-slides');
-    };
-  }
-  function addTechLayer(){
-    const visual=document.getElementById('homeVisual'); if(!visual||visual.querySelector('.v32-tech-layer'))return;
-    const layer=document.createElement('div'); layer.className='v32-tech-layer'; layer.setAttribute('aria-hidden','true');
-    layer.innerHTML='<div class="v32-network"></div><div class="v32-scan"></div><div class="v32-orbit"></div><div class="v32-touch"></div>';
-    visual.appendChild(layer);
-  }
-  const statSelector='.live-stat b,.public-report-stat b,.achievement-stat b,.pulse-stat b,.v6-number';
-  const animated=new WeakMap();
+  const SELECTORS = '.live-stat b,.achievement-stat b,.pulse-stat b,.public-report-stat b,.vision-metric b';
+  const state = new WeakMap();
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function parseValue(text){
-    const raw=String(text||'').trim(); if(!raw||raw==='—')return null;
-    const m=raw.match(/-?[\d,]+(?:\.\d+)?/); if(!m)return null;
-    const n=Number(m[0].replace(/,/g,'')); if(!Number.isFinite(n))return null;
-    return {n,dec:(m[0].split('.')[1]||'').length,prefix:raw.slice(0,m.index),suffix:raw.slice(m.index+m[0].length)};
+    const raw=String(text||'').trim();
+    const m=raw.match(/-?[\d٠-٩٬,]+(?:[\.٫][\d٠-٩]+)?/);
+    if(!m) return null;
+    const latin=m[0].replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[٬,]/g,'').replace('٫','.');
+    const n=Number(latin); if(!Number.isFinite(n)) return null;
+    return {n, prefix:raw.slice(0,m.index), suffix:raw.slice(m.index+m[0].length), decimals:(latin.split('.')[1]||'').length};
   }
-  function format(v,meta){const num=meta.dec?Number(v).toFixed(meta.dec):Math.round(v).toLocaleString('en-US');return meta.prefix+num+meta.suffix}
+  function format(n,d){return n.toLocaleString('ar-SA',{minimumFractionDigits:d,maximumFractionDigits:d});}
   function animate(el){
-    const meta=parseValue(el.textContent); if(!meta)return;
-    const last=animated.get(el); if(last===meta.n)return; animated.set(el,meta.n);
-    if(matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=format(meta.n,meta);return}
-    const duration=Math.min(1800,700+Math.log10(Math.abs(meta.n)+1)*260), start=performance.now(); el.classList.add('v32-counting');
-    function frame(now){const t=Math.min(1,(now-start)/duration),e=1-Math.pow(1-t,3);el.textContent=format(meta.n*e,meta);if(t<1)requestAnimationFrame(frame);else{el.textContent=format(meta.n,meta);el.classList.remove('v32-counting')}} requestAnimationFrame(frame);
+    const parsed=parseValue(el.textContent); if(!parsed) return;
+    const prev=state.get(el); if(prev && prev.target===parsed.n && prev.done) return;
+    if(reduced){state.set(el,{target:parsed.n,done:true});return;}
+    const target=parsed.n, duration=Math.min(2200,900+Math.abs(target)*3), start=performance.now();
+    state.set(el,{target,done:false});
+    function frame(now){
+      const cur=state.get(el); if(!cur || cur.target!==target) return;
+      const p=Math.min(1,(now-start)/duration), ease=1-Math.pow(1-p,3), val=target*ease;
+      el.textContent=parsed.prefix+format(parsed.decimals?val:Math.round(val),parsed.decimals)+parsed.suffix;
+      if(p<1) requestAnimationFrame(frame); else {el.textContent=parsed.prefix+format(target,parsed.decimals)+parsed.suffix;state.set(el,{target,done:true});}
+    }
+    requestAnimationFrame(frame);
   }
-  const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)animate(e.target)}),{threshold:.35});
-  function watchStats(root=document){root.querySelectorAll(statSelector).forEach(el=>{if(!el.dataset.v32Observed){el.dataset.v32Observed='1';io.observe(el)}})}
-  const mo=new MutationObserver(ms=>{for(const m of ms){const el=m.target.nodeType===3?m.target.parentElement:m.target;if(el&&el.matches&&el.matches(statSelector)&&el.getBoundingClientRect().top<innerHeight&&el.getBoundingClientRect().bottom>0){animated.delete(el);animate(el)} if(m.addedNodes.length)watchStats(document)}});
-  function init(){addTechLayer();watchStats();mo.observe(document.body,{subtree:true,childList:true,characterData:true});}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+  const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting) animate(e.target)}),{threshold:.35});
+  function scan(root=document){root.querySelectorAll(SELECTORS).forEach(el=>{if(!el.dataset.laithCounter){el.dataset.laithCounter='1';io.observe(el);}})}
+  scan();
+  const mo=new MutationObserver(muts=>{for(const m of muts){const el=m.target.nodeType===3?m.target.parentElement:m.target;if(el && el.matches && el.matches(SELECTORS)){const st=state.get(el);const p=parseValue(el.textContent);if(p && (!st||st.target!==p.n)){state.delete(el);if(el.getBoundingClientRect().top<innerHeight&&el.getBoundingClientRect().bottom>0) animate(el);}} if(m.addedNodes) m.addedNodes.forEach(n=>{if(n.nodeType===1) scan(n)});}});
+  mo.observe(document.body,{subtree:true,childList:true,characterData:true});
+  const v=document.getElementById('laithHeroVideo'); if(v){v.play().catch(()=>{});}
 })();
 </script>
-
 </body>
 </html>
