@@ -2,77 +2,69 @@ import "./fonts";
 import React from "react";
 import { AbsoluteFill, Audio, interpolate, Sequence, staticFile, useCurrentFrame } from "remotion";
 import { Grain, Vignette } from "./kit";
-import { About } from "./scenes/About";
-import { EndCard, LogoReveal, Opener } from "./scenes/Brand";
+import { EndCard, LogoReveal, NajranOpener } from "./scenes/Brand";
 import { Now } from "./scenes/Now";
-import { JoinPhoto, RescuerPhoto, TeamPhoto } from "./scenes/Photos";
-import { Response, StatsA, StatsB, StatsTitle } from "./scenes/Stats";
-import { Volunteer } from "./scenes/Volunteer";
-import { WorkCard, WorksTitle } from "./scenes/Works";
-import { IMPACTS, NAVY, SHOTS, ShotId, TransitionType, WHITE } from "./theme";
+import { AidPhoto, HajjPhoto, HaramPhoto, JoinPhoto, LeaderPhoto, TeamPhoto } from "./scenes/Photos";
+import { STAT_TICKS, StatsScroll } from "./scenes/Stats";
+import { WorksGrid } from "./scenes/Works";
+import { IMPACTS, NAVY, SHOTS, ShotId, T, TransitionType, WHITE } from "./theme";
 import { Shot } from "./transitions";
 
 const SCENES: Record<ShotId, React.FC> = {
-  opener: Opener,
-  team: TeamPhoto,
+  najran: NajranOpener,
   logo: LogoReveal,
-  about: About,
-  rescuer: RescuerPhoto,
-  worksTitle: WorksTitle,
-  work1: () => <WorkCard index={0} />,
-  work2: () => <WorkCard index={1} />,
-  work3: () => <WorkCard index={2} />,
-  work4: () => <WorkCard index={3} />,
-  volunteer: Volunteer,
-  statsTitle: StatsTitle,
-  statsA: StatsA,
-  statsB: StatsB,
-  response: Response,
+  team: TeamPhoto,
+  leader: LeaderPhoto,
+  works: WorksGrid,
+  aid: AidPhoto,
+  haram: HaramPhoto,
+  hajj: HajjPhoto,
+  stats: StatsScroll,
   now: Now,
   join: JoinPhoto,
   end: EndCard,
 };
 
-// Sound design: each transition type gets its own effect, timed so the
-// loudest part lands on the cut.
-type Sfx = "whoosh" | "swish" | "impact" | "glitch" | "shimmer" | "pop" | "tick";
+// Sound design: soft air movement under every transition, timed so its peak
+// lands on the cut; a single impact on the musical drop.
+type Sfx = "whoosh" | "swish" | "impact" | "shimmer" | "pop" | "tick";
 const TRANSITION_SFX: Record<TransitionType, [Sfx, number, number][]> = {
   none: [],
-  flash: [["impact", 0, 0.55], ["whoosh", -11, 0.35]],
-  zoom: [["whoosh", -11, 0.75]],
-  push: [["swish", -5, 0.7]],
-  pushX: [["swish", -5, 0.7]],
-  wipe: [["swish", -5, 0.7]],
-  iris: [["whoosh", -11, 0.6]],
-  split: [["whoosh", -11, 0.6], ["pop", 0, 0.5]],
-  glitch: [["glitch", -3, 0.6]],
+  zoom: [["whoosh", -11, 0.5]],
+  rise: [["whoosh", -11, 0.4]],
+  slide: [["swish", -5, 0.45]],
+  iris: [["whoosh", -11, 0.35], ["shimmer", -6, 0.25]],
+  fade: [["swish", -5, 0.25]],
+  leak: [["impact", 0, 0.55], ["shimmer", 0, 0.4]],
 };
 
-const EXTRA_SFX: [Sfx, number, number][] = [
-  ["shimmer", 252, 0.6], // logo reveal
-  ["shimmer", 1640, 0.7], // end card
-  ...[0, 1, 2, 3].map((i): [Sfx, number, number] => ["pop", 660 + i * 60 + 4, 0.45]), // work icons
-  ...[0, 1, 2].flatMap((i): [Sfx, number, number][] => [
-    ["tick", 1080 + 2 + i * 15, 0.5],
-    ["tick", 1200 + 2 + i * 15, 0.5],
-  ]),
-  ...[0, 1, 2].map((i): [Sfx, number, number] => ["pop", 1320 + 60 + i * 8, 0.4]),
-  ["pop", 1320 + 34, 0.5],
-  ["pop", 1500 + 34, 0.55],
-  ["pop", 1620 + 30, 0.5],
-];
+const shotStart = (id: ShotId) => SHOTS.find((s) => s.id === id)!.from - T / 2;
 
 const CUES: [Sfx, number, number][] = [
   ...SHOTS.flatMap((s) => TRANSITION_SFX[s.in].map(([n, off, v]): [Sfx, number, number] => [n, s.from + off, v])),
-  ...EXTRA_SFX,
+  ["shimmer", 196, 0.5], // logo reveal
+  ["shimmer", 1640, 0.6], // end card
+  ...[0, 1, 2, 3].map((i): [Sfx, number, number] => ["pop", shotStart("works") + 7 + 10 + i * 15, 0.3]),
+  ...STAT_TICKS.map((f): [Sfx, number, number] => ["tick", shotStart("stats") + f, 0.35]),
+  ["pop", shotStart("join") + 7 + 30, 0.4],
+  ["pop", 1620 + 30, 0.4],
 ];
 
-const FLASHES: number[] = SHOTS.filter((s) => s.in === "flash").map((s) => s.from);
-
-const Flash: React.FC = () => {
+// Light leak that blooms across the frame on "leak" cuts.
+const LEAKS: number[] = SHOTS.filter((s) => s.in === "leak").map((s) => s.from);
+const Leak: React.FC = () => {
   const f = useCurrentFrame();
-  const o = Math.max(0, ...FLASHES.map((c) => 1 - Math.abs(f - c) / 7));
-  return o > 0 ? <AbsoluteFill style={{ background: WHITE, opacity: o * 0.9 }} /> : null;
+  const o = Math.max(0, ...LEAKS.map((c) => 1 - Math.abs(f - c) / 14));
+  if (o <= 0) return null;
+  return (
+    <AbsoluteFill
+      style={{
+        background: `radial-gradient(ellipse 70% 50% at ${30 + o * 40}% 45%, ${WHITE} 0%, rgba(255,255,255,0.4) 40%, transparent 75%)`,
+        opacity: o * 0.85,
+        mixBlendMode: "screen",
+      }}
+    />
+  );
 };
 
 const Shake: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -81,10 +73,10 @@ const Shake: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   let y = 0;
   for (const i of IMPACTS) {
     const t = f - i;
-    if (t >= 0 && t < 18) {
-      const a = 14 * Math.exp(-t / 4);
-      x += Math.sin(t * 2.1) * a;
-      y += Math.cos(t * 2.7) * a;
+    if (t >= 0 && t < 20) {
+      const a = 9 * Math.exp(-t / 5);
+      x += Math.sin(t * 1.7) * a;
+      y += Math.cos(t * 2.3) * a;
     }
   }
   return <AbsoluteFill style={{ transform: `translate(${x}px, ${y}px) scale(1.02)` }}>{children}</AbsoluteFill>;
@@ -95,15 +87,14 @@ export const LaithVideo: React.FC = () => (
     <Shake>
       {SHOTS.map((s, i) => {
         const Scene = SCENES[s.id];
-        const next = SHOTS[i + 1];
         return (
-          <Shot key={s.id} name={s.id} from={s.from} to={s.to} inType={s.in} outType={next ? next.in : null}>
+          <Shot key={s.id} spec={s} next={SHOTS[i + 1] ?? null}>
             <Scene />
           </Shot>
         );
       })}
     </Shake>
-    <Flash />
+    <Leak />
     <Vignette />
     <Grain />
     <Audio

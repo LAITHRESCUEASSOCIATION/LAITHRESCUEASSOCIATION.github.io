@@ -1,126 +1,82 @@
 import React from "react";
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import { Icon, IconName } from "../Icons";
-import { CUT, clamp, Counter, Fill, MaskWords, Particles, Punch, useLinear, useSnap } from "../kit";
+import { CUT, clamp, Fill, Particles } from "../kit";
 import { TriangleBand } from "../Najran";
-import { FONT, NAVY, WHITE } from "../theme";
+import { FONT, NAVY, NAVY_DEEP, T, WHITE } from "../theme";
 
-// These are the association's proposed targets, so they sit under
-// "مستهدفاتنا" (our targets) rather than being presented as achievements.
-
-const Ticker: React.FC<{ y: number; dir: 1 | -1; text: string }> = ({ y, dir, text }) => {
-  const frame = useCurrentFrame();
-  return (
-    <div
-      style={{
-        position: "absolute",
-        top: y,
-        left: -400,
-        whiteSpace: "nowrap",
-        fontFamily: FONT,
-        fontSize: 170,
-        fontWeight: 700,
-        color: "transparent",
-        WebkitTextStroke: `2px ${WHITE}`,
-        opacity: 0.16,
-        transform: `translateX(${dir * (frame * 9 - 300)}px)`,
-      }}
-    >
-      {text}
-    </div>
-  );
-};
-
-export const StatsTitle: React.FC = () => (
-  <Fill>
-    <Ticker y={260} dir={1} text="1,500+  600+  25,000+  10,000+" />
-    <Ticker y={1430} dir={-1} text="95%  80+  2,000+  30+  12  750+" />
-    <div style={{ position: "absolute", top: 720, width: "100%" }}>
-      <Punch text="مستهدفاتنا" delay={CUT} size={190} />
-      <MaskWords text="أرقام نعمل للوصول إليها" delay={CUT + 14} stagger={3} size={62} weight={400} />
-    </div>
-  </Fill>
-);
+// One continuous camera move down a column of targets. These are the
+// association's proposed targets, so the column opens with "مستهدفاتنا".
+// Each number counts up as it scrolls into place, so nothing cuts.
 
 type Stat = { icon: IconName; to: number; label: string; suffix?: string };
+const STATS: Stat[] = [
+  { icon: "people", to: 1500, label: "متطوع مسجل" },
+  { icon: "person", to: 600, label: "متطوع نشط" },
+  { icon: "hours", to: 25000, label: "ساعة تطوع" },
+  { icon: "heart", to: 10000, label: "مستفيد" },
+  { icon: "siren", to: 750, label: "بلاغ نباشره سنويًا" },
+  { icon: "book", to: 80, label: "دورة وبرنامج تدريبي" },
+  { icon: "shield", to: 2000, label: "مشارك في التدريب" },
+  { icon: "link", to: 30, label: "شراكة" },
+  { icon: "flag", to: 12, label: "فريقًا ميدانيًا", suffix: "" },
+];
 
-const Row: React.FC<Stat & { delay: number }> = ({ icon, to, label, suffix = "+", delay }) => {
-  const p = useSnap(delay, 18, 200);
-  const line = useLinear(delay, delay + 20, Easing.inOut(Easing.cubic));
+const ROW0 = 760;
+const GAP = 290;
+const RING_Y = ROW0 + STATS.length * GAP + 60;
+const END_Y = RING_Y + 1180;
+const DUR = 300 + T;
+const TRIGGER = 1560; // screen y where a row has fully counted up by
+
+const scrollAt = (frame: number) =>
+  interpolate(frame, [CUT + 34, DUR - 20], [0, END_Y - 1920], {
+    ...clamp,
+    easing: Easing.bezier(0.45, 0, 0.4, 1),
+  });
+
+const countAt = (screenY: number) =>
+  Easing.out(Easing.cubic)(interpolate(-screenY, [-(TRIGGER + 330), -TRIGGER], [0, 1], clamp));
+
+// Local frames where each row starts counting (for the tick sound).
+export const STAT_TICKS: number[] = STATS.map((_, i) => {
+  for (let f = 0; f < DUR; f++) {
+    if (ROW0 + i * GAP - scrollAt(f) < TRIGGER + 330) return f;
+  }
+  return DUR;
+});
+
+const Row: React.FC<Stat & { y: number; scroll: number }> = ({ icon, to, label, suffix = "+", y, scroll }) => {
+  const screenY = y - scroll;
+  const p = countAt(screenY);
   return (
-    <div style={{ width: 920, margin: "0 auto", opacity: p, transform: `translateX(${(1 - p) * -200}px)` }}>
-      <div style={{ display: "flex", flexDirection: "row-reverse", alignItems: "center", gap: 34 }}>
-        <Icon name={icon} size={120} progress={line} stroke={1.5} />
+    <div style={{ position: "absolute", top: y, left: 90, width: 900, opacity: 0.25 + 0.75 * p }}>
+      <div style={{ display: "flex", flexDirection: "row-reverse", alignItems: "center", gap: 40 }}>
+        <Icon name={icon} size={120} progress={p} stroke={1.5} />
         <div style={{ flex: 1, textAlign: "right" }}>
-          <Counter to={to} delay={delay} dur={32} suffix={suffix} size={150} />
-          <div style={{ fontFamily: FONT, fontSize: 52, color: WHITE, opacity: 0.85, direction: "rtl" }}>{label}</div>
+          <div style={{ fontFamily: FONT, fontSize: 140, fontWeight: 700, color: WHITE, direction: "ltr", lineHeight: 1.05 }}>
+            {Math.round(to * p).toLocaleString("en-US")}
+            {suffix}
+          </div>
+          <div style={{ fontFamily: FONT, fontSize: 50, color: WHITE, opacity: 0.85, direction: "rtl" }}>{label}</div>
         </div>
       </div>
-      <div style={{ height: 3, background: WHITE, opacity: 0.35, width: `${line * 100}%`, marginRight: 0, marginLeft: "auto", marginTop: 20 }} />
+      <div style={{ height: 3, background: WHITE, opacity: 0.3, width: `${p * 100}%`, marginLeft: "auto", marginTop: 18 }} />
     </div>
   );
 };
 
-const StatsList: React.FC<{ stats: Stat[] }> = ({ stats }) => (
-  <Fill>
-    <Particles count={25} opacity={0.35} />
-    <div style={{ position: "absolute", top: 210, width: "100%" }}>
-      <MaskWords text="مستهدفاتنا" delay={CUT - 4} size={70} weight={400} style={{ opacity: 0.7 }} />
-    </div>
-    <TriangleBand y={350} progress={useLinear(CUT, CUT + 30)} opacity={0.3} />
-    <div style={{ position: "absolute", top: 480, width: "100%", display: "flex", flexDirection: "column", gap: 70 }}>
-      {stats.map((s, i) => (
-        <Row key={s.label} {...s} delay={CUT + 2 + i * 15} />
-      ))}
-    </div>
-  </Fill>
-);
-
-export const StatsA: React.FC = () => (
-  <StatsList
-    stats={[
-      { icon: "people", to: 1500, label: "متطوع مسجل" },
-      { icon: "person", to: 600, label: "متطوع نشط" },
-      { icon: "hours", to: 25000, label: "ساعة تطوع" },
-    ]}
-  />
-);
-
-export const StatsB: React.FC = () => (
-  <StatsList
-    stats={[
-      { icon: "heart", to: 10000, label: "مستفيد" },
-      { icon: "shield", to: 2000, label: "مشارك في التدريب" },
-      { icon: "book", to: 80, label: "دورة وبرنامج تدريبي" },
-    ]}
-  />
-);
-
-const Mini: React.FC<Stat & { delay: number }> = ({ icon, to, label, suffix = "+", delay }) => {
-  const p = useSnap(delay, 14, 220);
-  return (
-    <div style={{ width: 300, display: "flex", flexDirection: "column", alignItems: "center", opacity: p, transform: `translateY(${(1 - p) * 60}px)` }}>
-      <Icon name={icon} size={70} />
-      <Counter to={to} delay={delay} dur={24} suffix={suffix} size={92} />
-      <div style={{ fontFamily: FONT, fontSize: 40, color: WHITE, opacity: 0.85, direction: "rtl" }}>{label}</div>
-    </div>
-  );
-};
-
-export const Response: React.FC = () => {
-  const frame = useCurrentFrame();
-  const t = interpolate(frame, [CUT, CUT + 40], [0, 1], { ...clamp, easing: Easing.out(Easing.poly(4)) });
+const Response: React.FC<{ scroll: number }> = ({ scroll }) => {
+  const t = countAt(RING_Y + 300 - scroll);
   const r = 230;
   const c = 2 * Math.PI * r;
-  const clock = useSnap(CUT + 34, 14, 200);
+  const card = countAt(RING_Y + 760 - scroll);
   return (
-    <Fill>
-      <Particles count={25} opacity={0.35} />
-      <div style={{ position: "absolute", top: 230, left: 540 - 280, width: 560, height: 560 }}>
+    <div style={{ position: "absolute", top: RING_Y, left: 0, width: 1080 }}>
+      <div style={{ position: "relative", margin: "0 auto", width: 560, height: 560 }}>
         <svg width={560} height={560} style={{ position: "absolute" }}>
           {Array.from({ length: 60 }).map((_, i) => {
             const a = (i / 60) * Math.PI * 2;
-            const lit = i / 60 <= t * 0.95;
             return (
               <line
                 key={i}
@@ -130,7 +86,7 @@ export const Response: React.FC = () => {
                 y2={280 - Math.cos(a) * 274}
                 stroke={WHITE}
                 strokeWidth={3}
-                opacity={lit ? 0.9 : 0.2}
+                opacity={i / 60 <= t * 0.95 ? 0.9 : 0.2}
               />
             );
           })}
@@ -165,14 +121,12 @@ export const Response: React.FC = () => {
           {Math.round(t * 95)}%
         </div>
       </div>
-      <div style={{ position: "absolute", top: 820, width: "100%" }}>
-        <MaskWords text="نسبة الاستجابة للبلاغات" delay={CUT + 10} stagger={3} size={64} />
+      <div style={{ fontFamily: FONT, fontSize: 64, fontWeight: 700, color: WHITE, textAlign: "center", direction: "rtl", marginTop: 20 }}>
+        نسبة الاستجابة للبلاغات
       </div>
       <div
         style={{
-          position: "absolute",
-          top: 1000,
-          left: 90,
+          margin: "60px auto 0",
           width: 900,
           height: 200,
           borderRadius: 100,
@@ -183,11 +137,11 @@ export const Response: React.FC = () => {
           padding: "0 50px",
           gap: 30,
           boxSizing: "border-box",
-          opacity: clock,
-          transform: `scale(${0.6 + 0.4 * clock})`,
+          opacity: card,
+          transform: `scale(${0.85 + 0.15 * card})`,
         }}
       >
-        <div style={{ transform: `rotate(${interpolate(frame, [CUT + 34, 127], [0, 360], clamp)}deg)` }}>
+        <div style={{ transform: `rotate(${card * 360}deg)` }}>
           <Icon name="clock" size={120} color={NAVY} stroke={1.8} />
         </div>
         <div style={{ fontFamily: FONT, color: NAVY, direction: "rtl" }}>
@@ -195,11 +149,65 @@ export const Response: React.FC = () => {
           <div style={{ fontSize: 40 }}>متوسط زمن التعامل الأولي</div>
         </div>
       </div>
-      <AbsoluteFill style={{ top: 1330, display: "flex", flexDirection: "row-reverse", justifyContent: "center", gap: 20 }}>
-        <Mini icon="siren" to={750} label="بلاغ سنويًا" delay={CUT + 60} />
-        <Mini icon="flag" to={12} suffix="" label="فريقًا ميدانيًا" delay={CUT + 68} />
-        <Mini icon="link" to={30} label="شراكة" delay={CUT + 76} />
+    </div>
+  );
+};
+
+export const StatsScroll: React.FC = () => {
+  const frame = useCurrentFrame();
+  const scroll = scrollAt(frame);
+  const title = interpolate(frame, [CUT, CUT + 24], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
+  const pinned = interpolate(scroll, [380, 520], [0, 1], clamp);
+  return (
+    <Fill>
+      <Particles count={30} opacity={0.35} />
+      <AbsoluteFill style={{ transform: `translateY(${-scroll}px)` }}>
+        <div
+          style={{
+            position: "absolute",
+            top: 300,
+            width: "100%",
+            textAlign: "center",
+            fontFamily: FONT,
+            color: WHITE,
+            direction: "rtl",
+            opacity: title,
+            transform: `translateY(${(1 - title) * 50}px)`,
+            filter: `blur(${(1 - title) * 8}px)`,
+          }}
+        >
+          <div style={{ fontSize: 170, fontWeight: 700, lineHeight: 1.3 }}>مستهدفاتنا</div>
+          <div style={{ fontSize: 60, opacity: 0.8 }}>أرقام نعمل للوصول إليها</div>
+        </div>
+        {STATS.map((s, i) => (
+          <Row key={s.label} {...s} y={ROW0 + i * GAP} scroll={scroll} />
+        ))}
+        <Response scroll={scroll} />
       </AbsoluteFill>
+      <AbsoluteFill
+        style={{
+          background: `linear-gradient(180deg, ${NAVY_DEEP} 0%, ${NAVY_DEEP} 15%, ${NAVY_DEEP}00 27%, ${NAVY_DEEP}00 84%, ${NAVY_DEEP} 100%)`,
+          opacity: pinned,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: 130,
+          width: "100%",
+          textAlign: "center",
+          fontFamily: FONT,
+          fontSize: 60,
+          color: WHITE,
+          opacity: pinned * 0.85,
+          direction: "rtl",
+        }}
+      >
+        مستهدفاتنا
+      </div>
+      <div style={{ opacity: pinned }}>
+        <TriangleBand y={235} opacity={0.35} />
+      </div>
     </Fill>
   );
 };

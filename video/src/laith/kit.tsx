@@ -139,7 +139,7 @@ export const Marker: React.FC<
   );
 };
 
-// Large text that punches in from big scale with a quick blur.
+// Large text that settles in from a slightly larger scale out of a blur.
 export const Punch: React.FC<TextProps & { text: string; delay: number }> = ({
   text,
   delay,
@@ -148,17 +148,15 @@ export const Punch: React.FC<TextProps & { text: string; delay: number }> = ({
   color = WHITE,
   style,
 }) => {
-  const p = useSnap(delay, 14, 180);
-  const frame = useCurrentFrame();
-  const visible = frame >= delay;
+  const p = useLinear(delay, delay + 22, Easing.out(Easing.cubic));
   return (
     <div
       style={{
         ...textBase(size, weight, color),
         textAlign: "center",
-        opacity: visible ? Math.min(1, p * 2) : 0,
-        transform: `scale(${2.2 - 1.2 * p})`,
-        filter: `blur(${Math.max(0, 1 - p) * 14}px)`,
+        opacity: p,
+        transform: `scale(${1.25 - 0.25 * p})`,
+        filter: `blur(${(1 - p) * 10}px)`,
         ...style,
       }}
     >

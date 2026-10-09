@@ -1,115 +1,75 @@
 import React from "react";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { Easing, interpolate, useCurrentFrame } from "remotion";
 import { Icon, IconName } from "../Icons";
-import { CUT, clamp, Fill, MaskWords, Particles, Sweep, useLinear, useSnap } from "../kit";
+import { CUT, clamp, Fill, MaskWords, Particles, useLinear } from "../kit";
 import { TriangleBand } from "../Najran";
-import { FONT, NAVY, WHITE } from "../theme";
+import { FONT, WHITE } from "../theme";
 
-export const WORKS: { icon: IconName; title: string; sub: string }[] = [
-  { icon: "siren", title: "مباشرة البلاغات", sub: "استجابة ميدانية سريعة" },
-  { icon: "search", title: "البحث عن المفقودين", sub: "في الجبال والأودية والصحراء" },
-  { icon: "aid", title: "إسعاف المصابين", sub: "إسعافات أولية في موقع الحادث" },
-  { icon: "shield", title: "التدريب والتوعية", sub: "نشر ثقافة السلامة في المجتمع" },
+const WORKS: { icon: IconName; title: string }[] = [
+  { icon: "siren", title: "مباشرة البلاغات" },
+  { icon: "search", title: "البحث عن المفقودين" },
+  { icon: "aid", title: "إسعاف المصابين" },
+  { icon: "shield", title: "التدريب والتوعية" },
 ];
+// The aid card (index 2) sits bottom-right; the next shot irises open from it
+// (origin in theme.ts).
+const HERO = 2;
 
-// Outlined title that fills with white from right to left.
-export const WorksTitle: React.FC = () => {
-  const fill = useLinear(CUT + 10, CUT + 34, Easing.inOut(Easing.cubic));
-  const p = useSnap(CUT, 14, 160);
-  const style: React.CSSProperties = {
-    fontFamily: FONT,
-    fontSize: 280,
-    fontWeight: 700,
-    direction: "rtl",
-    textAlign: "center",
-    lineHeight: 1.4,
-  };
-  return (
-    <Fill>
-      <Particles count={30} opacity={0.4} />
-      <div style={{ position: "absolute", top: 640, width: "100%", transform: `scale(${1.3 - 0.3 * p})` }}>
-        <div style={{ ...style, color: "transparent", WebkitTextStroke: `3px ${WHITE}` }}>أعمالنا</div>
-        <div
-          style={{
-            ...style,
-            color: WHITE,
-            position: "absolute",
-            inset: 0,
-            clipPath: `inset(0 0 0 ${100 - fill * 100}%)`,
-          }}
-        >
-          أعمالنا
-        </div>
-      </div>
-      <TriangleBand y={1120} progress={useLinear(CUT + 10, CUT + 40)} opacity={0.4} />
-    </Fill>
-  );
-};
-
-export const WorkCard: React.FC<{ index: number }> = ({ index }) => {
+const Card: React.FC<{ i: number; icon: IconName; title: string }> = ({ i, icon, title }) => {
   const frame = useCurrentFrame();
-  const w = WORKS[index];
-  const light = index % 2 === 1;
-  const fg = light ? NAVY : WHITE;
-  const ring = useSnap(CUT, 14, 180);
-  const draw = useLinear(CUT + 2, CUT + 22);
-  const spin = interpolate(frame, [0, 74], [-30, 10], clamp);
+  const at = CUT + 10 + i * 15;
+  const p = useLinear(at, at + 18, Easing.out(Easing.cubic));
+  const draw = useLinear(at + 4, at + 28);
+  const hero = i === HERO ? interpolate(frame, [150, 192], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) }) : 0;
+  const dim = i !== HERO ? interpolate(frame, [150, 185], [1, 0.35], clamp) : 1;
   return (
-    <Fill color={light ? WHITE : NAVY}>
-      {!light && <Particles count={20} opacity={0.3} />}
-      <div
-        style={{
-          position: "absolute",
-          top: 230,
-          right: 90,
-          fontFamily: FONT,
-          fontSize: 150,
-          fontWeight: 700,
-          color: "transparent",
-          WebkitTextStroke: `2px ${fg}`,
-          opacity: 0.5,
-          transform: `translateY(${(1 - ring) * -80}px)`,
-        }}
-      >
-        0{index + 1}
+    <div
+      style={{
+        width: 440,
+        height: 460,
+        borderRadius: 36,
+        border: `3px solid rgba(255,255,255,${0.5 + hero * 0.5})`,
+        background: `rgba(255,255,255,${0.06 + hero * 0.12})`,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 24,
+        opacity: p * dim,
+        transform: `translateY(${(1 - p) * 60}px) scale(${1 + hero * 0.08})`,
+        boxSizing: "border-box",
+      }}
+    >
+      <Icon name={icon} size={150} progress={draw} stroke={1.4} />
+      <div style={{ fontFamily: FONT, fontSize: 52, fontWeight: 700, color: WHITE, direction: "rtl", textAlign: "center", padding: "0 20px" }}>
+        {title}
       </div>
-      <div
-        style={{
-          position: "absolute",
-          top: 520,
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <div
-          style={{
-            width: 440,
-            height: 440,
-            borderRadius: 220,
-            border: `4px solid ${fg}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transform: `scale(${ring}) rotate(${spin}deg)`,
-          }}
-        >
-          <div style={{ transform: `rotate(${-spin}deg)` }}>
-            <Icon name={w.icon} size={250} progress={draw} color={fg} stroke={1.4} />
-          </div>
-        </div>
-      </div>
-      <div style={{ position: "absolute", top: 1080, width: "100%" }}>
-        <MaskWords text={w.title} delay={CUT + 6} stagger={3} size={112} color={fg} />
-        <MaskWords text={w.sub} delay={CUT + 16} stagger={2} size={56} weight={400} color={fg} style={{ opacity: 0.8 }} />
-      </div>
-      {!light && <Sweep delay={CUT + 26} dur={18} />}
-    </Fill>
+    </div>
   );
 };
 
-export const Work: React.FC<{ index: number }> = ({ index }) => (
-  <AbsoluteFill>
-    <WorkCard index={index} />
-  </AbsoluteFill>
+export const WorksGrid: React.FC = () => (
+  <Fill>
+    <Particles count={30} opacity={0.4} />
+    <div style={{ position: "absolute", top: 250, width: "100%" }}>
+      <MaskWords text="أعمالنا" delay={CUT + 2} size={150} />
+    </div>
+    <TriangleBand y={490} progress={useLinear(CUT + 6, CUT + 40)} opacity={0.35} />
+    <div
+      style={{
+        position: "absolute",
+        top: 600,
+        left: 80,
+        width: 920,
+        display: "flex",
+        flexWrap: "wrap",
+        direction: "rtl",
+        gap: 40,
+      }}
+    >
+      {WORKS.map((w, i) => (
+        <Card key={w.title} i={i} {...w} />
+      ))}
+    </div>
+  </Fill>
 );

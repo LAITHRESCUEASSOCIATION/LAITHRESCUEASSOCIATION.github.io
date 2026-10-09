@@ -17,7 +17,9 @@ export const Now: React.FC = () => {
           <circle cx={540} cy={960} r={420 + pulse * 90} fill="none" stroke={WHITE} strokeWidth={2} opacity={0.08 + pulse * 0.25} />
         </svg>
         <div style={{ position: "absolute", top: 760, width: "100%" }}>
-          <Punch text="والآن.." delay={CUT} size={120} weight={400} style={{ opacity: frame < CUT + 28 ? 1 : 0.35 }} />
+          <div style={{ opacity: interpolate(frame, [CUT + 24, CUT + 34], [1, 0.35], clamp) }}>
+            <Punch text="والآن.." delay={CUT} size={120} weight={400} />
+          </div>
           <Punch text="دورك" delay={CUT + 28} size={240} />
         </div>
       </AbsoluteFill>

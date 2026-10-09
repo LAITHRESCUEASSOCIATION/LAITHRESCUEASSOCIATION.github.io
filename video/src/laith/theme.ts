@@ -10,48 +10,44 @@ export const DURATION = 60 * FPS;
 export const FONT = '"Thmanyah Serif Text", "Amiri", serif';
 
 // The music (tools/audio.py) is 120 BPM: one beat = 15 frames, one bar = 60.
-// Every cut below sits on a bar line so picture and music hit together.
+// Every cut below sits on a bar line so picture and music move together.
 export const BEAT = 15;
-export const T = 14; // transition length, centred on each cut
+export const T = 24; // transition length, centred on each cut
 
 export type TransitionType =
   | "none"
-  | "zoom"
-  | "push"
-  | "pushX"
-  | "iris"
-  | "wipe"
-  | "split"
-  | "flash"
-  | "glitch";
+  | "zoom" // zoom-through: outgoing flies at the camera, incoming settles back from close up
+  | "rise" // incoming card rises over the outgoing one (parallax)
+  | "slide" // horizontal parallax slide, right-to-left reading order
+  | "iris" // soft-edged circle opening from `origin`
+  | "fade" // dissolve with focus pull
+  | "leak"; // light-leak dissolve (used on the musical drop)
 
-export const SHOTS = [
-  { id: "opener", from: 0, to: 120, in: "none" },
-  { id: "team", from: 120, to: 240, in: "flash" },
-  { id: "logo", from: 240, to: 360, in: "iris" },
-  { id: "about", from: 360, to: 480, in: "push" },
-  { id: "rescuer", from: 480, to: 600, in: "flash" },
-  { id: "worksTitle", from: 600, to: 660, in: "glitch" },
-  { id: "work1", from: 660, to: 720, in: "pushX" },
-  { id: "work2", from: 720, to: 780, in: "split" },
-  { id: "work3", from: 780, to: 840, in: "iris" },
-  { id: "work4", from: 840, to: 900, in: "pushX" },
-  { id: "volunteer", from: 900, to: 1020, in: "zoom" },
-  { id: "statsTitle", from: 1020, to: 1080, in: "wipe" },
-  { id: "statsA", from: 1080, to: 1200, in: "push" },
-  { id: "statsB", from: 1200, to: 1320, in: "pushX" },
-  { id: "response", from: 1320, to: 1440, in: "zoom" },
-  { id: "now", from: 1440, to: 1500, in: "glitch" },
-  { id: "join", from: 1500, to: 1620, in: "flash" },
-  { id: "end", from: 1620, to: 1800, in: "zoom" },
-] as const satisfies readonly {
+export type ShotSpec = {
   id: string;
   from: number;
   to: number;
   in: TransitionType;
-}[];
+  origin?: string; // iris centre, CSS position
+};
+
+export const SHOTS = [
+  { id: "najran", from: 0, to: 180, in: "none" },
+  { id: "logo", from: 180, to: 300, in: "zoom" },
+  { id: "team", from: 300, to: 480, in: "rise" },
+  { id: "leader", from: 480, to: 600, in: "iris" },
+  { id: "works", from: 600, to: 780, in: "slide" },
+  // Opens out of the "إسعاف المصابين" card (bottom-right of the grid).
+  { id: "aid", from: 780, to: 900, in: "iris", origin: "72% 69%" },
+  { id: "haram", from: 900, to: 1020, in: "slide" },
+  { id: "hajj", from: 1020, to: 1140, in: "rise" },
+  { id: "stats", from: 1140, to: 1440, in: "zoom" },
+  { id: "now", from: 1440, to: 1500, in: "fade" },
+  { id: "join", from: 1500, to: 1620, in: "leak" },
+  { id: "end", from: 1620, to: 1800, in: "zoom" },
+] as const satisfies readonly ShotSpec[];
 
 export type ShotId = (typeof SHOTS)[number]["id"];
 
-// Frames where the picture gets a camera shake (impacts in the music / sfx).
-export const IMPACTS = [120, 480, 1500, 1620];
+// Camera shake only on the drop.
+export const IMPACTS = [1500];
