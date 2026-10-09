@@ -1,108 +1,65 @@
 import React from "react";
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate, random, spring, useCurrentFrame } from "remotion";
 import { Icon } from "../Icons";
-import { NAVY_DEEP, WHITE } from "../theme";
-import { clamp, RiseText, SmallLogo, useEnter } from "../ui";
+import { CUT, clamp, Fill, Marker, MaskWords, Sweep } from "../kit";
 
-// A Najrani doorway: pointed arch, triangle trim, two wooden leaves that open
-// ("نفتح أبوابنا") to let volunteers walk in.
-const Doorway: React.FC = () => {
-  const frame = useCurrentFrame();
-  const open = interpolate(frame, [82, 120], [0, 1], clamp);
-  const glow = interpolate(frame, [90, 140], [0, 0.1], clamp);
-  const W = 520;
-  const H = 640;
-  const arch = `M0 ${H} L0 150 Q0 0 ${W / 2} 0 Q${W} 0 ${W} 150 L${W} ${H}`;
-  const leaf = (side: -1 | 1) => (
-    <g
-      transform={`translate(${side === -1 ? 0 : W} 0) scale(${side * (1 - open * 0.82)} 1)`}
-    >
-      <rect x={0} y={150} width={W / 2} height={H - 150} fill={NAVY_DEEP} stroke={WHITE} strokeWidth={3} />
-      {[230, 340, 450, 560].map((yy) => (
-        <line key={yy} x1={0} x2={W / 2} y1={yy} y2={yy} stroke={WHITE} strokeOpacity={0.35} strokeWidth={2} />
-      ))}
-      {[200, 300, 410, 520].map((yy) => (
-        <path key={yy} d={`M${W / 4 - 26} ${yy + 22} L${W / 4} ${yy} L${W / 4 + 26} ${yy + 22} Z`} fill={WHITE} fillOpacity={0.8} />
-      ))}
-    </g>
-  );
-  return (
-    <svg width={W + 80} height={H + 80} viewBox={`-40 -40 ${W + 80} ${H + 80}`}>
-      <path d={arch + " Z"} fill={WHITE} fillOpacity={glow} />
-      {leaf(-1)}
-      {leaf(1)}
-      <path d={arch} fill="none" stroke={WHITE} strokeWidth={6} />
-      {Array.from({ length: 9 }).map((_, i) => {
-        const x = 40 + i * 55;
-        return <path key={i} d={`M${x - 16} -14 L${x} -38 L${x + 16} -14 Z`} fill={WHITE} />;
-      })}
-    </svg>
-  );
-};
-
-const Walker: React.FC<{ i: number }> = ({ i }) => {
-  const p = useEnter(112 + i * 9, 14);
-  return (
-    <div style={{ opacity: p, transform: `translateY(${(1 - p) * 60}px) scale(${0.6 + p * 0.4})` }}>
-      <Icon name="person" size={i === 2 ? 130 : 96} stroke={1.8} />
-    </div>
-  );
-};
+// A crowd of volunteers pops in from the centre outward, then the camera
+// pulls back as the message lands.
+const COLS = 9;
+const ROWS = 7;
 
 export const Volunteer: React.FC = () => {
-  const hero = useEnter(190, 12);
+  const frame = useCurrentFrame();
+  const pull = interpolate(frame, [CUT, 127], [1.25, 1], {
+    ...clamp,
+    easing: Easing.out(Easing.cubic),
+  });
   return (
-    <AbsoluteFill>
-      <SmallLogo />
-      <div style={{ position: "absolute", top: 400, width: "100%" }}>
-        <RiseText delay={6} size={150} weight={900}>
-          التطوع رسالة
-        </RiseText>
-      </div>
-      <div
+    <Fill>
+      <AbsoluteFill style={{ transform: `scale(${pull})` }}>
+        <div
+          style={{
+            position: "absolute",
+            top: 730,
+            left: 0,
+            width: 1080,
+            display: "grid",
+            gridTemplateColumns: `repeat(${COLS}, 1fr)`,
+            rowGap: 16,
+            justifyItems: "center",
+          }}
+        >
+          {Array.from({ length: COLS * ROWS }).map((_, i) => {
+            const c = i % COLS;
+            const r = Math.floor(i / COLS);
+            const dist = Math.hypot(c - (COLS - 1) / 2, r - (ROWS - 1) / 2);
+            const delay = CUT + 4 + dist * 5 + random(`v${i}`) * 4;
+            const p = spring({ frame: frame - delay, fps: 30, config: { damping: 12, stiffness: 220 } });
+            const hero = c === 4 && r === 3;
+            return (
+              <div key={i} style={{ transform: `scale(${p})`, opacity: hero ? 1 : 0.35 + 0.65 * (1 - dist / 6) }}>
+                <Icon name="person" size={hero ? 110 : 84} stroke={hero ? 2.2 : 1.6} />
+              </div>
+            );
+          })}
+        </div>
+      </AbsoluteFill>
+      <AbsoluteFill
         style={{
-          position: "absolute",
-          top: 680,
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
+          background:
+            "linear-gradient(180deg, #012d42 0%, #012d42cc 22%, transparent 36%, transparent 70%, #012d42 92%)",
         }}
-      >
-        <Doorway />
+      />
+      <div style={{ position: "absolute", top: 230, width: "100%" }}>
+        <MaskWords text="التطوع" delay={CUT + 2} size={190} />
+        <div style={{ display: "flex", justifyContent: "center", marginTop: -30 }}>
+          <Marker text="رسالة" delay={CUT + 20} size={150} />
+        </div>
       </div>
-      <div
-        style={{
-          position: "absolute",
-          top: 1080,
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "flex-end",
-          gap: 8,
-        }}
-      >
-        {[0, 1, 2, 3, 4].map((i) => (
-          <Walker key={i} i={i} />
-        ))}
+      <div style={{ position: "absolute", top: 1450, width: "100%" }}>
+        <MaskWords text="لكل من يحمل روح العطاء" delay={CUT + 50} stagger={3} size={74} weight={400} />
       </div>
-      <div style={{ position: "absolute", top: 1430, width: "100%" }}>
-        <RiseText delay={88} size={56} weight={400} opacity={0.9}>
-          لكل من يحمل روح العطاء
-        </RiseText>
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          top: 1560,
-          width: "100%",
-          opacity: hero,
-          transform: `scale(${0.8 + hero * 0.2})`,
-        }}
-      >
-        <RiseText delay={190} size={104} weight={900}>
-          ليكون منقذًا
-        </RiseText>
-      </div>
-    </AbsoluteFill>
+      <Sweep delay={CUT + 60} />
+    </Fill>
   );
 };

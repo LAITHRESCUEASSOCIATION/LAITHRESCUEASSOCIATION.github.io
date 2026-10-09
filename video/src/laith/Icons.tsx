@@ -29,13 +29,14 @@ export const Icon: React.FC<{
   size?: number;
   progress?: number;
   stroke?: number;
-}> = ({ name, size = 96, progress = 1, stroke = 1.6 }) => (
+  color?: string;
+}> = ({ name, size = 96, progress = 1, stroke = 1.6, color = WHITE }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     {ICONS[name].split(" M").map((seg, i) => (
       <path
         key={i}
         d={i === 0 ? seg : `M${seg}`}
-        stroke={WHITE}
+        stroke={color}
         strokeWidth={stroke}
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -1,273 +1,205 @@
 import React from "react";
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import { Icon, IconName } from "../Icons";
+import { CUT, clamp, Counter, Fill, MaskWords, Particles, Punch, useLinear, useSnap } from "../kit";
 import { TriangleBand } from "../Najran";
-import { FONT, WHITE } from "../theme";
-import { clamp, RiseText, SmallLogo, useEnter } from "../ui";
+import { FONT, NAVY, WHITE } from "../theme";
 
-// These are the association's proposed targets (مستهدفات), so they are
-// labelled as goals on screen and in the voiceover.
+// These are the association's proposed targets, so they sit under
+// "مستهدفاتنا" (our targets) rather than being presented as achievements.
 
-const fmt = (n: number) => Math.round(n).toLocaleString("en-US");
-
-const Counter: React.FC<{
-  to: number;
-  at: number;
-  prefix?: string;
-  suffix?: string;
-  size: number;
-}> = ({ to, at, prefix = "", suffix = "", size }) => {
-  const frame = useCurrentFrame();
-  const t = interpolate(frame, [at, at + 40], [0, 1], clamp);
-  const eased = 1 - Math.pow(1 - t, 3);
-  return (
-    <div
-      style={{
-        fontFamily: FONT,
-        fontSize: size,
-        fontWeight: 900,
-        color: WHITE,
-        direction: "ltr",
-        lineHeight: 1.1,
-        fontVariantNumeric: "tabular-nums",
-      }}
-    >
-      {prefix}
-      {fmt(to * eased)}
-      {suffix}
-    </div>
-  );
-};
-
-const StatCard: React.FC<{
-  icon: IconName;
-  to: number;
-  suffix?: string;
-  label: string;
-  at: number;
-}> = ({ icon, to, suffix = "+", label, at }) => {
-  const frame = useCurrentFrame();
-  const p = useEnter(at, 15);
-  const draw = interpolate(frame, [at, at + 25], [0, 1], clamp);
-  return (
-    <div
-      style={{
-        width: 440,
-        height: 330,
-        borderRadius: 32,
-        border: `3px solid rgba(255,255,255,0.55)`,
-        background: "rgba(255,255,255,0.06)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        opacity: p,
-        transform: `scale(${0.85 + p * 0.15})`,
-      }}
-    >
-      <Icon name={icon} size={72} progress={draw} />
-      <Counter to={to} at={at} suffix={suffix} size={92} />
-      <div
-        style={{
-          fontFamily: FONT,
-          fontSize: 38,
-          color: WHITE,
-          opacity: 0.85,
-          direction: "rtl",
-          textAlign: "center",
-          padding: "0 20px",
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-};
-
-const Header: React.FC = () => {
+const Ticker: React.FC<{ y: number; dir: 1 | -1; text: string }> = ({ y, dir, text }) => {
   const frame = useCurrentFrame();
   return (
-    <>
-      <SmallLogo />
-      <div style={{ position: "absolute", top: 390, width: "100%" }}>
-        <RiseText delay={0} size={112} weight={900}>
-          مستهدفاتنا
-        </RiseText>
-        <RiseText delay={10} size={44} weight={400} opacity={0.75}>
-          أرقام نعمل للوصول إليها
-        </RiseText>
-      </div>
-      <TriangleBand y={640} progress={interpolate(frame, [5, 60], [0, 1], clamp)} opacity={0.3} />
-    </>
-  );
-};
-
-// Order follows the voiceover: volunteers → hours → beneficiaries.
-const FIRST: React.ComponentProps<typeof StatCard>[] = [
-  { icon: "people", to: 1500, label: "متطوع مسجل", at: 18 },
-  { icon: "person", to: 600, label: "متطوع نشط", at: 50 },
-  { icon: "hours", to: 25000, label: "ساعة تطوع", at: 116 },
-  { icon: "book", to: 80, label: "دورة وبرنامج تدريبي", at: 150 },
-  { icon: "heart", to: 10000, label: "مستفيد", at: 218 },
-  { icon: "shield", to: 2000, label: "مشارك في التدريب", at: 250 },
-];
-
-export const StatsOne: React.FC = () => (
-  <AbsoluteFill>
-    <Header />
     <div
       style={{
         position: "absolute",
-        top: 730,
-        width: "100%",
-        display: "flex",
-        flexWrap: "wrap",
-        flexDirection: "row-reverse",
-        justifyContent: "center",
-        gap: 34,
-        padding: "0 60px",
-        boxSizing: "border-box",
+        top: y,
+        left: -400,
+        whiteSpace: "nowrap",
+        fontFamily: FONT,
+        fontSize: 170,
+        fontWeight: 700,
+        color: "transparent",
+        WebkitTextStroke: `2px ${WHITE}`,
+        opacity: 0.16,
+        transform: `translateX(${dir * (frame * 9 - 300)}px)`,
       }}
     >
-      {FIRST.map((s) => (
-        <StatCard key={s.label} {...s} />
-      ))}
+      {text}
     </div>
-  </AbsoluteFill>
+  );
+};
+
+export const StatsTitle: React.FC = () => (
+  <Fill>
+    <Ticker y={260} dir={1} text="1,500+  600+  25,000+  10,000+" />
+    <Ticker y={1430} dir={-1} text="95%  80+  2,000+  30+  12  750+" />
+    <div style={{ position: "absolute", top: 720, width: "100%" }}>
+      <Punch text="مستهدفاتنا" delay={CUT} size={190} />
+      <MaskWords text="أرقام نعمل للوصول إليها" delay={CUT + 14} stagger={3} size={62} weight={400} />
+    </div>
+  </Fill>
 );
 
-const Ring: React.FC<{ at: number }> = ({ at }) => {
+type Stat = { icon: IconName; to: number; label: string; suffix?: string };
+
+const Row: React.FC<Stat & { delay: number }> = ({ icon, to, label, suffix = "+", delay }) => {
+  const p = useSnap(delay, 18, 200);
+  const line = useLinear(delay, delay + 20, Easing.inOut(Easing.cubic));
+  return (
+    <div style={{ width: 920, margin: "0 auto", opacity: p, transform: `translateX(${(1 - p) * -200}px)` }}>
+      <div style={{ display: "flex", flexDirection: "row-reverse", alignItems: "center", gap: 34 }}>
+        <Icon name={icon} size={120} progress={line} stroke={1.5} />
+        <div style={{ flex: 1, textAlign: "right" }}>
+          <Counter to={to} delay={delay} dur={32} suffix={suffix} size={150} />
+          <div style={{ fontFamily: FONT, fontSize: 52, color: WHITE, opacity: 0.85, direction: "rtl" }}>{label}</div>
+        </div>
+      </div>
+      <div style={{ height: 3, background: WHITE, opacity: 0.35, width: `${line * 100}%`, marginRight: 0, marginLeft: "auto", marginTop: 20 }} />
+    </div>
+  );
+};
+
+const StatsList: React.FC<{ stats: Stat[] }> = ({ stats }) => (
+  <Fill>
+    <Particles count={25} opacity={0.35} />
+    <div style={{ position: "absolute", top: 210, width: "100%" }}>
+      <MaskWords text="مستهدفاتنا" delay={CUT - 4} size={70} weight={400} style={{ opacity: 0.7 }} />
+    </div>
+    <TriangleBand y={350} progress={useLinear(CUT, CUT + 30)} opacity={0.3} />
+    <div style={{ position: "absolute", top: 480, width: "100%", display: "flex", flexDirection: "column", gap: 70 }}>
+      {stats.map((s, i) => (
+        <Row key={s.label} {...s} delay={CUT + 2 + i * 15} />
+      ))}
+    </div>
+  </Fill>
+);
+
+export const StatsA: React.FC = () => (
+  <StatsList
+    stats={[
+      { icon: "people", to: 1500, label: "متطوع مسجل" },
+      { icon: "person", to: 600, label: "متطوع نشط" },
+      { icon: "hours", to: 25000, label: "ساعة تطوع" },
+    ]}
+  />
+);
+
+export const StatsB: React.FC = () => (
+  <StatsList
+    stats={[
+      { icon: "heart", to: 10000, label: "مستفيد" },
+      { icon: "shield", to: 2000, label: "مشارك في التدريب" },
+      { icon: "book", to: 80, label: "دورة وبرنامج تدريبي" },
+    ]}
+  />
+);
+
+const Mini: React.FC<Stat & { delay: number }> = ({ icon, to, label, suffix = "+", delay }) => {
+  const p = useSnap(delay, 14, 220);
+  return (
+    <div style={{ width: 300, display: "flex", flexDirection: "column", alignItems: "center", opacity: p, transform: `translateY(${(1 - p) * 60}px)` }}>
+      <Icon name={icon} size={70} />
+      <Counter to={to} delay={delay} dur={24} suffix={suffix} size={92} />
+      <div style={{ fontFamily: FONT, fontSize: 40, color: WHITE, opacity: 0.85, direction: "rtl" }}>{label}</div>
+    </div>
+  );
+};
+
+export const Response: React.FC = () => {
   const frame = useCurrentFrame();
-  const t = interpolate(frame, [at, at + 60], [0, 0.95], clamp);
-  const eased = 0.95 * (1 - Math.pow(1 - t / 0.95, 3));
-  const r = 200;
+  const t = interpolate(frame, [CUT, CUT + 40], [0, 1], { ...clamp, easing: Easing.out(Easing.poly(4)) });
+  const r = 230;
   const c = 2 * Math.PI * r;
+  const clock = useSnap(CUT + 34, 14, 200);
   return (
-    <div style={{ position: "relative", width: 480, height: 480 }}>
-      <svg width={480} height={480} style={{ position: "absolute" }}>
-        <circle cx={240} cy={240} r={r} stroke={WHITE} strokeOpacity={0.15} strokeWidth={26} fill="none" />
-        <circle
-          cx={240}
-          cy={240}
-          r={r}
-          stroke={WHITE}
-          strokeWidth={26}
-          fill="none"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={c * (1 - eased)}
-          transform="rotate(-90 240 240)"
-        />
-      </svg>
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: FONT,
-          fontSize: 150,
-          fontWeight: 900,
-          color: WHITE,
-          direction: "ltr",
-        }}
-      >
-        {Math.round(eased * 100)}%
+    <Fill>
+      <Particles count={25} opacity={0.35} />
+      <div style={{ position: "absolute", top: 230, left: 540 - 280, width: 560, height: 560 }}>
+        <svg width={560} height={560} style={{ position: "absolute" }}>
+          {Array.from({ length: 60 }).map((_, i) => {
+            const a = (i / 60) * Math.PI * 2;
+            const lit = i / 60 <= t * 0.95;
+            return (
+              <line
+                key={i}
+                x1={280 + Math.sin(a) * 262}
+                y1={280 - Math.cos(a) * 262}
+                x2={280 + Math.sin(a) * 274}
+                y2={280 - Math.cos(a) * 274}
+                stroke={WHITE}
+                strokeWidth={3}
+                opacity={lit ? 0.9 : 0.2}
+              />
+            );
+          })}
+          <circle cx={280} cy={280} r={r} stroke={WHITE} strokeOpacity={0.15} strokeWidth={24} fill="none" />
+          <circle
+            cx={280}
+            cy={280}
+            r={r}
+            stroke={WHITE}
+            strokeWidth={24}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={c}
+            strokeDashoffset={c * (1 - t * 0.95)}
+            transform="rotate(-90 280 280)"
+          />
+        </svg>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: FONT,
+            fontSize: 170,
+            fontWeight: 700,
+            color: WHITE,
+            direction: "ltr",
+          }}
+        >
+          {Math.round(t * 95)}%
+        </div>
       </div>
-    </div>
-  );
-};
-
-const Mini: React.FC<{ to: number; suffix?: string; label: string; at: number; icon: IconName }> = ({
-  to,
-  suffix = "+",
-  label,
-  at,
-  icon,
-}) => {
-  const p = useEnter(at, 15);
-  return (
-    <div
-      style={{
-        width: 300,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        opacity: p,
-        transform: `translateY(${(1 - p) * 40}px)`,
-      }}
-    >
-      <Icon name={icon} size={64} />
-      <Counter to={to} at={at} suffix={suffix} size={76} />
-      <div style={{ fontFamily: FONT, fontSize: 36, color: WHITE, opacity: 0.85, direction: "rtl", textAlign: "center" }}>
-        {label}
-      </div>
-    </div>
-  );
-};
-
-export const StatsTwo: React.FC = () => {
-  const ring = useEnter(4, 18);
-  const clock = useEnter(128, 15);
-  const frame = useCurrentFrame();
-  return (
-    <AbsoluteFill>
-      <Header />
-      <div
-        style={{
-          position: "absolute",
-          top: 700,
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          opacity: ring,
-        }}
-      >
-        <Ring at={8} />
-        <RiseText delay={20} size={52} weight={700}>
-          نسبة الاستجابة للبلاغات
-        </RiseText>
+      <div style={{ position: "absolute", top: 820, width: "100%" }}>
+        <MaskWords text="نسبة الاستجابة للبلاغات" delay={CUT + 10} stagger={3} size={64} />
       </div>
       <div
         style={{
           position: "absolute",
-          top: 1330,
-          width: "100%",
+          top: 1000,
+          left: 90,
+          width: 900,
+          height: 200,
+          borderRadius: 100,
+          background: WHITE,
           display: "flex",
           flexDirection: "row-reverse",
-          justifyContent: "center",
           alignItems: "center",
+          padding: "0 50px",
           gap: 30,
+          boxSizing: "border-box",
           opacity: clock,
-          transform: `scale(${0.85 + clock * 0.15})`,
+          transform: `scale(${0.6 + 0.4 * clock})`,
         }}
       >
-        <div style={{ transform: `rotate(${interpolate(frame, [128, 230], [0, 360], clamp)}deg)` }}>
-          <Icon name="clock" size={120} />
+        <div style={{ transform: `rotate(${interpolate(frame, [CUT + 34, 127], [0, 360], clamp)}deg)` }}>
+          <Icon name="clock" size={120} color={NAVY} stroke={1.8} />
         </div>
-        <div style={{ fontFamily: FONT, color: WHITE, direction: "rtl" }}>
-          <div style={{ fontSize: 76, fontWeight: 900, lineHeight: 1.2 }}>أقل من 10 دقائق</div>
-          <div style={{ fontSize: 38, opacity: 0.8 }}>متوسط زمن التعامل الأولي</div>
+        <div style={{ fontFamily: FONT, color: NAVY, direction: "rtl" }}>
+          <div style={{ fontSize: 80, fontWeight: 700, lineHeight: 1.15 }}>أقل من 10 دقائق</div>
+          <div style={{ fontSize: 40 }}>متوسط زمن التعامل الأولي</div>
         </div>
       </div>
-      <div
-        style={{
-          position: "absolute",
-          top: 1560,
-          width: "100%",
-          display: "flex",
-          flexDirection: "row-reverse",
-          justifyContent: "center",
-          gap: 20,
-        }}
-      >
-        <Mini icon="siren" to={750} label="بلاغ سنويًا" at={160} />
-        <Mini icon="flag" to={12} suffix="" label="فريقًا ميدانيًا" at={172} />
-        <Mini icon="link" to={30} label="شراكة" at={184} />
-      </div>
-    </AbsoluteFill>
+      <AbsoluteFill style={{ top: 1330, display: "flex", flexDirection: "row-reverse", justifyContent: "center", gap: 20 }}>
+        <Mini icon="siren" to={750} label="بلاغ سنويًا" delay={CUT + 60} />
+        <Mini icon="flag" to={12} suffix="" label="فريقًا ميدانيًا" delay={CUT + 68} />
+        <Mini icon="link" to={30} label="شراكة" delay={CUT + 76} />
+      </AbsoluteFill>
+    </Fill>
   );
 };

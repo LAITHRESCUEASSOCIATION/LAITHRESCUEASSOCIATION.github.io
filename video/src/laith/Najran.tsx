@@ -27,7 +27,7 @@ export const MudTower: React.FC<TowerProps> = ({
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const p = spring({ frame: frame - delay, fps, config: { damping: 18 } });
+  const p = spring({ frame: frame - delay, fps, config: { damping: 22, stiffness: 170 } });
   const top = w * 0.44;
   const half = (yy: number) => w / 2 - ((w / 2 - top) * -yy) / h;
 
@@ -128,7 +128,7 @@ export const Palm: React.FC<{
 }> = ({ x, y, h, lean = 20, phase = 0, delay = 0 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const p = spring({ frame: frame - delay, fps, config: { damping: 20 } });
+  const p = spring({ frame: frame - delay, fps, config: { damping: 22, stiffness: 170 } });
   const sway = Math.sin(frame / 22 + phase) * 2.5;
   const cx = lean;
   const cy = -h;
