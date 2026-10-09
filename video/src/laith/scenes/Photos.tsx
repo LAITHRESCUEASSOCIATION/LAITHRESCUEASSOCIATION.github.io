@@ -3,8 +3,8 @@ import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { CUT, clamp, Grade, Marker, MaskWords, Photo, Punch, Sweep, useSnap } from "../kit";
 import { NAVY, NAVY_DEEP, WHITE, FONT } from "../theme";
 
-// The team photo is landscape, so it plays as a cinematic band over a blurred,
-// graded copy of itself that fills the vertical frame.
+// The team photo (a real Laith field briefing) is landscape, so it plays as a
+// cinematic band over a blurred, graded copy of itself that fills the frame.
 const Band: React.FC<{ focus: string; top: number; height: number; dur: number }> = ({
   focus,
   top,
@@ -16,7 +16,7 @@ const Band: React.FC<{ focus: string; top: number; height: number; dur: number }
   return (
     <>
       <AbsoluteFill>
-        <Photo src="photos/team-najran.jpg" focus={focus} dur={dur} zoom={[1.25, 1.1]} style={{ filter: "blur(28px) brightness(0.55)" }} />
+        <Photo src="photos/laith-team.jpg" focus={focus} dur={dur} zoom={[1.25, 1.1]} style={{ filter: "blur(28px) brightness(0.55)" }} />
         <AbsoluteFill style={{ background: NAVY, opacity: 0.55 }} />
       </AbsoluteFill>
       <div
@@ -31,7 +31,7 @@ const Band: React.FC<{ focus: string; top: number; height: number; dur: number }
           boxShadow: "0 30px 80px rgba(0,0,0,0.45)",
         }}
       >
-        <Photo src="photos/team-najran.jpg" focus={focus} dur={dur} zoom={[1.18, 1]} />
+        <Photo src="photos/laith-team.jpg" focus={focus} dur={dur} zoom={[1.18, 1]} />
         <AbsoluteFill style={{ background: NAVY, mixBlendMode: "color", opacity: 0.25 }} />
       </div>
       <div style={{ position: "absolute", top: top - 3, height: 3, width: 1080 * open, right: 0, background: WHITE }} />
@@ -42,7 +42,7 @@ const Band: React.FC<{ focus: string; top: number; height: number; dur: number }
 
 export const TeamPhoto: React.FC = () => (
   <AbsoluteFill style={{ background: NAVY_DEEP }}>
-    <Band focus="30% 60%" top={560} height={800} dur={134} />
+    <Band focus="55% 50%" top={560} height={800} dur={134} />
     <div style={{ position: "absolute", top: 260, width: "100%" }}>
       <MaskWords text="فرق ميدانية" delay={CUT + 4} size={130} />
     </div>
@@ -55,9 +55,9 @@ export const TeamPhoto: React.FC = () => (
 
 export const RescuerPhoto: React.FC = () => (
   <AbsoluteFill style={{ background: NAVY_DEEP }}>
-    <Photo src="photos/rescuer.jpg" focus="45% 30%" dur={134} zoom={[1.2, 1.04]} />
+    <Photo src="photos/laith-leader.jpg" focus="50% 60%" dur={134} zoom={[1.18, 1.02]} />
     <Grade />
-    <div style={{ position: "absolute", top: 1290, width: "100%" }}>
+    <div style={{ position: "absolute", top: 200, width: "100%" }}>
       <Punch text="سريعون.." delay={CUT + 2} size={170} />
       <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
         <Marker text="لأجل الإنسانية" delay={CUT + 22} size={92} />
@@ -70,7 +70,7 @@ export const JoinPhoto: React.FC = () => {
   const pill = useSnap(CUT + 34, 12, 220);
   return (
     <AbsoluteFill style={{ background: NAVY_DEEP }}>
-      <Band focus="95% 50%" top={470} height={760} dur={134} />
+      <Band focus="100% 50%" top={470} height={760} dur={134} />
       <div style={{ position: "absolute", top: 170, width: "100%" }}>
         <Punch text="كن ليثًا" delay={CUT} size={230} />
       </div>

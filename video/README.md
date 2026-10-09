@@ -32,11 +32,15 @@ npx remotion render LaithRescue out/laith-rescue.mp4 --crf=23   # تصدير ا�
 
 ## الصور
 
-الصور في `public/photos/` مقصوصة من صور واجهة موقع الجمعية. عشان تحط صور حقيقية بدالها:
-1. احفظ الصورة الجديدة بنفس الاسم (`team-najran.jpg` أو `rescuer.jpg`).
+الصور في `public/photos/` صور حقيقية لفريق الجمعية:
+- `laith-team.jpg`: الصورة الأصلية.
+- `laith-leader.jpg`: قصّة طولية منها.
+
+عشان تبدّلها:
+1. احفظ الصورة الجديدة بنفس الاسم.
 2. أو أضف صورة جديدة واستخدمها بمكوّن `Photo` داخل `src/laith/scenes/Photos.tsx`.
 
-الأفضل تكون الصور عالية الدقة، و`rescuer.jpg` تكون طولية.
+الأفضل تكون الصور عالية الدقة، و`laith-leader.jpg` تكون طولية.
 
 ## الخط: Thmanyah Serif Text
 
