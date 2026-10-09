@@ -1,54 +1,55 @@
-# Remotion video
+# فيديو جمعية ليث للإنقاذ (موشن جرافيك)
 
-<p align="center">
-  <a href="https://github.com/remotion-dev/logo">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-dark.apng">
-      <img alt="Animated Remotion Logo" src="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-light.gif">
-    </picture>
-  </a>
-</p>
+فيديو طولي 1080×1920 مدته 60 ثانية، مبني بأداة [Remotion](https://www.remotion.dev).
 
-Welcome to your Remotion project!
-
-## Commands
-
-**Install Dependencies**
+## التشغيل
 
 ```console
-npm i --loglevel=error
+npm install
+npm run dev                                        # معاينة في Remotion Studio
+npx remotion render LaithRescue out/laith-rescue.mp4   # تصدير الفيديو
 ```
 
-**Start Preview**
+## الخط: Thmanyah Serif Text
 
-```console
-npm run dev
-```
+خط ثمانية مجاني، لكن رخصته تمنع إعادة نشره، ولهذا ما هو مرفوع في المستودع.
+حمّله من موقع ثمانية (يوصلك على الإيميل)، وانسخ ملفاته داخل `public/fonts/` بهذي الأسماء
+(الامتداد يكون `.woff2` أو `.otf` أو `.ttf`):
 
-**Render video**
+| الوزن | اسم الملف |
+|---|---|
+| 400 | `ThmanyahSerifText-Regular` |
+| 500 | `ThmanyahSerifText-Medium` |
+| 700 | `ThmanyahSerifText-Bold` |
+| 900 | `ThmanyahSerifText-Black` |
 
-```console
-npx remotion render
-```
+إذا ما لقى الملفات يستخدم خط Amiri بداله (مرفوع في المستودع ورخصته OFL).
 
-**Upgrade Remotion**
+## الملفات
 
-```console
-npx remotion upgrade
-```
+| الملف | المحتوى |
+|---|---|
+| `src/laith/theme.ts` | الألوان وتوقيت المشاهد |
+| `src/laith/scenes/` | المشاهد السبعة: المقدمة، عن الجمعية، أعمالنا، التطوع، المستهدفات (مشهدين)، الخاتمة |
+| `src/laith/Najran.tsx` | رسومات نجران: بيوت الطين، النخيل، الجبال، نقش المثلثات |
+| `public/audio/` | التعليق الصوتي `vo1`–`vo7` والموسيقى `music.mp3` |
+| `tools/` | نص التعليق الصوتي وسكربتات توليد الصوت والموسيقى |
 
-## Docs
+## تغيير التعليق الصوتي
 
-Get started with Remotion by reading the [fundamentals page](https://www.remotion.dev/docs/the-fundamentals).
+التعليق الصوتي الحالي مولّد بصوت آلي مفتوح المصدر (Piper، صوت `ar_JO-kareem`).
+عشان تحطّ تسجيل بصوت معلّق حقيقي، سجّل كل جملة من `tools/voiceover.txt` في ملف لحاله،
+واحفظها بنفس الأسماء `public/audio/vo1.mp3` … `vo7.mp3`. إذا صارت مدة جملة أطول،
+عدّل `dur` و`voAt` للمشهد في `src/laith/theme.ts`.
 
-## Help
+الموسيقى مولّدة برمجيًا (`tools/music.py`)، ولذلك ما عليها أي حقوق.
 
-We provide help on our [Discord server](https://discord.gg/6VzzNDwUwV).
+## ملاحظة عن الأرقام
 
-## Issues
+الأرقام اللي في الفيديو **مستهدفات مقترحة**، ولهذا تظهر تحت عنوان «مستهدفاتنا»،
+والتعليق الصوتي يقول «نطمح إلى».
 
-Found an issue with Remotion? [File an issue here](https://github.com/remotion-dev/remotion/issues/new).
+## رخصة Remotion
 
-## License
-
-Note that for some entities a company license is needed. [Read the terms here](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).
+Remotion مجاني للأفراد، وللجهات غير الربحية مثل الجمعيات، وللشركات اللي فيها 3 موظفين أو أقل. اقرأ
+[شروط الرخصة](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).
