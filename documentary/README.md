@@ -11,7 +11,18 @@
 | `assets/end-card.png` | لقطة النهاية: الشعار وعبارة «جاهزون عندما تحتاجنا» |
 | `assemble.sh` | سكربت يجمع الفيلم النهائي تلقائيًا |
 
-## خطوات الإنتاج
+## النسخة المرسومة (جاهزة بدون تصوير)
+
+نسخة رسوم متحركة كاملة من الفيلم، بموسيقى أصلية ومؤثرات صوتية مولّدة برمجيًا، فلا تحتاج حقوق استخدام:
+
+```bash
+pip install pycairo scipy numpy pillow
+python3 documentary/render/illustrate.py   # يرسم اللقطات الثلاثين في shots/
+python3 documentary/render/score.py        # الموسيقى والأنفاس والمؤثرات في music/
+./documentary/assemble.sh                  # documentary/laith-documentary.mp4
+```
+
+## خطوات الإنتاج (النسخة الواقعية)
 
 1. ولّد كل لقطة من `PROMPTS.md` في Veo 3 أو Sora 2 أو Kling أو Runway، مع رفع `assets/uniform-reference.jpg` مرجعًا. يمكن أيضًا تصوير اللقطات فعليًا مع الفريق.
 2. احفظ اللقطات في `shots/01.mp4` … `shots/30.mp4`. يقبل السكربت mp4 وmov، وأي مقاس أو اتجاه أو معدل إطارات.
